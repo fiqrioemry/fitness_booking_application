@@ -10,30 +10,29 @@ import (
 )
 
 type User struct {
-	ID        uuid.UUID      `gorm:"type:char(36);primaryKey" json:"id"`
-	Email     string         `gorm:"type:varchar(255);uniqueIndex;not null" json:"email"`
-	Password  string         `gorm:"type:text;not null" json:"-"`
-	Role      string         `gorm:"type:varchar(255);default:'customer';check:role IN ('customer','admin','instructor')" json:"role"`
-	Fullname  string         `gorm:"type:varchar(255);not null" json:"fullname"`
-	Birthday  *time.Time     `gorm:"birthday,omitempty"`
-	Phone     string         `gorm:"type:varchar(20)" json:"phone"`
-	Avatar    string         `gorm:"type:varchar(255)" json:"avatar"`
-	Gender    string         `gorm:"type:varchar(10)" json:"gender"`
-	CreatedAt time.Time      `gorm:"autoCreateTime"`
-	UpdatedAt time.Time      `gorm:"autoUpdateTime"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	ID        uuid.UUID  `gorm:"type:char(36);primaryKey" json:"id"`
+	Email     string     `gorm:"type:varchar(255);uniqueIndex;not null" json:"email"`
+	Password  string     `gorm:"type:text;not null" json:"-"`
+	Role      string     `gorm:"type:varchar(255);default:'customer';check:role IN ('customer','admin','instructor')" json:"role"`
+	Fullname  string     `gorm:"type:varchar(255);not null" json:"fullname"`
+	Birthday  *time.Time `gorm:"birthday,omitempty"`
+	Phone     *string    `gorm:"type:varchar(20)" json:"phone"`
+	Avatar    string     `gorm:"type:varchar(255)" json:"avatar"`
+	Gender    *string    `gorm:"type:varchar(10)" json:"gender"`
+	CreatedAt time.Time  `gorm:"autoCreateTime"`
+	UpdatedAt time.Time  `gorm:"autoUpdateTime"`
 
 	Tokens []Token `gorm:"foreignKey:UserID" json:"-"`
 }
 
 type Token struct {
-	ID        uuid.UUID      `gorm:"type:char(36);primaryKey" json:"id"`
-	UserID    uuid.UUID      `gorm:"type:char(36);index;not null" json:"userId"`
-	Token     string         `gorm:"type:text;not null" json:"token"`
-	ExpiredAt time.Time      `json:"expiredAt"`
-	CreatedAt time.Time      `gorm:"autoCreateTime"`
-	UpdatedAt time.Time      `gorm:"autoUpdateTime"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	ID        uuid.UUID `gorm:"type:char(36);primaryKey" json:"id"`
+	UserID    uuid.UUID `gorm:"type:char(36);index;not null" json:"userId"`
+	Token     string    `gorm:"type:text;not null" json:"token"`
+	UserAgent string
+	IP        string
+	ExpiredAt time.Time `json:"expiredAt"`
+	CreatedAt time.Time `gorm:"autoCreateTime"`
 }
 
 type Class struct {
@@ -426,13 +425,6 @@ func (p *Package) BeforeCreate(tx *gorm.DB) (err error) {
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	if u.ID == uuid.Nil {
 		u.ID = uuid.New()
-	}
-	return
-}
-
-func (p *Profile) BeforeCreate(tx *gorm.DB) (err error) {
-	if p.ID == uuid.Nil {
-		p.ID = uuid.New()
 	}
 	return
 }

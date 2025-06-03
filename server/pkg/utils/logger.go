@@ -1,4 +1,5 @@
-package middleware
+// internal/utils/logging.go
+package utils
 
 import (
 	"go.uber.org/zap"
@@ -21,7 +22,7 @@ func GetLogger() *zap.Logger {
 func LogServiceError(service, action string, err error, fields ...zap.Field) {
 	logFields := append([]zap.Field{
 		zap.String("service", service),
-		zap.String("action", action),
+		zap.String("act", action),
 		zap.Error(err),
 	}, fields...)
 	logger.Error("error occurred", logFields...)
@@ -30,7 +31,7 @@ func LogServiceError(service, action string, err error, fields ...zap.Field) {
 func LogServiceWarn(service, action, msg string, fields ...zap.Field) {
 	logFields := append([]zap.Field{
 		zap.String("service", service),
-		zap.String("action", action),
+		zap.String("act", action),
 	}, fields...)
 	logger.Warn(msg, logFields...)
 }
@@ -38,7 +39,7 @@ func LogServiceWarn(service, action, msg string, fields ...zap.Field) {
 func LogServiceInfo(service, action, msg string, fields ...zap.Field) {
 	logFields := append([]zap.Field{
 		zap.String("service", service),
-		zap.String("action", action),
+		zap.String("act", action),
 	}, fields...)
 	logger.Info(msg, logFields...)
 }

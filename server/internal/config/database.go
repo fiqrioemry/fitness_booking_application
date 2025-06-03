@@ -49,7 +49,6 @@ func InitDatabase() {
 	if err := DB.AutoMigrate(
 		&models.User{},
 		&models.Token{},
-		&models.Profile{},
 		&models.Package{},
 		&models.PackageClass{},
 		&models.UserPackage{},

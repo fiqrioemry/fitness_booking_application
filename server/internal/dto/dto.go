@@ -4,7 +4,7 @@ import (
 	"mime/multipart"
 )
 
-// AUTHENTICATION  ==============
+// USER & AUTHENTICATION  ==============
 type RegisterRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
@@ -38,7 +38,60 @@ type AuthMeResponse struct {
 	Role     string `json:"role"`
 }
 
-// AUTHENTICATION  =============
+type UpdateAvatarRequest struct {
+	Avatar    *multipart.FileHeader `form:"avatar" binding:"required"`
+	AvatarURL string                `form:"-"`
+}
+
+type UpdateUserDetailRequest struct {
+	Fullname string `form:"fullname" binding:"required,min=5"`
+	Birthday string `form:"birthday"`
+	Gender   string `form:"gender"`
+	Phone    string `form:"phone"`
+	Bio      string `form:"bio"`
+}
+
+type UserQueryParam struct {
+	Q     string `form:"q"`
+	Role  string `form:"role"`
+	Sort  string `form:"sort"`
+	Page  int    `form:"page,default=1"`
+	Limit int    `form:"limit,default=10"`
+}
+
+type UserListResponse struct {
+	ID       string `json:"id"`
+	Email    string `json:"email"`
+	Role     string `json:"role"`
+	Fullname string `json:"fullname"`
+	Phone    string `json:"phone"`
+	Avatar   string `json:"avatar"`
+	JoinedAt string `json:"joinedAt"`
+}
+
+type UserDetailResponse struct {
+	ID        string `json:"id"`
+	Email     string `json:"email"`
+	Role      string `json:"role"`
+	Fullname  string `json:"fullname"`
+	Phone     string `json:"phone"`
+	Avatar    string `json:"avatar"`
+	Gender    string `json:"gender"`
+	Birthday  string `json:"birthday,omitempty"`
+	Bio       string `json:"bio"`
+	LastLogin string `json:"lastLogin"`
+	JoinedAt  string `json:"joinedAt"`
+}
+
+type UserStatsResponse struct {
+	Total        int64 `json:"total"`
+	Customers    int64 `json:"customers"`
+	Instructors  int64 `json:"instructors"`
+	Admins       int64 `json:"admins"`
+	NewThisMonth int64 `json:"newThisMonth"`
+}
+
+// USER & AUTHENTICATION  =============
 
 // CLASS  ======================
 
@@ -656,68 +709,6 @@ type ReviewResponse struct {
 }
 
 // ATTENDANCE ==========================
-
-// USER-LIST ==========================
-type UserQueryParam struct {
-	Q     string `form:"q"`
-	Role  string `form:"role"`
-	Sort  string `form:"sort"`
-	Page  int    `form:"page,default=1"`
-	Limit int    `form:"limit,default=10"`
-}
-
-type UserListResponse struct {
-	ID       string `json:"id"`
-	Email    string `json:"email"`
-	Role     string `json:"role"`
-	Fullname string `json:"fullname"`
-	Phone    string `json:"phone"`
-	Avatar   string `json:"avatar"`
-	JoinedAt string `json:"joinedAt"`
-}
-
-type UserDetailResponse struct {
-	ID       string `json:"id"`
-	Email    string `json:"email"`
-	Role     string `json:"role"`
-	Fullname string `json:"fullname"`
-	Phone    string `json:"phone"`
-	Avatar   string `json:"avatar"`
-	Gender   string `json:"gender"`
-	Birthday string `json:"birthday,omitempty"`
-	Bio      string `json:"bio"`
-	JoinedAt string `json:"joinedAt"`
-}
-
-type UserStatsResponse struct {
-	Total        int64 `json:"total"`
-	Customers    int64 `json:"customers"`
-	Instructors  int64 `json:"instructors"`
-	Admins       int64 `json:"admins"`
-	NewThisMonth int64 `json:"newThisMonth"`
-}
-
-// USER-LIST ==========================
-
-type ProfileResponse struct {
-	ID       string `json:"id"`
-	Email    string `json:"email"`
-	Fullname string `json:"fullname"`
-	Avatar   string `json:"avatar"`
-	Gender   string `json:"gender"`
-	Birthday string `json:"birthday"`
-	Bio      string `json:"bio"`
-	Phone    string `json:"phone"`
-	JoinedAt string `json:"joinedAt"`
-}
-
-type UpdateProfileRequest struct {
-	Fullname string `form:"fullname" binding:"required,min=5"`
-	Birthday string `form:"birthday"`
-	Gender   string `form:"gender"`
-	Phone    string `form:"phone"`
-	Bio      string `form:"bio"`
-}
 
 type UserPackageResponse struct {
 	ID              string `json:"id"`

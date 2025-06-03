@@ -35,11 +35,16 @@ func main() {
 
 	// Inisialisasi Dependency for auth module
 	authRepo := repositories.NewAuthRepository(db)
-	userService := services.NewAuthService(authRepo)
-	authHandler := handlers.NewAuthHandler(userService)
+	authService := services.NewAuthService(authRepo)
+	authHandler := handlers.NewAuthHandler(authService)
+
+	userRepo := repositories.NewUserRepository(db)
+	userService := services.NewUserService(userRepo)
+	userHandler := handlers.NewUserHandler(userService)
 
 	// Route Binding ==========================
 	routes.AuthRoutes(r, authHandler)
+	routes.UserRoutes(r, userHandler)
 
 	// Start Server ===========================
 	port := os.Getenv("PORT")

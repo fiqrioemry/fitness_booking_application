@@ -2,6 +2,7 @@ package routes
 
 import (
 	"server/internal/handlers"
+	"server/pkg/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,5 +19,9 @@ func AuthRoutes(r *gin.Engine, handler *handlers.AuthHandler) {
 		auth.POST("/refresh-token", handler.RefreshToken)
 		auth.GET("/google", handler.GoogleOAuthRedirect)
 		auth.GET("/google/callback", handler.GoogleOAuthCallback)
+
+		protected := auth.Group("")
+		protected.Use(middleware.AuthRequired())
+		protected.GET("/me", handler.AuthMe)
 	}
 }

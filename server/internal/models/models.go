@@ -16,9 +16,10 @@ type User struct {
 	Role      string     `gorm:"type:varchar(255);default:'customer';check:role IN ('customer','admin','instructor')" json:"role"`
 	Fullname  string     `gorm:"type:varchar(255);not null" json:"fullname"`
 	Birthday  *time.Time `gorm:"birthday,omitempty"`
-	Phone     *string    `gorm:"type:varchar(20)" json:"phone"`
+	Phone     string     `gorm:"type:varchar(20)" json:"phone"`
+	Gender    string     `gorm:"type:varchar(10)" json:"gender"`
 	Avatar    string     `gorm:"type:varchar(255)" json:"avatar"`
-	Gender    *string    `gorm:"type:varchar(10)" json:"gender"`
+	Bio       string     `gorm:"type:text" json:"bio"`
 	CreatedAt time.Time  `gorm:"autoCreateTime"`
 	UpdatedAt time.Time  `gorm:"autoUpdateTime"`
 

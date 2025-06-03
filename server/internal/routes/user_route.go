@@ -10,7 +10,7 @@ import (
 
 func UserRoutes(r *gin.Engine, handler *handlers.UserHandler) {
 	user := r.Group("/api/users")
-	user.Use(middleware.AuthRequired())
+	user.Use(middleware.AuthRequired(), middleware.RoleOnly("customer", "instructor"))
 	user.GET("/me", handler.GetProfile)
 	user.PUT("/me", handler.UpdateProfile)
 	user.PUT("/me/avatar", handler.UpdateAvatar)
@@ -19,5 +19,6 @@ func UserRoutes(r *gin.Engine, handler *handlers.UserHandler) {
 	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.GET("", handler.GetAllUsers)
 	admin.GET("/:id", handler.GetUserDetail)
+	admin.GET("/stats", handler.GetUserStats)
 
 }

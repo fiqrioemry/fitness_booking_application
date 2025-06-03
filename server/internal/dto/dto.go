@@ -157,6 +157,12 @@ type ClassDetailResponse struct {
 	CreatedAt   string   `json:"createdAt"`
 }
 
+type UpdateGalleryRequest struct {
+	Images     []*multipart.FileHeader `form:"images"`
+	KeepImages []string                `form:"keepImages[]"`
+	ImageURLs  []string                `form:"-"`
+}
+
 type GalleryResponse struct {
 	ID        string `json:"id"`
 	ImageURL  string `json:"imageUrl"`

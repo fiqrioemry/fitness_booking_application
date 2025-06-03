@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 
+	"slices"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -52,12 +54,7 @@ func GetQueryInt(c *gin.Context, key string, defaultValue int) int {
 }
 
 func IsDayMatched(currentDay int, allowedDays []int) bool {
-	for _, d := range allowedDays {
-		if d == currentDay {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(allowedDays, currentDay)
 }
 
 func IsDiceBear(url string) bool {

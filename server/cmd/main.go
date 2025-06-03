@@ -42,9 +42,19 @@ func main() {
 	userService := services.NewUserService(userRepo)
 	userHandler := handlers.NewUserHandler(userService)
 
+	classRepo := repositories.NewClassRepository(db)
+	classService := services.NewClassService(classRepo)
+	classHandler := handlers.NewClassHandler(classService)
+
+	categoryRepo := repositories.NewCategoryRepository(db)
+	categoryService := services.NewCategoryService(categoryRepo)
+	categoryHandler := handlers.NewCategoryHandler(categoryService)
+
 	// Route Binding ==========================
 	routes.AuthRoutes(r, authHandler)
 	routes.UserRoutes(r, userHandler)
+	routes.ClassRoutes(r, classHandler)
+	routes.CategoryRoutes(r, categoryHandler)
 
 	// Start Server ===========================
 	port := os.Getenv("PORT")

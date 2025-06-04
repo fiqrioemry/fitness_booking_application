@@ -1,9 +1,9 @@
 package services
 
 import (
-	"errors"
 	"server/internal/dto"
 	"server/internal/repositories"
+	customErr "server/pkg/errors"
 	"server/pkg/utils"
 	"time"
 )
@@ -27,7 +27,7 @@ func NewUserService(repo repositories.UserRepository) UserService {
 func (s *userService) GetUserStats() (*dto.UserStatsResponse, error) {
 	total, customers, instructors, admins, newMonth, err := s.repo.GetUserStats()
 	if err != nil {
-		return nil, err
+		return nil, customErr.ErrNotFound
 	}
 	return &dto.UserStatsResponse{
 		Total:        total,
@@ -41,7 +41,7 @@ func (s *userService) GetUserStats() (*dto.UserStatsResponse, error) {
 func (s *userService) UpdateAvatar(userID string, req dto.UpdateAvatarRequest) error {
 	user, err := s.repo.GetUserByID(userID)
 	if err != nil {
-		return errors.New("user not found")
+		return customErr.ErrNotFound
 	}
 
 	if user.Avatar != "" && user.Avatar != req.AvatarURL && !isDiceBear(user.Avatar) {
@@ -49,33 +49,40 @@ func (s *userService) UpdateAvatar(userID string, req dto.UpdateAvatarRequest) e
 	}
 
 	user.Avatar = req.AvatarURL
-	return s.repo.UpdateUser(user)
+	if err := s.repo.UpdateUser(user); err != nil {
+		return customErr.ErrUpdateFailed
+	}
+	return nil
 }
 
 func (s *userService) UpdateProfile(userID string, req dto.UpdateUserDetailRequest) error {
 	user, err := s.repo.GetUserByID(userID)
 	if err != nil {
-		return err
+		return customErr.ErrNotFound
 	}
+
 	user.Bio = req.Bio
 	user.Phone = req.Phone
 	user.Gender = req.Gender
 	user.Fullname = req.Fullname
 	if req.Birthday != "" {
 		birthday, err := time.Parse("2006-01-02", req.Birthday)
-		if err == nil {
-			user.Birthday = &birthday
+		if err != nil {
+			return customErr.ErrInvalidInput
 		}
+		user.Birthday = &birthday
 	}
 
-	return s.repo.UpdateUser(user)
+	if err := s.repo.UpdateUser(user); err != nil {
+		return customErr.ErrUpdateFailed
+	}
+	return nil
 }
 
 func (s *userService) GetAllUsers(params dto.UserQueryParam) ([]dto.UserListResponse, *dto.PaginationResponse, error) {
-
 	users, total, err := s.repo.FindAllUsers(params)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, customErr.ErrNotFound
 	}
 
 	var results []dto.UserListResponse
@@ -92,13 +99,12 @@ func (s *userService) GetAllUsers(params dto.UserQueryParam) ([]dto.UserListResp
 	}
 	pagination := utils.Paginate(total, params.Page, params.Limit)
 	return results, pagination, nil
-
 }
 
 func (s *userService) GetUserDetail(id string) (*dto.UserDetailResponse, error) {
 	u, err := s.repo.GetUserByID(id)
 	if err != nil {
-		return nil, err
+		return nil, customErr.ErrNotFound
 	}
 	var lastLogin string
 	if len(u.Tokens) > 0 {

@@ -25,13 +25,57 @@ func NewCategoryService(repo repositories.CategoryRepository) CategoryService {
 	return &categoryService{repo}
 }
 
+func (s *categoryService) CreateCategory(req dto.CreateCategoryRequest) error {
+	category := models.Category{
+		ID:   uuid.New(),
+		Name: req.Name,
+	}
+
+	if err := s.repo.CreateCategory(&category); err != nil {
+		return customErr.ErrCreateFailed
+	}
+
+	return nil
+}
+
+func (s *categoryService) UpdateCategory(id string, req dto.UpdateCategoryRequest) error {
+	category, err := s.repo.GetCategoryByID(id)
+	if err != nil {
+		return customErr.ErrNotFound
+	}
+
+	category.Name = req.Name
+
+	if err := s.repo.UpdateCategory(category); err != nil {
+		return customErr.ErrUpdateFailed
+	}
+
+	return nil
+}
+
 func (s *categoryService) DeleteCategory(id string) error {
 	_, err := s.repo.GetCategoryByID(id)
 	if err != nil {
 		return customErr.ErrNotFound
 	}
 
-	return s.repo.DeleteCategory(id)
+	if err := s.repo.DeleteCategory(id); err != nil {
+		return customErr.ErrDeleteFailed
+	}
+
+	return nil
+}
+
+func (s *categoryService) GetCategoryByID(id string) (*dto.CategoryResponse, error) {
+	category, err := s.repo.GetCategoryByID(id)
+	if err != nil {
+		return nil, customErr.NewNotFound("Category not found")
+	}
+
+	return &dto.CategoryResponse{
+		ID:   category.ID.String(),
+		Name: category.Name,
+	}, nil
 }
 
 func (s *categoryService) GetAllCategories() ([]dto.CategoryResponse, error) {
@@ -47,45 +91,6 @@ func (s *categoryService) GetAllCategories() ([]dto.CategoryResponse, error) {
 			Name: c.Name,
 		})
 	}
+
 	return result, nil
-}
-
-func (s *categoryService) CreateCategory(req dto.CreateCategoryRequest) error {
-	category := models.Category{
-		ID:   uuid.New(),
-		Name: req.Name,
-	}
-	err := s.repo.CreateCategory(&category)
-	if err != nil {
-		return customErr.ErrNotFound
-	}
-
-	return nil
-}
-
-func (s *categoryService) GetCategoryByID(id string) (*dto.CategoryResponse, error) {
-	category, err := s.repo.GetCategoryByID(id)
-	if err != nil {
-		return nil, customErr.ErrNotFound
-	}
-
-	return &dto.CategoryResponse{
-		ID:   category.ID.String(),
-		Name: category.Name,
-	}, nil
-}
-
-func (s *categoryService) UpdateCategory(id string, req dto.UpdateCategoryRequest) error {
-	category, err := s.repo.GetCategoryByID(id)
-	if err != nil {
-		return customErr.ErrNotFound
-	}
-
-	category.Name = req.Name
-	err = s.repo.UpdateCategory(category)
-	if err != nil {
-		return customErr.ErrNotFound
-	}
-
-	return nil
 }

@@ -2,32 +2,37 @@ package utils
 
 import (
 	"net/http"
-	customErr "server/pkg/errors"
-
-	"errors"
+	"server/pkg/errors"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 func HandleServiceError(c *gin.Context, err error, fallbackMsg string) {
-	switch {
-	case errors.Is(err, customErr.ErrNotFound):
-		c.JSON(http.StatusNotFound, gin.H{"message": "Resource not found"})
-	case errors.Is(err, customErr.ErrAlreadyExist):
-		c.JSON(http.StatusConflict, gin.H{"message": "Resource already exists"})
-	case errors.Is(err, customErr.ErrInvalidInput):
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid input"})
-	case errors.Is(err, customErr.ErrUnauthorized):
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
-	case errors.Is(err, customErr.ErrForbidden):
-		c.JSON(http.StatusForbidden, gin.H{"message": "Forbidden Access"})
-	case errors.Is(err, customErr.ErrUpdateFailed):
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update resource"})
-	case errors.Is(err, customErr.ErrCreateFailed):
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create resource"})
-	case errors.Is(err, customErr.ErrDeleteFailed):
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete resource"})
-	default:
+	logger := GetLogger()
+
+	appErr, ok := err.(*errors.AppError)
+	if !ok {
+		logger.Warn("⚠️ Unrecognized error",
+			zap.String("path", c.FullPath()),
+			zap.String("method", c.Request.Method),
+			zap.String("ip", c.ClientIP()),
+			zap.String("fallback", fallbackMsg),
+			zap.String("raw_error", err.Error()),
+		)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": fallbackMsg})
+		return
 	}
+
+	if appErr.Code >= 500 {
+		logger.Error("🔥 Internal error",
+			zap.String("path", c.FullPath()),
+			zap.String("method", c.Request.Method),
+			zap.String("ip", c.ClientIP()),
+			zap.String("message", appErr.Message),
+			zap.Error(appErr.Err),
+		)
+	}
+
+	c.JSON(appErr.Code, gin.H{"message": appErr.Message})
 }

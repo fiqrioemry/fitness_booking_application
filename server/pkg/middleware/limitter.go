@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"server/internal/config"
+	customErr "server/pkg/errors"
+	"server/pkg/utils"
 	"strings"
 	"time"
 
@@ -20,13 +22,14 @@ func LimitFileSize(maxSize int64) gin.HandlerFunc {
 func RateLimiter(maxAttempts int, duration time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ip := GetClientIP(c)
-
 		key := fmt.Sprintf("ratelimit:%s", ip)
 
 		count, _ := config.RedisClient.Get(config.Ctx, key).Int()
-
 		if count >= maxAttempts {
-			c.JSON(http.StatusTooManyRequests, gin.H{})
+			utils.HandleServiceError(c,
+				customErr.NewTooManyRequest("Too many requests. Slow down baby."),
+				"Rate limit exceeded",
+			)
 			c.Abort()
 			return
 		}

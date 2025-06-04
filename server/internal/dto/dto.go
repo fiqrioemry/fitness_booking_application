@@ -4,7 +4,7 @@ import (
 	"mime/multipart"
 )
 
-// USER & AUTHENTICATION  ==============
+// USER & AUTHENTICATION MODULE MANAGEMENT =============
 type RegisterRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
@@ -91,10 +91,9 @@ type UserStatsResponse struct {
 	NewThisMonth int64 `json:"newThisMonth"`
 }
 
-// USER & AUTHENTICATION  =============
+// USER & AUTHENTICATION MODULE MANAGEMENT =============
 
-// CLASS  ======================
-
+// CLASS MODULE MANAGEMENT =============================
 type ClassQueryParam struct {
 	Q             string `form:"q"`
 	Status        string `form:"status"`
@@ -186,9 +185,6 @@ type ClassResponse struct {
 	CreatedAt     string   `json:"createdAt"`
 }
 
-// CLASS  ========================
-
-// CLASS CATEGORY ================
 type CreateCategoryRequest struct {
 	Name string `json:"name" binding:"required,min=2"`
 }
@@ -202,9 +198,6 @@ type CategoryResponse struct {
 	Name string `json:"name"`
 }
 
-// CLASS CATEGORY ================
-
-// CLASS SUBCATEGORY =============
 type CreateSubcategoryRequest struct {
 	Name       string `json:"name" binding:"required,min=2"`
 	CategoryID string `json:"categoryId" binding:"required"`
@@ -221,9 +214,6 @@ type SubcategoryResponse struct {
 	CategoryID string `json:"categoryId"`
 }
 
-// CLASS SUBCATEGORY =============
-
-// CLASS TYPE ====================
 type CreateTypeRequest struct {
 	Name string `json:"name" binding:"required,min=2"`
 }
@@ -237,9 +227,6 @@ type TypeResponse struct {
 	Name string `json:"name"`
 }
 
-// CLASS TYPE ===================
-
-// CLASS LEVEL ==================
 type CreateLevelRequest struct {
 	Name string `json:"name" binding:"required,min=2"`
 }
@@ -253,9 +240,6 @@ type LevelResponse struct {
 	Name string `json:"name"`
 }
 
-// CLASS LEVEL ==================
-
-// LOCATION =====================
 type CreateLocationRequest struct {
 	Name        string `json:"name" binding:"required,min=2"`
 	Address     string `json:"address" binding:"required"`
@@ -275,9 +259,34 @@ type LocationResponse struct {
 	GeoLocation string `json:"geoLocation"`
 }
 
-// LOCATION =========================
+type CreateInstructorRequest struct {
+	UserID         string `json:"userId" binding:"required,uuid"`
+	Experience     int    `json:"experience"`
+	Specialties    string `json:"specialties" binding:"required"`
+	Certifications string `json:"certifications"`
+}
 
-// PACKAGE ==========================
+type UpdateInstructorRequest struct {
+	UserID         string `json:"userId" binding:"required,uuid"`
+	Experience     int    `json:"experience"`
+	Specialties    string `json:"specialties"`
+	Certifications string `json:"certifications"`
+}
+type InstructorResponse struct {
+	ID             string  `json:"id"`
+	UserID         string  `json:"userId"`
+	Fullname       string  `json:"fullname"`
+	Avatar         string  `json:"avatar"`
+	Experience     int     `json:"experience"`
+	Specialties    string  `json:"specialties"`
+	Certifications string  `json:"certifications"`
+	Rating         float64 `json:"rating"`
+	TotalClass     int     `json:"totalClass"`
+}
+
+// CLASS MODULE MANAGEMENT =============================
+
+// PACKAGE MODULE MANAGEMENT =============================
 
 type PackageQueryParam struct {
 	Q      string `form:"q"`
@@ -350,35 +359,7 @@ type ClassSummaryResponse struct {
 	Duration int    `json:"duration"`
 }
 
-// PACKAGE ==========================
-
-// INSTRUCTOR ==========================
-type CreateInstructorRequest struct {
-	UserID         string `json:"userId" binding:"required,uuid"`
-	Experience     int    `json:"experience"`
-	Specialties    string `json:"specialties" binding:"required"`
-	Certifications string `json:"certifications"`
-}
-
-type UpdateInstructorRequest struct {
-	UserID         string `json:"userId" binding:"required,uuid"`
-	Experience     int    `json:"experience"`
-	Specialties    string `json:"specialties"`
-	Certifications string `json:"certifications"`
-}
-type InstructorResponse struct {
-	ID             string  `json:"id"`
-	UserID         string  `json:"userId"`
-	Fullname       string  `json:"fullname"`
-	Avatar         string  `json:"avatar"`
-	Experience     int     `json:"experience"`
-	Specialties    string  `json:"specialties"`
-	Certifications string  `json:"certifications"`
-	Rating         float64 `json:"rating"`
-	TotalClass     int     `json:"totalClass"`
-}
-
-// INSTRUCTOR ==========================
+// PACKAGE MODULE MANAGEMENT =============================
 
 // PAYMENT ================================
 type CreatePaymentRequest struct {

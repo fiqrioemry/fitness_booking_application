@@ -29,7 +29,7 @@ func (h *ClassHandler) CreateClass(c *gin.Context) {
 
 	imageURL, err := utils.UploadImageWithValidation(req.Image)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 	req.ImageURL = imageURL
@@ -37,8 +37,8 @@ func (h *ClassHandler) CreateClass(c *gin.Context) {
 	if len(req.Images) > 0 {
 		imageURLs, err := utils.UploadMultipleImagesWithValidation(req.Images)
 		if err != nil {
-			utils.CleanupImageOnError(req.ImageURL) // customize rollback upload cloudinary
-			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			utils.CleanupImageOnError(req.ImageURL)
+			utils.HandleServiceError(c, err, err.Error())
 			return
 		}
 		req.ImageURLs = imageURLs
@@ -47,7 +47,7 @@ func (h *ClassHandler) CreateClass(c *gin.Context) {
 	if err := h.service.CreateClass(req); err != nil {
 		utils.CleanupImageOnError(req.ImageURL)
 		utils.CleanupImagesOnError(req.ImageURLs)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		utils.HandleServiceError(c, err, "Failed to create class")
 		return
 	}
 
@@ -66,7 +66,7 @@ func (h *ClassHandler) UpdateClass(c *gin.Context) {
 	if req.Image != nil && req.Image.Filename != "" {
 		imageURL, err := utils.UploadImageWithValidation(req.Image)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			utils.HandleServiceError(c, err, err.Error())
 			return
 		}
 		req.ImageURL = imageURL
@@ -74,7 +74,7 @@ func (h *ClassHandler) UpdateClass(c *gin.Context) {
 
 	if err := h.service.UpdateClass(id, req); err != nil {
 		utils.CleanupImageOnError(req.ImageURL)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		utils.HandleServiceError(c, err, "Failed to update class")
 		return
 	}
 
@@ -85,7 +85,7 @@ func (h *ClassHandler) DeleteClass(c *gin.Context) {
 	id := c.Param("id")
 
 	if err := h.service.DeleteClass(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		utils.HandleServiceError(c, err, "Failed to delete class")
 		return
 	}
 
@@ -97,7 +97,7 @@ func (h *ClassHandler) GetClassByID(c *gin.Context) {
 
 	classResponse, err := h.service.GetClassByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Class not found"})
+		utils.HandleServiceError(c, err, "Failed to get class")
 		return
 	}
 	c.JSON(http.StatusOK, classResponse)
@@ -111,7 +111,7 @@ func (h *ClassHandler) GetAllClasses(c *gin.Context) {
 
 	classes, pagination, err := h.service.GetAllClasses(params)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		utils.HandleServiceError(c, err, "Failed to get all classes")
 		return
 	}
 
@@ -138,14 +138,14 @@ func (h *ClassHandler) UploadClassGallery(c *gin.Context) {
 	imageURLs, err := utils.UploadMultipleImagesWithValidation(req.Images)
 	if err != nil {
 		utils.CleanupImagesOnError(imageURLs)
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 	req.ImageURLs = imageURLs
 
 	if err := h.service.UpdateClassGallery(parsedID, req.KeepImages, req.ImageURLs); err != nil {
 		utils.CleanupImagesOnError(req.ImageURLs)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		utils.HandleServiceError(c, err, "Failed to update class gallery")
 		return
 	}
 

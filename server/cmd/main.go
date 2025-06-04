@@ -19,9 +19,14 @@ import (
 func main() {
 	// config =================================
 	config.InitConfiguration()
+	utils.InitLogger()
 
 	db := config.DB
 	r := gin.Default()
+	err := r.SetTrustedProxies(config.GetTrustedProxies())
+	if err != nil {
+		log.Fatalf("Failed to set trusted proxies: %v", err)
+	}
 
 	// middleware ======================
 	r.Use(
@@ -50,11 +55,26 @@ func main() {
 	categoryService := services.NewCategoryService(categoryRepo)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 
+	levelRepo := repositories.NewLevelRepository(db)
+	levelService := services.NewLevelService(levelRepo)
+	levelHandler := handlers.NewLevelHandler(levelService)
+
+	locationRepo := repositories.NewLocationRepository(db)
+	locationService := services.NewLocationService(locationRepo)
+	locationHandler := handlers.NewLocationHandler(locationService)
+
+	subcategoryRepo := repositories.NewSubcategoryRepository(db)
+	subcategoryService := services.NewSubcategoryService(subcategoryRepo)
+	subcategoryHandler := handlers.NewSubcategoryHandler(subcategoryService)
+
 	// Route Binding ==========================
 	routes.AuthRoutes(r, authHandler)
 	routes.UserRoutes(r, userHandler)
 	routes.ClassRoutes(r, classHandler)
+	routes.LevelRoutes(r, levelHandler)
 	routes.CategoryRoutes(r, categoryHandler)
+	routes.LocationRoutes(r, locationHandler)
+	routes.SubcategoryRoutes(r, subcategoryHandler)
 
 	// Start Server ===========================
 	port := os.Getenv("PORT")

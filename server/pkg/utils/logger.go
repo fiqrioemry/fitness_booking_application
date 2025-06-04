@@ -1,45 +1,35 @@
-// internal/utils/logging.go
 package utils
 
 import (
+	"os"
+
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var logger *zap.Logger
 
 func InitLogger() {
+	env := os.Getenv("NODE_ENV")
 	var err error
-	logger, err = zap.NewProduction()
+
+	if env == "development" {
+		cfg := zap.NewDevelopmentConfig()
+		cfg.DisableStacktrace = true
+		cfg.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		logger, err = cfg.Build()
+	} else {
+		cfg := zap.NewProductionConfig()
+		cfg.DisableStacktrace = false
+		logger, err = cfg.Build()
+	}
+
 	if err != nil {
-		panic("failed to initialize zap logger")
+		panic("failed to initialize logger")
 	}
 }
 
+// Akses global logger
 func GetLogger() *zap.Logger {
 	return logger
-}
-
-func LogServiceError(service, action string, err error, fields ...zap.Field) {
-	logFields := append([]zap.Field{
-		zap.String("service", service),
-		zap.String("act", action),
-		zap.Error(err),
-	}, fields...)
-	logger.Error("error occurred", logFields...)
-}
-
-func LogServiceWarn(service, action, msg string, fields ...zap.Field) {
-	logFields := append([]zap.Field{
-		zap.String("service", service),
-		zap.String("act", action),
-	}, fields...)
-	logger.Warn(msg, logFields...)
-}
-
-func LogServiceInfo(service, action, msg string, fields ...zap.Field) {
-	logFields := append([]zap.Field{
-		zap.String("service", service),
-		zap.String("act", action),
-	}, fields...)
-	logger.Info(msg, logFields...)
 }

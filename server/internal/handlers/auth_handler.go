@@ -25,7 +25,7 @@ func (h *AuthHandler) ResendOTP(c *gin.Context) {
 	}
 
 	if err := h.service.SendOTP(req.Email); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		utils.HandleServiceError(c, err, "Failed to resend OTP")
 		return
 	}
 
@@ -39,7 +39,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	if err := h.service.Register(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		utils.HandleServiceError(c, err, "Registration failed")
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "OTP sent to your email"})
@@ -53,7 +53,7 @@ func (h *AuthHandler) VerifyOTP(c *gin.Context) {
 
 	tokens, err := h.service.VerifyOTP(req.Email, req.OTP)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		utils.HandleServiceError(c, err, "OTP verification failed")
 		return
 	}
 
@@ -71,53 +71,51 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	tokens, err := h.service.Login(&req)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		utils.HandleServiceError(c, err, "Login failed")
 		return
 	}
 
 	utils.SetAccessTokenCookie(c, tokens.AccessToken)
 	utils.SetRefreshTokenCookie(c, tokens.RefreshToken)
 
-	c.JSON(http.StatusOK, gin.H{"message": "Login Successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Login successfully"})
 }
 
 func (h *AuthHandler) Logout(c *gin.Context) {
 	refreshToken, err := c.Cookie("refreshToken")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Refresh token cookie missing"})
+		utils.HandleServiceError(c, err, "Refresh token missing")
 		return
 	}
 
 	if err := h.service.Logout(refreshToken); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		utils.HandleServiceError(c, err, "Logout failed")
 		return
 	}
 
 	utils.ClearAccessTokenCookie(c)
-
 	utils.ClearRefreshTokenCookie(c)
 
-	c.JSON(http.StatusOK, gin.H{"message": "Logout Successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Logout successfully"})
 }
 
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	refreshToken, err := c.Cookie("refreshToken")
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Refresh token cookie missing"})
+		utils.HandleServiceError(c, err, "Refresh token missing")
 		return
 	}
 
 	tokens, err := h.service.RefreshToken(refreshToken)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		utils.HandleServiceError(c, err, "Token refresh failed")
 		return
 	}
 
 	utils.SetAccessTokenCookie(c, tokens.AccessToken)
-
 	utils.SetRefreshTokenCookie(c, tokens.RefreshToken)
 
-	c.JSON(http.StatusOK, gin.H{"message": "Refresh Successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Token refreshed successfully"})
 }
 
 func (h *AuthHandler) AuthMe(c *gin.Context) {
@@ -125,7 +123,7 @@ func (h *AuthHandler) AuthMe(c *gin.Context) {
 
 	response, err := h.service.GetUserProfile(userID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		utils.HandleServiceError(c, err, "Failed to retrieve user profile")
 		return
 	}
 
@@ -146,12 +144,11 @@ func (h *AuthHandler) GoogleOAuthCallback(c *gin.Context) {
 
 	tokens, err := h.service.HandleGoogleOAuthCallback(code)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		utils.HandleServiceError(c, err, "Google OAuth failed")
 		return
 	}
 
 	utils.SetAccessTokenCookie(c, tokens.AccessToken)
-
 	utils.SetRefreshTokenCookie(c, tokens.RefreshToken)
 
 	c.Redirect(http.StatusTemporaryRedirect, os.Getenv("FRONTEND_REDIRECT_URL"))

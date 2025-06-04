@@ -1,0 +1,62 @@
+# fitness application
+services:
+  server:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: app-fitness
+    env_file:
+      - .env
+    ports:
+      - "5001:5000"
+    depends_on:
+      - redis
+      - db
+    volumes:
+      - .:/app
+    networks:
+      - fitness_net
+
+  db:
+    image: mysql:latest
+    container_name: mysql-fitness
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-fitness-data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "${DB_HOST}",
+          "-u",
+          "${DB_USERNAME}",
+          "--password=${DB_PASSWORD}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - fitness_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis-fitness
+    ports:
+      - "6380:6379"
+    networks:
+      - fitness_net
+
+volumes:
+  mysql-fitness-data:
+
+networks:
+  fitness_net:

@@ -4,6 +4,7 @@ import (
 	"server/internal/dto"
 	"server/internal/models"
 	"server/internal/repositories"
+	customErr "server/pkg/errors"
 	"server/pkg/utils"
 
 	"slices"
@@ -32,23 +33,23 @@ func NewClassService(repo repositories.ClassRepository) ClassService {
 func (s *classService) CreateClass(req dto.CreateClassRequest) error {
 	typeID, err := uuid.Parse(req.TypeID)
 	if err != nil {
-		return err
+		return customErr.ErrInvalidInput
 	}
 	levelID, err := uuid.Parse(req.LevelID)
 	if err != nil {
-		return err
+		return customErr.ErrInvalidInput
 	}
 	locationID, err := uuid.Parse(req.LocationID)
 	if err != nil {
-		return err
+		return customErr.ErrInvalidInput
 	}
 	categoryID, err := uuid.Parse(req.CategoryID)
 	if err != nil {
-		return err
+		return customErr.ErrInvalidInput
 	}
 	subcategoryID, err := uuid.Parse(req.SubcategoryID)
 	if err != nil {
-		return err
+		return customErr.ErrInvalidInput
 	}
 
 	class := models.Class{
@@ -66,7 +67,7 @@ func (s *classService) CreateClass(req dto.CreateClassRequest) error {
 	}
 
 	if err := s.repo.CreateClass(&class); err != nil {
-		return err
+		return customErr.ErrCreateFailed
 	}
 
 	if len(req.ImageURLs) > 0 {
@@ -79,7 +80,7 @@ func (s *classService) CreateClass(req dto.CreateClassRequest) error {
 			})
 		}
 		if err := s.repo.SaveClassGalleries(galleries); err != nil {
-			return err
+			return customErr.ErrCreateFailed
 		}
 	}
 
@@ -89,7 +90,7 @@ func (s *classService) CreateClass(req dto.CreateClassRequest) error {
 func (s *classService) UpdateClass(id string, req dto.UpdateClassRequest) error {
 	class, err := s.repo.GetClassByID(id)
 	if err != nil {
-		return err
+		return customErr.ErrNotFound
 	}
 
 	class.Title = req.Title
@@ -102,25 +103,40 @@ func (s *classService) UpdateClass(id string, req dto.UpdateClassRequest) error 
 	}
 
 	if req.TypeID != "" {
-		typeID, _ := uuid.Parse(req.TypeID)
+		typeID, err := uuid.Parse(req.TypeID)
+		if err != nil {
+			return customErr.ErrInvalidInput
+		}
 		class.TypeID = typeID
 	}
 	if req.LevelID != "" {
-		levelID, _ := uuid.Parse(req.LevelID)
+		levelID, err := uuid.Parse(req.LevelID)
+		if err != nil {
+			return customErr.ErrInvalidInput
+		}
 		class.LevelID = levelID
 	}
 
 	if req.LocationID != "" {
-		locationID, _ := uuid.Parse(req.LocationID)
+		locationID, err := uuid.Parse(req.LocationID)
+		if err != nil {
+			return customErr.ErrInvalidInput
+		}
 		class.LocationID = locationID
 	}
 	if req.CategoryID != "" {
-		categoryID, _ := uuid.Parse(req.CategoryID)
+		categoryID, err := uuid.Parse(req.CategoryID)
+		if err != nil {
+			return customErr.ErrInvalidInput
+		}
 		class.CategoryID = categoryID
 	}
 
 	if req.SubcategoryID != "" {
-		subcategoryID, _ := uuid.Parse(req.SubcategoryID)
+		subcategoryID, err := uuid.Parse(req.SubcategoryID)
+		if err != nil {
+			return customErr.ErrInvalidInput
+		}
 		class.SubcategoryID = subcategoryID
 	}
 
@@ -134,7 +150,7 @@ func (s *classService) UpdateClass(id string, req dto.UpdateClassRequest) error 
 func (s *classService) DeleteClass(id string) error {
 	class, err := s.repo.GetClassByID(id)
 	if err != nil {
-		return err
+		return customErr.ErrNotFound
 	}
 
 	if class.Image != "" {
@@ -153,7 +169,7 @@ func (s *classService) DeleteClass(id string) error {
 func (s *classService) GetClassByID(id string) (*dto.ClassDetailResponse, error) {
 	class, err := s.repo.GetClassByID(id)
 	if err != nil {
-		return nil, err
+		return nil, customErr.ErrNotFound
 	}
 
 	var galleries []string
@@ -176,12 +192,12 @@ func (s *classService) GetClassByID(id string) (*dto.ClassDetailResponse, error)
 		Galleries:   galleries,
 		CreatedAt:   class.CreatedAt.Format("2006-01-02"),
 	}, nil
-
 }
+
 func (s *classService) GetAllClasses(params dto.ClassQueryParam) ([]dto.ClassResponse, *dto.PaginationResponse, error) {
 	classes, total, err := s.repo.GetAllClasses(params)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, customErr.ErrNotFound
 	}
 
 	var results []dto.ClassResponse
@@ -215,7 +231,7 @@ func (s *classService) GetAllClasses(params dto.ClassQueryParam) ([]dto.ClassRes
 func (s *classService) UpdateClassGallery(classID uuid.UUID, keepImages []string, newImageURLs []string) error {
 	oldGalleries, err := s.repo.FindGalleriesByClassID(classID)
 	if err != nil {
-		return err
+		return customErr.ErrNotFound
 	}
 
 	for _, gallery := range oldGalleries {
@@ -236,7 +252,7 @@ func (s *classService) UpdateClassGallery(classID uuid.UUID, keepImages []string
 			})
 		}
 		if err := s.repo.SaveClassGalleries(newGalleries); err != nil {
-			return err
+			return customErr.ErrUpdateFailed
 		}
 	}
 
@@ -244,5 +260,8 @@ func (s *classService) UpdateClassGallery(classID uuid.UUID, keepImages []string
 }
 
 func (s *classService) AddClassGallery(galleries []models.ClassGallery) error {
-	return s.repo.SaveClassGalleries(galleries)
+	if err := s.repo.SaveClassGalleries(galleries); err != nil {
+		return customErr.ErrCreateFailed
+	}
+	return nil
 }

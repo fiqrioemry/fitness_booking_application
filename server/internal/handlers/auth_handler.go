@@ -25,7 +25,7 @@ func (h *AuthHandler) ResendOTP(c *gin.Context) {
 	}
 
 	if err := h.service.SendOTP(req.Email); err != nil {
-		utils.HandleServiceError(c, err, "Failed to resend OTP")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -39,7 +39,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	if err := h.service.Register(&req); err != nil {
-		utils.HandleServiceError(c, err, "Registration failed")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "OTP sent to your email"})
@@ -53,7 +53,7 @@ func (h *AuthHandler) VerifyOTP(c *gin.Context) {
 
 	tokens, err := h.service.VerifyOTP(req.Email, req.OTP)
 	if err != nil {
-		utils.HandleServiceError(c, err, "OTP verification failed")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -71,7 +71,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	tokens, err := h.service.Login(&req)
 	if err != nil {
-		utils.HandleServiceError(c, err, "Login failed")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -84,12 +84,12 @@ func (h *AuthHandler) Login(c *gin.Context) {
 func (h *AuthHandler) Logout(c *gin.Context) {
 	refreshToken, err := c.Cookie("refreshToken")
 	if err != nil {
-		utils.HandleServiceError(c, err, "Refresh token missing")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
 	if err := h.service.Logout(refreshToken); err != nil {
-		utils.HandleServiceError(c, err, "Logout failed")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -102,7 +102,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	refreshToken, err := c.Cookie("refreshToken")
 	if err != nil {
-		utils.HandleServiceError(c, err, "Refresh token missing")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -123,7 +123,7 @@ func (h *AuthHandler) AuthMe(c *gin.Context) {
 
 	response, err := h.service.GetUserProfile(userID)
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to retrieve user profile")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 

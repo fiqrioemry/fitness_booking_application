@@ -29,17 +29,17 @@ func NewInstructorService(repo repositories.InstructorRepository, user repositor
 func (s *instructorService) DeleteInstructor(id string) error {
 	instructor, err := s.repo.GetInstructorByID(id)
 	if err != nil {
-		return customErr.NewNotFound("Instructor not found")
+		return customErr.NewNotFound("instructor not found")
 	}
 
 	user, err := s.user.GetUserByID(instructor.UserID.String())
 	if err == nil {
 		user.Role = "customer"
-		_ = s.user.UpdateUser(user)
+		_ = s.user.UpdateUser(user) // optional fallback, ignore error
 	}
 
 	if err := s.repo.DeleteInstructor(id); err != nil {
-		return customErr.ErrDeleteFailed
+		return customErr.NewInternal("failed to delete instructor", err)
 	}
 	return nil
 }
@@ -47,7 +47,7 @@ func (s *instructorService) DeleteInstructor(id string) error {
 func (s *instructorService) GetAllInstructors() ([]dto.InstructorResponse, error) {
 	instructors, err := s.repo.GetAllInstructors()
 	if err != nil {
-		return nil, customErr.ErrInternalServer
+		return nil, customErr.NewInternal("failed to fetch instructors", err)
 	}
 
 	var result []dto.InstructorResponse
@@ -70,12 +70,12 @@ func (s *instructorService) GetAllInstructors() ([]dto.InstructorResponse, error
 func (s *instructorService) CreateInstructor(req dto.CreateInstructorRequest) error {
 	user, err := s.user.GetUserByID(req.UserID)
 	if err != nil {
-		return customErr.NewNotFound("User not found")
+		return customErr.NewNotFound("user not found")
 	}
 
 	user.Role = "instructor"
 	if err := s.user.UpdateUser(user); err != nil {
-		return customErr.ErrUpdateFailed
+		return customErr.NewInternal("failed to update user role", err)
 	}
 
 	instructor := models.Instructor{
@@ -86,7 +86,7 @@ func (s *instructorService) CreateInstructor(req dto.CreateInstructorRequest) er
 	}
 
 	if err := s.repo.CreateInstructor(&instructor); err != nil {
-		return customErr.ErrCreateFailed
+		return customErr.NewInternal("failed to create instructor", err)
 	}
 
 	return nil
@@ -95,7 +95,7 @@ func (s *instructorService) CreateInstructor(req dto.CreateInstructorRequest) er
 func (s *instructorService) GetInstructorByID(id string) (*dto.InstructorResponse, error) {
 	instructor, err := s.repo.GetInstructorByID(id)
 	if err != nil {
-		return nil, customErr.NewNotFound("Instructor not found")
+		return nil, customErr.NewNotFound("instructor not found")
 	}
 
 	return &dto.InstructorResponse{
@@ -114,11 +114,11 @@ func (s *instructorService) GetInstructorByID(id string) (*dto.InstructorRespons
 func (s *instructorService) UpdateInstructor(id string, req dto.UpdateInstructorRequest) error {
 	instructor, err := s.repo.GetInstructorByID(id)
 	if err != nil {
-		return customErr.NewNotFound("Instructor not found")
+		return customErr.NewNotFound("instructor not found")
 	}
 
 	if instructor.UserID.String() != req.UserID {
-		return customErr.ErrForbidden
+		return customErr.NewForbidden("forbidden: user mismatch")
 	}
 
 	if req.Experience != 0 {
@@ -132,7 +132,7 @@ func (s *instructorService) UpdateInstructor(id string, req dto.UpdateInstructor
 	}
 
 	if err := s.repo.UpdateInstructor(instructor); err != nil {
-		return customErr.ErrUpdateFailed
+		return customErr.NewInternal("failed to update instructor", err)
 	}
 
 	return nil

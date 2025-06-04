@@ -34,7 +34,7 @@ func (s *locationService) CreateLocation(req dto.CreateLocationRequest) error {
 	}
 
 	if err := s.repo.CreateLocation(&location); err != nil {
-		return customErr.ErrCreateFailed
+		return customErr.NewInternal("failed to create location", err)
 	}
 	return nil
 }
@@ -42,7 +42,7 @@ func (s *locationService) CreateLocation(req dto.CreateLocationRequest) error {
 func (s *locationService) UpdateLocation(id string, req dto.UpdateLocationRequest) error {
 	location, err := s.repo.GetLocationByID(id)
 	if err != nil {
-		return customErr.ErrNotFound
+		return customErr.NewNotFound("location not found")
 	}
 
 	location.Name = req.Name
@@ -50,7 +50,7 @@ func (s *locationService) UpdateLocation(id string, req dto.UpdateLocationReques
 	location.GeoLocation = req.GeoLocation
 
 	if err := s.repo.UpdateLocation(location); err != nil {
-		return customErr.ErrUpdateFailed
+		return customErr.NewInternal("failed to update location", err)
 	}
 	return nil
 }
@@ -58,11 +58,11 @@ func (s *locationService) UpdateLocation(id string, req dto.UpdateLocationReques
 func (s *locationService) DeleteLocation(id string) error {
 	_, err := s.repo.GetLocationByID(id)
 	if err != nil {
-		return customErr.ErrNotFound
+		return customErr.NewNotFound("location not found")
 	}
 
 	if err := s.repo.DeleteLocation(id); err != nil {
-		return customErr.ErrDeleteFailed
+		return customErr.NewInternal("failed to delete location", err)
 	}
 	return nil
 }
@@ -70,7 +70,7 @@ func (s *locationService) DeleteLocation(id string) error {
 func (s *locationService) GetAllLocations() ([]dto.LocationResponse, error) {
 	locations, err := s.repo.GetAllLocations()
 	if err != nil {
-		return nil, customErr.NewInternal("Failed to fetch locations", err)
+		return nil, customErr.NewInternal("failed to fetch locations", err)
 	}
 
 	var result []dto.LocationResponse
@@ -88,7 +88,7 @@ func (s *locationService) GetAllLocations() ([]dto.LocationResponse, error) {
 func (s *locationService) GetLocationByID(id string) (*dto.LocationResponse, error) {
 	location, err := s.repo.GetLocationByID(id)
 	if err != nil {
-		return nil, customErr.NewNotFound("Location not found")
+		return nil, customErr.NewNotFound("location not found")
 	}
 
 	return &dto.LocationResponse{

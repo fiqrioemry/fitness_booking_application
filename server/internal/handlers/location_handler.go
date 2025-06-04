@@ -24,7 +24,7 @@ func (h *LocationHandler) CreateLocation(c *gin.Context) {
 	}
 
 	if err := h.locationService.CreateLocation(req); err != nil {
-		utils.HandleServiceError(c, err, "Failed to create location")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -40,7 +40,7 @@ func (h *LocationHandler) UpdateLocation(c *gin.Context) {
 	}
 
 	if err := h.locationService.UpdateLocation(id, req); err != nil {
-		utils.HandleServiceError(c, err, "Failed to update location")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -51,7 +51,7 @@ func (h *LocationHandler) DeleteLocation(c *gin.Context) {
 	id := c.Param("id")
 
 	if err := h.locationService.DeleteLocation(id); err != nil {
-		utils.HandleServiceError(c, err, "Failed to delete location")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -61,7 +61,7 @@ func (h *LocationHandler) DeleteLocation(c *gin.Context) {
 func (h *LocationHandler) GetAllLocations(c *gin.Context) {
 	locations, err := h.locationService.GetAllLocations()
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to fetch locations")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -77,7 +77,7 @@ func (h *LocationHandler) GetLocationByID(c *gin.Context) {
 
 	location, err := h.locationService.GetLocationByID(id)
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to fetch location")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 

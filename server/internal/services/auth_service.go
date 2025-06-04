@@ -42,25 +42,25 @@ func NewAuthService(repo repositories.AuthRepository, user repositories.UserRepo
 func (s *authService) SendOTP(email string) error {
 	_, err := config.RedisClient.Get(config.Ctx, "otp_data:"+email).Result()
 	if err != nil {
-		return customErr.ErrNotFound
+		return customErr.NewNotFound("OTP data not found")
 	}
 
 	limitKey := "otp_resend_limit:" + email
 	count, _ := config.RedisClient.Get(config.Ctx, limitKey).Int()
 	if count >= 3 {
-		return customErr.ErrTooManyRequest
+		return customErr.NewTooManyRequest("Too many OTP requests")
 	}
 	config.RedisClient.Incr(config.Ctx, limitKey)
 	config.RedisClient.Expire(config.Ctx, limitKey, 30*time.Minute)
 
 	otp := utils.GenerateOTP(6)
 	if err := config.RedisClient.Set(config.Ctx, "otp:"+email, otp, 5*time.Minute).Err(); err != nil {
-		return customErr.ErrInternalServer
+		return customErr.NewInternal("Failed to store OTP", err)
 	}
 	subject := "Your New OTP Code"
 	body := fmt.Sprintf("Your new OTP is %s", otp)
 	if err := utils.SendEmail(subject, email, otp, body); err != nil {
-		return customErr.ErrInternalServer
+		return customErr.NewInternal("Failed to send OTP email", err)
 	}
 
 	return nil
@@ -83,7 +83,7 @@ func (s *authService) VerifyOTP(email, otp string) (*dto.AuthResponse, error) {
 	}
 	var temp map[string]string
 	if err := json.Unmarshal([]byte(val), &temp); err != nil {
-		return nil, customErr.ErrInternalServer
+		return nil, customErr.NewInternal("Failed to parse user data", err)
 	}
 
 	user := models.User{
@@ -111,7 +111,7 @@ func (s *authService) VerifyOTP(email, otp string) (*dto.AuthResponse, error) {
 		ExpiredAt: time.Now().Add(7 * 24 * time.Hour),
 	}
 	if err := s.repo.StoreRefreshToken(session); err != nil {
-		return nil, customErr.ErrInternalServer
+		return nil, customErr.NewInternal("Failed to store refresh token", err)
 	}
 
 	return &dto.AuthResponse{
@@ -123,7 +123,7 @@ func (s *authService) VerifyOTP(email, otp string) (*dto.AuthResponse, error) {
 func (s *authService) GetUserProfile(userID string) (*dto.AuthMeResponse, error) {
 	user, err := s.user.GetUserByID(userID)
 	if err != nil {
-		return nil, customErr.ErrNotFound
+		return nil, customErr.NewNotFound("User not found")
 	}
 	return &dto.AuthMeResponse{
 		ID:       user.ID.String(),
@@ -159,13 +159,13 @@ func (s *authService) Login(req *dto.LoginRequest) (*dto.AuthResponse, error) {
 	if err != nil {
 		return nil, customErr.ErrTokenGeneration
 	}
-	tokenModel := &models.Token{
+	session := &models.Token{
 		UserID:    user.ID,
 		Token:     refreshToken,
 		ExpiredAt: time.Now().Add(7 * 24 * time.Hour),
 	}
-	if err := s.repo.StoreRefreshToken(tokenModel); err != nil {
-		return nil, customErr.ErrInternalServer
+	if err := s.repo.StoreRefreshToken(session); err != nil {
+		return nil, customErr.NewInternal("Failed to store refresh token", err)
 	}
 
 	return &dto.AuthResponse{
@@ -219,14 +219,14 @@ func (s *authService) RefreshToken(refreshToken string) (*dto.AuthResponse, erro
 	}
 	tokenModel, err := s.repo.FindRefreshToken(refreshToken)
 	if err != nil {
-		return nil, customErr.ErrNotFound
+		return nil, customErr.NewNotFound("Refresh token not found")
 	}
 	if tokenModel.ExpiredAt.Before(time.Now()) {
 		return nil, customErr.ErrUnauthorized
 	}
 	user, err := s.user.GetUserByID(tokenModel.UserID.String())
 	if err != nil {
-		return nil, customErr.ErrNotFound
+		return nil, customErr.NewNotFound("User not found")
 	}
 
 	accessToken, err := utils.GenerateAccessToken(user.ID.String(), user.Role)
@@ -239,7 +239,7 @@ func (s *authService) RefreshToken(refreshToken string) (*dto.AuthResponse, erro
 	}
 
 	if err := s.repo.DeleteRefreshToken(refreshToken); err != nil {
-		return nil, customErr.ErrInternalServer
+		return nil, customErr.NewInternal("Failed to delete refresh token", err)
 	}
 	session := &models.Token{
 		UserID:    user.ID,
@@ -247,7 +247,7 @@ func (s *authService) RefreshToken(refreshToken string) (*dto.AuthResponse, erro
 		ExpiredAt: time.Now().Add(7 * 24 * time.Hour),
 	}
 	if err := s.repo.StoreRefreshToken(session); err != nil {
-		return nil, customErr.ErrInternalServer
+		return nil, customErr.NewInternal("Failed to store new refresh token", err)
 	}
 
 	return &dto.AuthResponse{
@@ -263,7 +263,7 @@ func (s *authService) GoogleSignIn(idToken string) (*dto.AuthResponse, error) {
 	}
 	email, ok := payload.Claims["email"].(string)
 	if !ok || email == "" {
-		return nil, customErr.ErrInvalidInput
+		return nil, customErr.NewBadRequest("Invalid email in ID token")
 	}
 	name, _ := payload.Claims["name"].(string)
 
@@ -277,7 +277,7 @@ func (s *authService) GoogleSignIn(idToken string) (*dto.AuthResponse, error) {
 			Avatar:   utils.RandomUserAvatar(name),
 		}
 		if err := s.user.CreateUser(user); err != nil {
-			return nil, customErr.ErrInternalServer
+			return nil, customErr.NewInternal("Failed to create user", err)
 		}
 	}
 
@@ -296,7 +296,7 @@ func (s *authService) GoogleSignIn(idToken string) (*dto.AuthResponse, error) {
 		ExpiredAt: time.Now().Add(7 * 24 * time.Hour),
 	}
 	if err := s.repo.StoreRefreshToken(session); err != nil {
-		return nil, customErr.ErrInternalServer
+		return nil, customErr.NewInternal("Failed to store refresh token", err)
 	}
 
 	return &dto.AuthResponse{

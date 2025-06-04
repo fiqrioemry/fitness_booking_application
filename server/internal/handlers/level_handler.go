@@ -24,7 +24,7 @@ func (h *LevelHandler) CreateLevel(c *gin.Context) {
 	}
 
 	if err := h.levelService.CreateLevel(req); err != nil {
-		utils.HandleServiceError(c, err, "Failed to create level")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -40,7 +40,7 @@ func (h *LevelHandler) UpdateLevel(c *gin.Context) {
 	}
 
 	if err := h.levelService.UpdateLevel(id, req); err != nil {
-		utils.HandleServiceError(c, err, "Failed to update level")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -51,7 +51,7 @@ func (h *LevelHandler) DeleteLevel(c *gin.Context) {
 	id := c.Param("id")
 
 	if err := h.levelService.DeleteLevel(id); err != nil {
-		utils.HandleServiceError(c, err, "Failed to delete level")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -61,7 +61,7 @@ func (h *LevelHandler) DeleteLevel(c *gin.Context) {
 func (h *LevelHandler) GetAllLevels(c *gin.Context) {
 	levels, err := h.levelService.GetAllLevels()
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to fetch levels")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -77,7 +77,7 @@ func (h *LevelHandler) GetLevelByID(c *gin.Context) {
 
 	level, err := h.levelService.GetLevelByID(id)
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to fetch level")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 

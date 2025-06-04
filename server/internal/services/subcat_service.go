@@ -29,7 +29,7 @@ func NewSubcategoryService(repo repositories.SubcategoryRepository) SubcategoryS
 func (s *subcategoryService) CreateSubcategory(req dto.CreateSubcategoryRequest) error {
 	categoryID, err := uuid.Parse(req.CategoryID)
 	if err != nil {
-		return customErr.NewBadRequest("Invalid category ID")
+		return customErr.NewBadRequest("invalid category ID")
 	}
 
 	subcategory := models.Subcategory{
@@ -39,7 +39,7 @@ func (s *subcategoryService) CreateSubcategory(req dto.CreateSubcategoryRequest)
 	}
 
 	if err := s.repo.CreateSubcategory(&subcategory); err != nil {
-		return customErr.ErrCreateFailed
+		return customErr.NewInternal("failed to create subcategory", err)
 	}
 
 	return nil
@@ -48,19 +48,19 @@ func (s *subcategoryService) CreateSubcategory(req dto.CreateSubcategoryRequest)
 func (s *subcategoryService) UpdateSubcategory(id string, req dto.UpdateSubcategoryRequest) error {
 	subcategory, err := s.repo.GetSubcategoryByID(id)
 	if err != nil {
-		return customErr.ErrNotFound
+		return customErr.NewNotFound("subcategory not found")
 	}
 
 	categoryID, err := uuid.Parse(req.CategoryID)
 	if err != nil {
-		return customErr.NewBadRequest("Invalid category ID")
+		return customErr.NewBadRequest("invalid category ID")
 	}
 
 	subcategory.Name = req.Name
 	subcategory.CategoryID = categoryID
 
 	if err := s.repo.UpdateSubcategory(subcategory); err != nil {
-		return customErr.ErrUpdateFailed
+		return customErr.NewInternal("failed to update subcategory", err)
 	}
 
 	return nil
@@ -69,11 +69,11 @@ func (s *subcategoryService) UpdateSubcategory(id string, req dto.UpdateSubcateg
 func (s *subcategoryService) DeleteSubcategory(id string) error {
 	_, err := s.repo.GetSubcategoryByID(id)
 	if err != nil {
-		return customErr.ErrNotFound
+		return customErr.NewNotFound("subcategory not found")
 	}
 
 	if err := s.repo.DeleteSubcategory(id); err != nil {
-		return customErr.ErrDeleteFailed
+		return customErr.NewInternal("failed to delete subcategory", err)
 	}
 
 	return nil
@@ -82,7 +82,7 @@ func (s *subcategoryService) DeleteSubcategory(id string) error {
 func (s *subcategoryService) GetAllSubcategories() ([]dto.SubcategoryResponse, error) {
 	subcategories, err := s.repo.GetAllSubcategories()
 	if err != nil {
-		return nil, customErr.NewNotFound("category not found")
+		return nil, customErr.NewInternal("failed to fetch subcategories", err)
 	}
 
 	var result []dto.SubcategoryResponse
@@ -100,7 +100,7 @@ func (s *subcategoryService) GetAllSubcategories() ([]dto.SubcategoryResponse, e
 func (s *subcategoryService) GetSubcategoryByID(id string) (*dto.SubcategoryResponse, error) {
 	subcategory, err := s.repo.GetSubcategoryByID(id)
 	if err != nil {
-		return nil, customErr.NewNotFound("Subcategory not found")
+		return nil, customErr.NewNotFound("subcategory not found")
 	}
 
 	return &dto.SubcategoryResponse{
@@ -113,7 +113,7 @@ func (s *subcategoryService) GetSubcategoryByID(id string) (*dto.SubcategoryResp
 func (s *subcategoryService) GetSubcategoriesByCategoryID(categoryID string) ([]dto.SubcategoryResponse, error) {
 	subcategories, err := s.repo.GetSubcategoriesByCategoryID(categoryID)
 	if err != nil {
-		return nil, customErr.NewNotFound("category not found")
+		return nil, customErr.NewInternal("failed to fetch subcategories by category ID", err)
 	}
 
 	var result []dto.SubcategoryResponse

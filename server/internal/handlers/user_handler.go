@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"server/internal/dto"
 	"server/internal/services"
-	customErr "server/pkg/errors"
 	"server/pkg/utils"
 
 	"github.com/gin-gonic/gin"
@@ -23,7 +22,7 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 
 	response, err := h.service.GetUserDetail(userID)
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to get profile")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -39,7 +38,7 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	}
 
 	if err := h.service.UpdateProfile(userID, req); err != nil {
-		utils.HandleServiceError(c, err, "Failed to update profile")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -57,14 +56,14 @@ func (h *UserHandler) UpdateAvatar(c *gin.Context) {
 	if req.Avatar != nil && req.Avatar.Filename != "" {
 		avatarURL, err := utils.UploadImageWithValidation(req.Avatar)
 		if err != nil {
-			utils.HandleServiceError(c, customErr.ErrInvalidInput, "Failed to upload avatar")
+			utils.HandleServiceError(c, err, err.Error())
 			return
 		}
 		req.AvatarURL = avatarURL
 	}
 
 	if err := h.service.UpdateAvatar(userID, req); err != nil {
-		utils.HandleServiceError(c, err, "Failed to update avatar")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -79,7 +78,7 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 
 	users, pagination, err := h.service.GetAllUsers(params)
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to fetch users")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -94,7 +93,7 @@ func (h *UserHandler) GetUserDetail(c *gin.Context) {
 	user, err := h.service.GetUserDetail(id)
 
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to get user detail")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, user)
@@ -103,7 +102,7 @@ func (h *UserHandler) GetUserDetail(c *gin.Context) {
 func (h *UserHandler) GetUserStats(c *gin.Context) {
 	stats, err := h.service.GetUserStats()
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to get user stats")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, stats)

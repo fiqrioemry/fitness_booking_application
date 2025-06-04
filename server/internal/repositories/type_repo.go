@@ -36,16 +36,12 @@ func (r *typeRepository) DeleteType(id string) error {
 
 func (r *typeRepository) GetAllTypes() ([]models.Type, error) {
 	var types []models.Type
-	if err := r.db.Order("name asc").Find(&types).Error; err != nil {
-		return nil, err
-	}
-	return types, nil
+	err := r.db.Order("name asc").Find(&types).Error
+	return types, err
 }
 
 func (r *typeRepository) GetTypeByID(id string) (*models.Type, error) {
 	var t models.Type
-	if err := r.db.First(&t, "id = ?", id).Error; err != nil {
-		return nil, err
-	}
-	return &t, nil
+	err := r.db.First(&t, "id = ?", id).Error
+	return &t, err
 }

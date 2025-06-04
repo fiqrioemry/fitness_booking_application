@@ -25,7 +25,7 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 	}
 
 	if err := h.service.CreateCategory(req); err != nil {
-		utils.HandleServiceError(c, err, "Failed to create category")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -41,7 +41,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 	}
 
 	if err := h.service.UpdateCategory(id, req); err != nil {
-		utils.HandleServiceError(c, err, "Failed to update category")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -52,7 +52,7 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	id := c.Param("id")
 
 	if err := h.service.DeleteCategory(id); err != nil {
-		utils.HandleServiceError(c, err, "Failed to delete category")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -62,7 +62,7 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
 	categories, err := h.service.GetAllCategories()
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to get categories")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -78,7 +78,7 @@ func (h *CategoryHandler) GetCategoryByID(c *gin.Context) {
 
 	category, err := h.service.GetCategoryByID(id)
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to get category")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 

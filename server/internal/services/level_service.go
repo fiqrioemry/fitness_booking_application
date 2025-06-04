@@ -26,11 +26,11 @@ func NewLevelService(repo repositories.LevelRepository) LevelService {
 func (s *levelService) DeleteLevel(id string) error {
 	_, err := s.repo.GetLevelByID(id)
 	if err != nil {
-		return customErr.ErrNotFound
+		return customErr.NewNotFound("level not found")
 	}
 
 	if err := s.repo.DeleteLevel(id); err != nil {
-		return customErr.ErrDeleteFailed
+		return customErr.NewInternal("failed to delete level", err)
 	}
 
 	return nil
@@ -39,7 +39,7 @@ func (s *levelService) DeleteLevel(id string) error {
 func (s *levelService) GetAllLevels() ([]dto.LevelResponse, error) {
 	levels, err := s.repo.GetAllLevels()
 	if err != nil {
-		return nil, customErr.ErrInternalServer
+		return nil, customErr.NewInternal("failed to fetch levels", err)
 	}
 
 	var result []dto.LevelResponse
@@ -58,7 +58,7 @@ func (s *levelService) CreateLevel(req dto.CreateLevelRequest) error {
 	}
 
 	if err := s.repo.CreateLevel(&level); err != nil {
-		return customErr.ErrCreateFailed
+		return customErr.NewInternal("failed to create level", err)
 	}
 
 	return nil
@@ -67,7 +67,7 @@ func (s *levelService) CreateLevel(req dto.CreateLevelRequest) error {
 func (s *levelService) GetLevelByID(id string) (*dto.LevelResponse, error) {
 	level, err := s.repo.GetLevelByID(id)
 	if err != nil {
-		return nil, customErr.NewNotFound("Level not found")
+		return nil, customErr.NewNotFound("level not found")
 	}
 
 	return &dto.LevelResponse{
@@ -79,13 +79,13 @@ func (s *levelService) GetLevelByID(id string) (*dto.LevelResponse, error) {
 func (s *levelService) UpdateLevel(id string, req dto.UpdateLevelRequest) error {
 	level, err := s.repo.GetLevelByID(id)
 	if err != nil {
-		return customErr.ErrNotFound
+		return customErr.NewNotFound("level not found")
 	}
 
 	level.Name = req.Name
 
 	if err := s.repo.UpdateLevel(level); err != nil {
-		return customErr.ErrUpdateFailed
+		return customErr.NewInternal("failed to update level", err)
 	}
 
 	return nil

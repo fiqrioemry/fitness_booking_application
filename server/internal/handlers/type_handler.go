@@ -24,7 +24,7 @@ func (h *TypeHandler) CreateType(c *gin.Context) {
 	}
 
 	if err := h.typeService.CreateType(req); err != nil {
-		utils.HandleServiceError(c, err, "Failed to create type")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -40,7 +40,7 @@ func (h *TypeHandler) UpdateType(c *gin.Context) {
 	}
 
 	if err := h.typeService.UpdateType(id, req); err != nil {
-		utils.HandleServiceError(c, err, "Failed to update type")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -51,7 +51,7 @@ func (h *TypeHandler) DeleteType(c *gin.Context) {
 	id := c.Param("id")
 
 	if err := h.typeService.DeleteType(id); err != nil {
-		utils.HandleServiceError(c, err, "Failed to delete type")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -61,7 +61,7 @@ func (h *TypeHandler) DeleteType(c *gin.Context) {
 func (h *TypeHandler) GetAllTypes(c *gin.Context) {
 	types, err := h.typeService.GetAllTypes()
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to fetch types")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -77,7 +77,7 @@ func (h *TypeHandler) GetTypeByID(c *gin.Context) {
 
 	typeClass, err := h.typeService.GetTypeByID(id)
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to fetch type")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 

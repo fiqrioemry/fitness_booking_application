@@ -36,16 +36,12 @@ func (r *categoryRepository) DeleteCategory(id string) error {
 
 func (r *categoryRepository) GetAllCategories() ([]models.Category, error) {
 	var categories []models.Category
-	if err := r.db.Order("name asc").Find(&categories).Error; err != nil {
-		return nil, err
-	}
-	return categories, nil
+	err := r.db.Order("name asc").Find(&categories).Error
+	return categories, err
 }
 
 func (r *categoryRepository) GetCategoryByID(id string) (*models.Category, error) {
 	var category models.Category
-	if err := r.db.First(&category, "id = ?", id).Error; err != nil {
-		return nil, err
-	}
-	return &category, nil
+	err := r.db.First(&category, "id = ?", id).Error
+	return &category, err
 }

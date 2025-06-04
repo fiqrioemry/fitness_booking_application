@@ -69,7 +69,7 @@ func (s *categoryService) DeleteCategory(id string) error {
 func (s *categoryService) GetCategoryByID(id string) (*dto.CategoryResponse, error) {
 	category, err := s.repo.GetCategoryByID(id)
 	if err != nil {
-		return nil, customErr.NewNotFound("Category not found")
+		return nil, customErr.ErrNotFound
 	}
 
 	return &dto.CategoryResponse{
@@ -81,7 +81,7 @@ func (s *categoryService) GetCategoryByID(id string) (*dto.CategoryResponse, err
 func (s *categoryService) GetAllCategories() ([]dto.CategoryResponse, error) {
 	categories, err := s.repo.GetAllCategories()
 	if err != nil {
-		return nil, err
+		return nil, customErr.ErrNotFound
 	}
 
 	var result []dto.CategoryResponse

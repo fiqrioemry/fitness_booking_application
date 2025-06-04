@@ -46,7 +46,7 @@ func (h *ClassHandler) CreateClass(c *gin.Context) {
 	if err := h.service.CreateClass(req); err != nil {
 		utils.CleanupImageOnError(req.ImageURL)
 		utils.CleanupImagesOnError(req.ImageURLs)
-		utils.HandleServiceError(c, err, "Failed to create class")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -73,7 +73,7 @@ func (h *ClassHandler) UpdateClass(c *gin.Context) {
 
 	if err := h.service.UpdateClass(id, req); err != nil {
 		utils.CleanupImageOnError(req.ImageURL)
-		utils.HandleServiceError(c, err, "Failed to update class")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -84,7 +84,7 @@ func (h *ClassHandler) DeleteClass(c *gin.Context) {
 	id := c.Param("id")
 
 	if err := h.service.DeleteClass(id); err != nil {
-		utils.HandleServiceError(c, err, "Failed to delete class")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -96,7 +96,7 @@ func (h *ClassHandler) GetClassByID(c *gin.Context) {
 
 	classResponse, err := h.service.GetClassByID(id)
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to get class")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, classResponse)
@@ -110,7 +110,7 @@ func (h *ClassHandler) GetAllClasses(c *gin.Context) {
 
 	classes, pagination, err := h.service.GetAllClasses(params)
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to get all classes")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -146,7 +146,7 @@ func (h *ClassHandler) UploadClassGallery(c *gin.Context) {
 
 	if err := h.service.UpdateClassGallery(parsedID, oldImages, req.ImageURLs); err != nil {
 		utils.CleanupImagesOnError(req.ImageURLs)
-		utils.HandleServiceError(c, err, "Failed to update class gallery")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 

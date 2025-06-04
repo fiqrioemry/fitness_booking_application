@@ -70,13 +70,25 @@ func main() {
 	locationService := services.NewLocationService(locationRepo)
 	locationHandler := handlers.NewLocationHandler(locationService)
 
+	packageRepo := repositories.NewPackageRepository(db)
+	packageService := services.NewPackageService(packageRepo)
+	packageHandler := handlers.NewPackageHandler(packageService)
+
 	subcategoryRepo := repositories.NewSubcategoryRepository(db)
 	subcategoryService := services.NewSubcategoryService(subcategoryRepo)
 	subcategoryHandler := handlers.NewSubcategoryHandler(subcategoryService)
 
+	voucherRepo := repositories.NewVoucherRepository(db)
+	voucherService := services.NewVoucherService(voucherRepo)
+	voucherHandler := handlers.NewVoucherHandler(voucherService)
+
 	instructorRepo := repositories.NewInstructorRepository(db)
 	instructorService := services.NewInstructorService(instructorRepo, userRepo)
 	instructorHandler := handlers.NewInstructorHandler(instructorService)
+
+	paymentRepo := repositories.NewPaymentRepository(db)
+	paymentService := services.NewPaymentService(paymentRepo, packageRepo, userRepo, voucherService)
+	paymentHandler := handlers.NewPaymentHandler(paymentService)
 
 	// Route Binding ==========================
 	routes.AuthRoutes(r, authHandler)
@@ -84,10 +96,13 @@ func main() {
 	routes.TypeRoutes(r, typeHandler)
 	routes.ClassRoutes(r, classHandler)
 	routes.LevelRoutes(r, levelHandler)
+	routes.PackageRoutes(r, packageHandler)
 	routes.CategoryRoutes(r, categoryHandler)
+	routes.VoucherRoutes(r, voucherHandler)
+	routes.PaymentRoutes(r, paymentHandler)
 	routes.LocationRoutes(r, locationHandler)
-	routes.SubcategoryRoutes(r, subcategoryHandler)
 	routes.InstructorRoutes(r, instructorHandler)
+	routes.SubcategoryRoutes(r, subcategoryHandler)
 
 	// Start Server ===========================
 	port := os.Getenv("PORT")

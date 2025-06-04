@@ -24,7 +24,7 @@ func (h *SubcategoryHandler) CreateSubcategory(c *gin.Context) {
 	}
 
 	if err := h.subcategoryService.CreateSubcategory(req); err != nil {
-		utils.HandleServiceError(c, err, "Failed to create subcategory")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -40,7 +40,7 @@ func (h *SubcategoryHandler) UpdateSubcategory(c *gin.Context) {
 	}
 
 	if err := h.subcategoryService.UpdateSubcategory(id, req); err != nil {
-		utils.HandleServiceError(c, err, "Failed to update subcategory")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -51,7 +51,7 @@ func (h *SubcategoryHandler) DeleteSubcategory(c *gin.Context) {
 	id := c.Param("id")
 
 	if err := h.subcategoryService.DeleteSubcategory(id); err != nil {
-		utils.HandleServiceError(c, err, "Failed to delete subcategory")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -61,7 +61,7 @@ func (h *SubcategoryHandler) DeleteSubcategory(c *gin.Context) {
 func (h *SubcategoryHandler) GetAllSubcategories(c *gin.Context) {
 	subcategories, err := h.subcategoryService.GetAllSubcategories()
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to fetch subcategories")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -77,7 +77,7 @@ func (h *SubcategoryHandler) GetSubcategoryByID(c *gin.Context) {
 
 	subcategory, err := h.subcategoryService.GetSubcategoryByID(id)
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to fetch subcategory")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -89,7 +89,7 @@ func (h *SubcategoryHandler) GetSubcategoriesByCategoryID(c *gin.Context) {
 
 	subcategories, err := h.subcategoryService.GetSubcategoriesByCategoryID(categoryID)
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to fetch subcategories by category")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 

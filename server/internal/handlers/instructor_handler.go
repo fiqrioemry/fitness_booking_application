@@ -24,7 +24,7 @@ func (h *InstructorHandler) CreateInstructor(c *gin.Context) {
 	}
 
 	if err := h.service.CreateInstructor(req); err != nil {
-		utils.HandleServiceError(c, err, "Failed to create instructor")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -40,7 +40,7 @@ func (h *InstructorHandler) UpdateInstructor(c *gin.Context) {
 	}
 
 	if err := h.service.UpdateInstructor(id, req); err != nil {
-		utils.HandleServiceError(c, err, "Failed to update instructor")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -51,7 +51,7 @@ func (h *InstructorHandler) DeleteInstructor(c *gin.Context) {
 	id := c.Param("id")
 
 	if err := h.service.DeleteInstructor(id); err != nil {
-		utils.HandleServiceError(c, err, "Failed to delete instructor")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -63,7 +63,7 @@ func (h *InstructorHandler) GetInstructorByID(c *gin.Context) {
 
 	instructor, err := h.service.GetInstructorByID(id)
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to get instructor")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -73,7 +73,7 @@ func (h *InstructorHandler) GetInstructorByID(c *gin.Context) {
 func (h *InstructorHandler) GetAllInstructors(c *gin.Context) {
 	instructors, err := h.service.GetAllInstructors()
 	if err != nil {
-		utils.HandleServiceError(c, err, "Failed to fetch instructors")
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 

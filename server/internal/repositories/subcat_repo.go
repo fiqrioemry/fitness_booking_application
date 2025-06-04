@@ -29,10 +29,8 @@ func (r *subcategoryRepository) DeleteSubcategory(id string) error {
 
 func (r *subcategoryRepository) GetAllSubcategories() ([]models.Subcategory, error) {
 	var subcategories []models.Subcategory
-	if err := r.db.Order("name asc").Find(&subcategories).Error; err != nil {
-		return nil, err
-	}
-	return subcategories, nil
+	err := r.db.Order("name asc").Find(&subcategories).Error
+	return subcategories, err
 }
 
 func (r *subcategoryRepository) CreateSubcategory(subcategory *models.Subcategory) error {
@@ -45,16 +43,12 @@ func (r *subcategoryRepository) UpdateSubcategory(subcategory *models.Subcategor
 
 func (r *subcategoryRepository) GetSubcategoryByID(id string) (*models.Subcategory, error) {
 	var subcategory models.Subcategory
-	if err := r.db.First(&subcategory, "id = ?", id).Error; err != nil {
-		return nil, err
-	}
-	return &subcategory, nil
+	err := r.db.First(&subcategory, "id = ?", id).Error
+	return &subcategory, err
 }
 
 func (r *subcategoryRepository) GetSubcategoriesByCategoryID(categoryID string) ([]models.Subcategory, error) {
 	var subcategories []models.Subcategory
-	if err := r.db.Where("category_id = ?", categoryID).Find(&subcategories).Error; err != nil {
-		return nil, err
-	}
-	return subcategories, nil
+	err := r.db.Where("category_id = ?", categoryID).Find(&subcategories).Error
+	return subcategories, err
 }

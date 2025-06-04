@@ -36,16 +36,13 @@ func (r *levelRepository) UpdateLevel(l *models.Level) error {
 
 func (r *levelRepository) GetAllLevels() ([]models.Level, error) {
 	var levels []models.Level
-	if err := r.db.Order("name asc").Find(&levels).Error; err != nil {
-		return nil, err
-	}
-	return levels, nil
+	err := r.db.Order("name asc").Find(&levels).Error
+	return levels, err
 }
 
 func (r *levelRepository) GetLevelByID(id string) (*models.Level, error) {
-	var l models.Level
-	if err := r.db.First(&l, "id = ?", id).Error; err != nil {
-		return nil, err
-	}
-	return &l, nil
+	var level models.Level
+	err := r.db.First(&level, "id = ?", id).Error
+	return &level, err
+
 }

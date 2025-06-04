@@ -5,8 +5,6 @@ import (
 	"server/internal/models"
 	"server/internal/repositories"
 	customErr "server/pkg/errors"
-
-	"github.com/google/uuid"
 )
 
 type LevelService interface {
@@ -25,19 +23,6 @@ func NewLevelService(repo repositories.LevelRepository) LevelService {
 	return &levelService{repo}
 }
 
-func (s *levelService) CreateLevel(req dto.CreateLevelRequest) error {
-	level := models.Level{
-		ID:   uuid.New(),
-		Name: req.Name,
-	}
-
-	if err := s.repo.CreateLevel(&level); err != nil {
-		return customErr.ErrCreateFailed
-	}
-
-	return nil
-}
-
 func (s *levelService) DeleteLevel(id string) error {
 	_, err := s.repo.GetLevelByID(id)
 	if err != nil {
@@ -54,7 +39,7 @@ func (s *levelService) DeleteLevel(id string) error {
 func (s *levelService) GetAllLevels() ([]dto.LevelResponse, error) {
 	levels, err := s.repo.GetAllLevels()
 	if err != nil {
-		return nil, customErr.NewInternal("Failed to fetch levels", err)
+		return nil, customErr.ErrInternalServer
 	}
 
 	var result []dto.LevelResponse
@@ -65,6 +50,18 @@ func (s *levelService) GetAllLevels() ([]dto.LevelResponse, error) {
 		})
 	}
 	return result, nil
+}
+
+func (s *levelService) CreateLevel(req dto.CreateLevelRequest) error {
+	level := models.Level{
+		Name: req.Name,
+	}
+
+	if err := s.repo.CreateLevel(&level); err != nil {
+		return customErr.ErrCreateFailed
+	}
+
+	return nil
 }
 
 func (s *levelService) GetLevelByID(id string) (*dto.LevelResponse, error) {

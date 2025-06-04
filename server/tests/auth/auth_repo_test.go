@@ -25,7 +25,8 @@ func setupTestDB(t *testing.T) *gorm.DB {
 
 func TestCreateAndGetUser(t *testing.T) {
 	db := setupTestDB(t)
-	repo := repositories.NewAuthRepository(db)
+	userRepo := repositories.NewUserRepository(db)
+	authRepo := repositories.NewAuthRepository(db)
 
 	user := &models.User{
 		ID:       uuid.New(),
@@ -34,10 +35,10 @@ func TestCreateAndGetUser(t *testing.T) {
 		Fullname: "Test User",
 	}
 
-	err := repo.CreateUser(user)
+	err := userRepo.CreateUser(user)
 	require.NoError(t, err)
 
-	fetched, err := repo.GetUserByEmail("test@example.com")
+	fetched, err := authRepo.GetUserByEmail("test@example.com")
 	require.NoError(t, err)
 	assert.Equal(t, user.Email, fetched.Email)
 }

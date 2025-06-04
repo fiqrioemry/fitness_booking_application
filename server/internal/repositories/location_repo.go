@@ -7,10 +7,11 @@ import (
 )
 
 type LocationRepository interface {
-	CreateLocation(location *models.Location) error
-	UpdateLocation(location *models.Location) error
 	DeleteLocation(id string) error
 	GetAllLocations() ([]models.Location, error)
+	CreateLocation(location *models.Location) error
+	UpdateLocation(location *models.Location) error
+
 	GetLocationByID(id string) (*models.Location, error)
 }
 
@@ -20,14 +21,6 @@ type locationRepository struct {
 
 func NewLocationRepository(db *gorm.DB) LocationRepository {
 	return &locationRepository{db}
-}
-
-func (r *locationRepository) CreateLocation(location *models.Location) error {
-	return r.db.Create(location).Error
-}
-
-func (r *locationRepository) UpdateLocation(location *models.Location) error {
-	return r.db.Save(location).Error
 }
 
 func (r *locationRepository) DeleteLocation(id string) error {
@@ -40,6 +33,13 @@ func (r *locationRepository) GetAllLocations() ([]models.Location, error) {
 		return nil, err
 	}
 	return locations, nil
+}
+func (r *locationRepository) CreateLocation(location *models.Location) error {
+	return r.db.Create(location).Error
+}
+
+func (r *locationRepository) UpdateLocation(location *models.Location) error {
+	return r.db.Save(location).Error
 }
 
 func (r *locationRepository) GetLocationByID(id string) (*models.Location, error) {

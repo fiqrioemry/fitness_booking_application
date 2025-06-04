@@ -9,6 +9,7 @@ import (
 )
 
 type UserRepository interface {
+	CreateUser(user *models.User) error
 	UpdateUser(user *models.User) error
 	GetUserByID(userID string) (*models.User, error)
 	GetUserStats() (int64, int64, int64, int64, int64, error)
@@ -23,14 +24,38 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 	return &userRepository{db}
 }
 
+func (r *userRepository) CreateUser(user *models.User) error {
+	err := r.db.Create(user).Error
+	return err
+}
+
 func (r *userRepository) UpdateUser(user *models.User) error {
 	return r.db.Session(&gorm.Session{FullSaveAssociations: true}).Updates(user).Error
 }
 
-func (r *userRepository) GetUserByID(id string) (*models.User, error) {
+func (r *userRepository) GetUserByID(userID string) (*models.User, error) {
 	var user models.User
-	err := r.db.Preload("Tokens").First(&user, "id = ?", id).Error
-	return &user, err
+	if err := r.db.Preload("Tokens").First(&user, "id = ?", userID).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+func (r *userRepository) GetUserStats() (int64, int64, int64, int64, int64, error) {
+	var total, customers, instructors, admins, newThisMonth int64
+	var err error
+	db := r.db.Model(&models.User{})
+
+	db.Count(&total)
+
+	db.Where("role = ?", "customer").Count(&customers)
+
+	db.Where("role = ?", "instructor").Count(&instructors)
+
+	db.Where("role = ?", "admin").Count(&admins)
+
+	db.Where("created_at >= ?", time.Now().AddDate(0, -1, 0)).Count(&newThisMonth)
+
+	return total, customers, instructors, admins, newThisMonth, err
 }
 
 func (r *userRepository) FindAllUsers(params dto.UserQueryParam) ([]models.User, int64, error) {
@@ -72,22 +97,4 @@ func (r *userRepository) FindAllUsers(params dto.UserQueryParam) ([]models.User,
 		return nil, 0, err
 	}
 	return users, count, nil
-}
-
-func (r *userRepository) GetUserStats() (int64, int64, int64, int64, int64, error) {
-	var total, customers, instructors, admins, newThisMonth int64
-	var err error
-	db := r.db.Model(&models.User{})
-
-	db.Count(&total)
-
-	db.Where("role = ?", "customer").Count(&customers)
-
-	db.Where("role = ?", "instructor").Count(&instructors)
-
-	db.Where("role = ?", "admin").Count(&admins)
-
-	db.Where("created_at >= ?", time.Now().AddDate(0, -1, 0)).Count(&newThisMonth)
-
-	return total, customers, instructors, admins, newThisMonth, err
 }

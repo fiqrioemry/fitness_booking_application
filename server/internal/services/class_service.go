@@ -74,7 +74,6 @@ func (s *classService) CreateClass(req dto.CreateClassRequest) error {
 		var galleries []models.ClassGallery
 		for _, url := range req.ImageURLs {
 			galleries = append(galleries, models.ClassGallery{
-				ID:      uuid.New(),
 				ClassID: class.ID,
 				URL:     url,
 			})
@@ -246,7 +245,6 @@ func (s *classService) UpdateClassGallery(classID uuid.UUID, keepImages []string
 		var newGalleries []models.ClassGallery
 		for _, url := range newImageURLs {
 			newGalleries = append(newGalleries, models.ClassGallery{
-				ID:      uuid.New(),
 				ClassID: classID,
 				URL:     url,
 			})

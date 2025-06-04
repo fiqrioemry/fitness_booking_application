@@ -32,10 +32,11 @@ type AuthService interface {
 
 type authService struct {
 	repo repositories.AuthRepository
+	user repositories.UserRepository
 }
 
-func NewAuthService(repo repositories.AuthRepository) AuthService {
-	return &authService{repo: repo}
+func NewAuthService(repo repositories.AuthRepository, user repositories.UserRepository) AuthService {
+	return &authService{repo, user}
 }
 
 func (s *authService) SendOTP(email string) error {
@@ -91,7 +92,7 @@ func (s *authService) VerifyOTP(email, otp string) (*dto.AuthResponse, error) {
 		Password: temp["password"],
 		Avatar:   utils.RandomUserAvatar(temp["fullname"]),
 	}
-	if err := s.repo.CreateUser(&user); err != nil {
+	if err := s.user.CreateUser(&user); err != nil {
 		return nil, customErr.NewConflict("Email is already registered")
 	}
 
@@ -120,7 +121,7 @@ func (s *authService) VerifyOTP(email, otp string) (*dto.AuthResponse, error) {
 }
 
 func (s *authService) GetUserProfile(userID string) (*dto.AuthMeResponse, error) {
-	user, err := s.repo.GetUserByID(userID)
+	user, err := s.user.GetUserByID(userID)
 	if err != nil {
 		return nil, customErr.ErrNotFound
 	}
@@ -223,7 +224,7 @@ func (s *authService) RefreshToken(refreshToken string) (*dto.AuthResponse, erro
 	if tokenModel.ExpiredAt.Before(time.Now()) {
 		return nil, customErr.ErrUnauthorized
 	}
-	user, err := s.repo.GetUserByID(tokenModel.UserID.String())
+	user, err := s.user.GetUserByID(tokenModel.UserID.String())
 	if err != nil {
 		return nil, customErr.ErrNotFound
 	}
@@ -275,7 +276,7 @@ func (s *authService) GoogleSignIn(idToken string) (*dto.AuthResponse, error) {
 			Fullname: name,
 			Avatar:   utils.RandomUserAvatar(name),
 		}
-		if err := s.repo.CreateUser(user); err != nil {
+		if err := s.user.CreateUser(user); err != nil {
 			return nil, customErr.ErrInternalServer
 		}
 	}

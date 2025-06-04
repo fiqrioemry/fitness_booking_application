@@ -7,7 +7,6 @@ import (
 	"server/pkg/utils"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type ClassHandler struct {
@@ -25,7 +24,7 @@ func (h *ClassHandler) CreateClass(c *gin.Context) {
 		return
 	}
 
-	req.IsActive, _ = utils.ParseBoolFormField(c, "isActive")
+	req.IsActive = utils.ParseBoolFormField(c, "isActive")
 
 	imageURL, err := utils.UploadImageWithValidation(req.Image)
 	if err != nil {
@@ -61,7 +60,7 @@ func (h *ClassHandler) UpdateClass(c *gin.Context) {
 		return
 	}
 
-	req.IsActive, _ = utils.ParseBoolFormField(c, "isActive")
+	req.IsActive = utils.ParseBoolFormField(c, "isActive")
 
 	if req.Image != nil && req.Image.Filename != "" {
 		imageURL, err := utils.UploadImageWithValidation(req.Image)
@@ -129,21 +128,23 @@ func (h *ClassHandler) UploadClassGallery(c *gin.Context) {
 		return
 	}
 
-	parsedID, err := uuid.Parse(classID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid class ID"})
+	form := utils.GetMultipartForm(c)
+	if c.IsAborted() {
 		return
 	}
 
-	imageURLs, err := utils.UploadMultipleImagesWithValidation(req.Images)
+	oldImages, newUpload := utils.ParseMixedImages(form)
+	parsedID := utils.MustParseUUID(c, classID, "classID")
+
+	newImageURLs, err := utils.UploadMultipleImagesWithValidation(newUpload)
 	if err != nil {
-		utils.CleanupImagesOnError(imageURLs)
+		utils.CleanupImagesOnError(newImageURLs)
 		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
-	req.ImageURLs = imageURLs
+	req.ImageURLs = append(req.ImageURLs, newImageURLs...)
 
-	if err := h.service.UpdateClassGallery(parsedID, req.KeepImages, req.ImageURLs); err != nil {
+	if err := h.service.UpdateClassGallery(parsedID, oldImages, req.ImageURLs); err != nil {
 		utils.CleanupImagesOnError(req.ImageURLs)
 		utils.HandleServiceError(c, err, "Failed to update class gallery")
 		return

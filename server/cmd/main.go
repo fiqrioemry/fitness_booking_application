@@ -21,7 +21,10 @@ func main() {
 	config.InitConfiguration()
 	utils.InitLogger()
 
+	// seeders
 	db := config.DB
+	// seeders.ResetDatabase(db)
+
 	r := gin.Default()
 	err := r.SetTrustedProxies(config.GetTrustedProxies())
 	if err != nil {
@@ -38,14 +41,14 @@ func main() {
 		middleware.APIKeyGateway([]string{"/api/auth/google", "/api/auth/google/callback"}),
 	)
 
-	// Inisialisasi Dependency for auth module
-	authRepo := repositories.NewAuthRepository(db)
-	authService := services.NewAuthService(authRepo)
-	authHandler := handlers.NewAuthHandler(authService)
-
 	userRepo := repositories.NewUserRepository(db)
 	userService := services.NewUserService(userRepo)
 	userHandler := handlers.NewUserHandler(userService)
+
+	// Inisialisasi Dependency for auth module
+	authRepo := repositories.NewAuthRepository(db)
+	authService := services.NewAuthService(authRepo, userRepo)
+	authHandler := handlers.NewAuthHandler(authService)
 
 	classRepo := repositories.NewClassRepository(db)
 	classService := services.NewClassService(classRepo)
@@ -54,6 +57,10 @@ func main() {
 	categoryRepo := repositories.NewCategoryRepository(db)
 	categoryService := services.NewCategoryService(categoryRepo)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
+
+	typeRepo := repositories.NewTypeRepository(db)
+	typeService := services.NewTypeService(typeRepo)
+	typeHandler := handlers.NewTypeHandler(typeService)
 
 	levelRepo := repositories.NewLevelRepository(db)
 	levelService := services.NewLevelService(levelRepo)
@@ -67,14 +74,20 @@ func main() {
 	subcategoryService := services.NewSubcategoryService(subcategoryRepo)
 	subcategoryHandler := handlers.NewSubcategoryHandler(subcategoryService)
 
+	instructorRepo := repositories.NewInstructorRepository(db)
+	instructorService := services.NewInstructorService(instructorRepo, userRepo)
+	instructorHandler := handlers.NewInstructorHandler(instructorService)
+
 	// Route Binding ==========================
 	routes.AuthRoutes(r, authHandler)
 	routes.UserRoutes(r, userHandler)
+	routes.TypeRoutes(r, typeHandler)
 	routes.ClassRoutes(r, classHandler)
 	routes.LevelRoutes(r, levelHandler)
 	routes.CategoryRoutes(r, categoryHandler)
 	routes.LocationRoutes(r, locationHandler)
 	routes.SubcategoryRoutes(r, subcategoryHandler)
+	routes.InstructorRoutes(r, instructorHandler)
 
 	// Start Server ===========================
 	port := os.Getenv("PORT")

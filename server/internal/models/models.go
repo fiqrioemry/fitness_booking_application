@@ -457,6 +457,13 @@ func (pc *PackageClass) BeforeCreate(tx *gorm.DB) (err error) {
 	return
 }
 
+func (m *ClassGallery) BeforeCreate(tx *gorm.DB) (err error) {
+	if m.ID == uuid.Nil {
+		m.ID = uuid.New()
+	}
+	return
+}
+
 func (p *Package) BeforeSave(tx *gorm.DB) error {
 	if p.AdditionalList != nil {
 		data, err := json.Marshal(p.AdditionalList)

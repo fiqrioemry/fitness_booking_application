@@ -20,7 +20,7 @@ func HandleServiceError(c *gin.Context, err error, fallbackMsg string) {
 			zap.String("fallback", fallbackMsg),
 			zap.String("raw_error", err.Error()),
 		)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": fallbackMsg})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": fallbackMsg, "error": err.Error()})
 		return
 	}
 
@@ -34,5 +34,5 @@ func HandleServiceError(c *gin.Context, err error, fallbackMsg string) {
 		)
 	}
 
-	c.JSON(appErr.Code, gin.H{"message": appErr.Message})
+	c.JSON(appErr.Code, gin.H{"message": appErr.Message, "error": err.Error()})
 }

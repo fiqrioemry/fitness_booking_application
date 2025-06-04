@@ -157,9 +157,8 @@ type ClassDetailResponse struct {
 }
 
 type UpdateGalleryRequest struct {
-	Images     []*multipart.FileHeader `form:"images"`
-	KeepImages []string                `form:"keepImages[]"`
-	ImageURLs  []string                `form:"-"`
+	Images    []*multipart.FileHeader `form:"images"`
+	ImageURLs []string                `form:"-"`
 }
 
 type GalleryResponse struct {

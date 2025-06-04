@@ -29,7 +29,8 @@ func (m *MockAuthRepo) GetUserByEmail(email string) (*models.User, error) {
 
 func TestRegisterSuccess(t *testing.T) {
 	mockRepo := new(mocks.MockAuthRepository)
-	service := services.NewAuthService(mockRepo)
+	mockUserRepo := new(mocks.MockUserRepository)
+	service := services.NewAuthService(mockRepo, mockUserRepo)
 
 	mockRepo.On("GetUserByEmail", "test@example.com").Return(nil, errors.New("not found"))
 

@@ -81,3 +81,11 @@ func GenerateInvoiceNumber(paymentID uuid.UUID) string {
 	shortID := paymentID.String()[:8]
 	return fmt.Sprintf("INV/%s/%s", timestamp, shortID)
 }
+
+func GenerateTimeLocal(date time.Time, hour, minute int) time.Time {
+	return time.Date(date.Year(), date.Month(), date.Day(), hour, minute, 0, 0, time.Local)
+}
+
+func GenerateTimeUTC(date time.Time, hour, minute int) time.Time {
+	return time.Date(date.Year(), date.Month(), date.Day(), hour, minute, 0, 0, time.UTC)
+}

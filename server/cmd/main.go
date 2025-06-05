@@ -97,13 +97,17 @@ func main() {
 	paymentService := services.NewPaymentService(paymentRepo, packageRepo, userRepo, voucherService, notificationService, userPackageRepo)
 	paymentHandler := handlers.NewPaymentHandler(paymentService)
 
-	scheduleRepo := repositories.NewClassScheduleRepository(db)
-	scheduleService := services.NewClassScheduleService(scheduleRepo)
-	scheduleHandler := handlers.NewClassScheduleHandler(scheduleService)
-
 	bookingRepo := repositories.NewBookingRepository(db)
+	scheduleRepo := repositories.NewClassScheduleRepository(db)
+	templateRepo := repositories.NewScheduleTemplateRepository(db)
+
+	templateService := services.NewScheduleTemplateService(templateRepo, classRepo, instructorRepo, scheduleRepo)
 	bookingService := services.NewBookingService(db, bookingRepo, packageRepo, notificationService, userPackageRepo, scheduleRepo)
+	scheduleService := services.NewClassScheduleService(scheduleRepo, templateService, classRepo, instructorRepo, bookingRepo, packageRepo)
+
 	bookingHandler := handlers.NewBookingHandler(bookingService)
+	scheduleHandler := handlers.NewClassScheduleHandler(scheduleService)
+	templateHandler := handlers.NewScheduleTemplateHandler(templateService)
 
 	reviewRepo := repositories.NewReviewRepository(db)
 	reviewService := services.NewReviewService(reviewRepo, bookingRepo, instructorRepo)
@@ -127,6 +131,7 @@ func main() {
 	routes.ScheduleRoutes(r, scheduleHandler)
 	routes.ReviewRoutes(r, reviewHandler)
 	routes.BookingRoutes(r, bookingHandler)
+	routes.TemplateRoutes(r, templateHandler)
 
 	// Start Server ===========================
 	port := os.Getenv("PORT")

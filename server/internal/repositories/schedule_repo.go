@@ -13,16 +13,14 @@ type ClassScheduleRepository interface {
 	DeleteClassSchedule(id string) error
 	IncrementBooked(scheduleID uuid.UUID) error
 	GetClassSchedules() ([]models.ClassSchedule, error)
-	GetClassByID(id uuid.UUID) (*models.Class, error)
 	HasActiveBooking(scheduleID uuid.UUID) (bool, error)
 	CreateClassSchedule(schedule *models.ClassSchedule) error
 	UpdateClassSchedule(schedule *models.ClassSchedule) error
 	GetClassScheduleByID(id string) (*models.ClassSchedule, error)
-	GetInstructorWithProfileByID(id uuid.UUID) (*models.Instructor, error)
 	GetClassSchedulesWithFilter(filter dto.ClassScheduleQueryParam) ([]models.ClassSchedule, error)
 
 	// instructor
-	GetInstructorByUserID(userID uuid.UUID) (*models.Instructor, error)
+
 	CloseScheduleWithCode(scheduleID uuid.UUID, code string) error
 	OpenSchedule(scheduleID uuid.UUID, schedule *models.ClassSchedule) error
 	GetAttendancesByScheduleID(scheduleID string) ([]models.Booking, error)
@@ -51,23 +49,18 @@ func (r *classScheduleRepository) DeleteClassSchedule(id string) error {
 
 func (r *classScheduleRepository) GetClassScheduleByID(id string) (*models.ClassSchedule, error) {
 	var schedule models.ClassSchedule
-	if err := r.db.
-		First(&schedule, "id = ?", id).Error; err != nil {
-		return nil, err
-	}
-	return &schedule, nil
+	err := r.db.First(&schedule, "id = ?", id).Error
+	return &schedule, err
 }
 
 func (r *classScheduleRepository) GetClassSchedules() ([]models.ClassSchedule, error) {
 	var schedules []models.ClassSchedule
-	if err := r.db.
+	err := r.db.
 		Order("date asc").
 		Order("start_hour asc").
 		Order("start_minute asc").
-		Find(&schedules).Error; err != nil {
-		return nil, err
-	}
-	return schedules, nil
+		Find(&schedules).Error
+	return schedules, err
 }
 
 func (r *classScheduleRepository) GetClassSchedulesWithFilter(filter dto.ClassScheduleQueryParam) ([]models.ClassSchedule, error) {
@@ -107,34 +100,6 @@ func (r *classScheduleRepository) HasActiveBooking(scheduleID uuid.UUID) (bool, 
 		return false, err
 	}
 	return count > 0, nil
-}
-
-func (r *classScheduleRepository) GetClassByID(id uuid.UUID) (*models.Class, error) {
-	var class models.Class
-	if err := r.db.Unscoped().Preload("Location").First(&class, "id = ?", id).Error; err != nil {
-		return nil, err
-	}
-	return &class, nil
-}
-
-func (r *classScheduleRepository) GetInstructorWithProfileByID(id uuid.UUID) (*models.Instructor, error) {
-	var instructor models.Instructor
-	if err := r.db.
-		Preload("User.Profile", func(db *gorm.DB) *gorm.DB {
-			return db.Unscoped()
-		}).
-		First(&instructor, "id = ?", id).Error; err != nil {
-		return nil, err
-	}
-	return &instructor, nil
-}
-
-func (r *classScheduleRepository) GetInstructorByUserID(userID uuid.UUID) (*models.Instructor, error) {
-	var instructor models.Instructor
-	if err := r.db.Where("user_id = ?", userID).Find(&instructor).Error; err != nil {
-		return nil, err
-	}
-	return &instructor, nil
 }
 
 func (r *classScheduleRepository) GetSchedulesByInstructorID(instructorID uuid.UUID, params dto.InstructorScheduleQueryParam) ([]models.ClassSchedule, int64, error) {

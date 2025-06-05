@@ -14,6 +14,7 @@ type InstructorRepository interface {
 	CreateInstructor(instructor *models.Instructor) error
 	GetInstructorByID(id string) (*models.Instructor, error)
 	UpdateRating(instructorID uuid.UUID, rating float64) error
+	GetInstructorByUserID(userID string) (*models.Instructor, error)
 }
 
 type instructorRepository struct {
@@ -52,4 +53,11 @@ func (r *instructorRepository) UpdateRating(instructorID uuid.UUID, rating float
 	return r.db.Model(&models.Instructor{}).
 		Where("id = ?", instructorID).
 		Update("rating", rating).Error
+}
+
+func (r *instructorRepository) GetInstructorByUserID(userID string) (*models.Instructor, error) {
+	var instructor models.Instructor
+	err := r.db.Where("user_id = ?", userID).Find(&instructor).Error
+	return &instructor, err
+
 }

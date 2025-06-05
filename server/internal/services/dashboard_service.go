@@ -3,6 +3,7 @@ package services
 import (
 	"server/internal/dto"
 	"server/internal/repositories"
+	customErr "server/pkg/errors"
 )
 
 type DashboardService interface {
@@ -46,7 +47,7 @@ func (s *dashboardService) GetSummary() (*dto.DashboardSummaryResponse, error) {
 func (s *dashboardService) GetRevenueStats(rangeType string) (*dto.RevenueStatsResponse, error) {
 	stats, total, err := s.repo.GetRevenueStatsByRange(rangeType)
 	if err != nil {
-		return nil, err
+		return nil, customErr.NewInternal("failed to fetch revenue", err)
 	}
 
 	return &dto.RevenueStatsResponse{

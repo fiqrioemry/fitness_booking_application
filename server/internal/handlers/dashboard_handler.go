@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"server/internal/services"
+	"server/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,7 +19,7 @@ func NewDashboardHandler(dashboardService services.DashboardService) *DashboardH
 func (h *DashboardHandler) GetSummary(c *gin.Context) {
 	data, err := h.dashboardService.GetSummary()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to fetch dashboard summary"})
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, data)
@@ -28,7 +29,7 @@ func (h *DashboardHandler) GetRevenueStats(c *gin.Context) {
 
 	result, err := h.dashboardService.GetRevenueStats(rangeType)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 

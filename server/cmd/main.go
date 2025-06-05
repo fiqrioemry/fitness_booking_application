@@ -97,8 +97,12 @@ func main() {
 	paymentService := services.NewPaymentService(paymentRepo, packageRepo, userRepo, voucherService, notificationService, userPackageRepo)
 	paymentHandler := handlers.NewPaymentHandler(paymentService)
 
+	bookingRepo := repositories.NewBookingRepository(db)
+	bookingService := services.NewBookingService(bookingRepo)
+	bookingHandler := handlers.NewBookingHandler(bookingService)
+
 	reviewRepo := repositories.NewReviewRepository(db)
-	reviewService := services.NewReviewService(reviewRepo)
+	reviewService := services.NewReviewService(reviewRepo, bookingRepo, instructorRepo)
 	reviewHandler := handlers.NewReviewHandler(reviewService)
 
 	// Route Binding ==========================
@@ -117,6 +121,7 @@ func main() {
 	routes.NotificationRoutes(r, notificationHandler)
 	routes.UserPackageRoutes(r, userPackageHandler)
 	routes.ReviewRoutes(r, reviewHandler)
+	routes.BookingRoutes(r, bookingHandler)
 
 	// Start Server ===========================
 	port := os.Getenv("PORT")

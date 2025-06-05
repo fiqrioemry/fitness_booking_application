@@ -113,6 +113,10 @@ func main() {
 	reviewService := services.NewReviewService(reviewRepo, bookingRepo, instructorRepo)
 	reviewHandler := handlers.NewReviewHandler(reviewService)
 
+	dashboardRepo := repositories.NewDashboardRepository(db)
+	dashboardService := services.NewDashboardService(dashboardRepo)
+	dashboardHandler := handlers.NewDashboardHandler(dashboardService)
+
 	// Route Binding ==========================
 	routes.AuthRoutes(r, authHandler)
 	routes.UserRoutes(r, userHandler)
@@ -132,6 +136,7 @@ func main() {
 	routes.ReviewRoutes(r, reviewHandler)
 	routes.BookingRoutes(r, bookingHandler)
 	routes.TemplateRoutes(r, templateHandler)
+	routes.DashboardRoutes(r, dashboardHandler)
 
 	// Start Server ===========================
 	port := os.Getenv("PORT")

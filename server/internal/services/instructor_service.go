@@ -5,6 +5,7 @@ import (
 	"server/internal/models"
 	"server/internal/repositories"
 	customErr "server/pkg/errors"
+	"server/pkg/utils"
 
 	"github.com/google/uuid"
 )
@@ -35,7 +36,7 @@ func (s *instructorService) DeleteInstructor(id string) error {
 	user, err := s.user.GetUserByID(instructor.UserID.String())
 	if err == nil {
 		user.Role = "customer"
-		_ = s.user.UpdateUser(user) // optional fallback, ignore error
+		_ = s.user.UpdateUser(user)
 	}
 
 	if err := s.repo.DeleteInstructor(id); err != nil {
@@ -121,15 +122,9 @@ func (s *instructorService) UpdateInstructor(id string, req dto.UpdateInstructor
 		return customErr.NewForbidden("forbidden: user mismatch")
 	}
 
-	if req.Experience != 0 {
-		instructor.Experience = req.Experience
-	}
-	if req.Specialties != "" {
-		instructor.Specialties = req.Specialties
-	}
-	if req.Certifications != "" {
-		instructor.Certifications = req.Certifications
-	}
+	utils.SetIfNotZero(&instructor.Experience, req.Experience)
+	utils.SetIfNotEmpty(&instructor.Specialties, req.Specialties)
+	utils.SetIfNotEmpty(&instructor.Certifications, req.Certifications)
 
 	if err := s.repo.UpdateInstructor(instructor); err != nil {
 		return customErr.NewInternal("failed to update instructor", err)

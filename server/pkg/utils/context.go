@@ -2,7 +2,6 @@ package utils
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 func MustGetUserID(c *gin.Context) string {
@@ -15,18 +14,6 @@ func MustGetUserID(c *gin.Context) string {
 		panic("userID in context is not a string")
 	}
 	return idStr
-}
-
-func MustGetAppID(c *gin.Context) uuid.UUID {
-	appID, exists := c.Get("appID")
-	if !exists {
-		panic("appID not found in context")
-	}
-	id, ok := appID.(uuid.UUID)
-	if !ok {
-		panic("appID in context is not uuid.UUID")
-	}
-	return id
 }
 
 func MustGetRole(c *gin.Context) string {

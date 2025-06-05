@@ -7,17 +7,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ClassRoutes(r *gin.Engine, handler *handlers.ClassHandler) {
+func ClassRoutes(r *gin.Engine, h *handlers.ClassHandler) {
 	class := r.Group("/api/classes")
 
 	// public endpoints
-	class.GET("", handler.GetAllClasses)
-	class.GET("/:id", handler.GetClassByID)
+	class.GET("", h.GetAllClasses)
+	class.GET("/:id", h.GetClassByID)
 
 	// admin-protected endpoints
 	admin := class.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
-	admin.POST("", handler.CreateClass)
-	admin.PUT("/:id", handler.UpdateClass)
-	admin.POST("/:id/gallery", handler.UploadClassGallery)
-	admin.DELETE("/:id", handler.DeleteClass)
+	admin.POST("", h.CreateClass)
+	admin.PUT("/:id", h.UpdateClass)
+	admin.POST("/:id/gallery", h.UploadClassGallery)
+	admin.DELETE("/:id", h.DeleteClass)
 }

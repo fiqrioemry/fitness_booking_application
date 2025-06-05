@@ -40,12 +40,11 @@ func main() {
 		middleware.LimitFileSize(12<<20),
 		middleware.APIKeyGateway([]string{"/api/auth/google", "/api/auth/google/callback"}),
 	)
-
+	// Inisialisasi Dependency for auth module
 	userRepo := repositories.NewUserRepository(db)
 	userService := services.NewUserService(userRepo)
 	userHandler := handlers.NewUserHandler(userService)
 
-	// Inisialisasi Dependency for auth module
 	authRepo := repositories.NewAuthRepository(db)
 	authService := services.NewAuthService(authRepo, userRepo)
 	authHandler := handlers.NewAuthHandler(authService)
@@ -86,9 +85,21 @@ func main() {
 	instructorService := services.NewInstructorService(instructorRepo, userRepo)
 	instructorHandler := handlers.NewInstructorHandler(instructorService)
 
+	notificationRepo := repositories.NewNotificationRepository(db)
+	notificationService := services.NewNotificationService(notificationRepo)
+	notificationHandler := handlers.NewNotificationHandler(notificationService)
+
+	userPackageRepo := repositories.NewUserPackageRepository(db)
+	userPackageService := services.NewUserPackageService(userPackageRepo)
+	userPackageHandler := handlers.NewUserPackageHandler(userPackageService)
+
 	paymentRepo := repositories.NewPaymentRepository(db)
-	paymentService := services.NewPaymentService(paymentRepo, packageRepo, userRepo, voucherService)
+	paymentService := services.NewPaymentService(paymentRepo, packageRepo, userRepo, voucherService, notificationService, userPackageRepo)
 	paymentHandler := handlers.NewPaymentHandler(paymentService)
+
+	reviewRepo := repositories.NewReviewRepository(db)
+	reviewService := services.NewReviewService(reviewRepo)
+	reviewHandler := handlers.NewReviewHandler(reviewService)
 
 	// Route Binding ==========================
 	routes.AuthRoutes(r, authHandler)
@@ -103,6 +114,9 @@ func main() {
 	routes.LocationRoutes(r, locationHandler)
 	routes.InstructorRoutes(r, instructorHandler)
 	routes.SubcategoryRoutes(r, subcategoryHandler)
+	routes.NotificationRoutes(r, notificationHandler)
+	routes.UserPackageRoutes(r, userPackageHandler)
+	routes.ReviewRoutes(r, reviewHandler)
 
 	// Start Server ===========================
 	port := os.Getenv("PORT")

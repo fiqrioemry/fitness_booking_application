@@ -22,35 +22,35 @@ import (
 type PaymentService interface {
 	ExpireOldPendingPayments() error
 	StripeWebhookNotification(event stripe.Event) error
-	GetPaymentDetail(paymentID string) (dto.PaymentDetailResponse, error)
+	GetPaymentDetail(paymentID string) (*dto.PaymentDetailResponse, error)
 	CreatePayment(userID string, req dto.CreatePaymentRequest) (*dto.CreatePaymentResponse, error)
 	GetAllUserPayments(params dto.PaymentQueryParam) ([]dto.PaymentListResponse, *dto.PaginationResponse, error)
 	GetPaymentsByUserID(userID string, params dto.PaymentQueryParam) ([]dto.PaymentListResponse, *dto.PaginationResponse, error)
 }
 type paymentService struct {
-	payment             repositories.PaymentRepository
-	packageRepo         repositories.PackageRepository
-	user                repositories.UserRepository
-	voucher             VoucherService
-	userPackageRepo     repositories.UserPackageRepository
-	notificationService NotificationService
+	payment repositories.PaymentRepository
+	pkg     repositories.PackageRepository
+	user    repositories.UserRepository
+	voucher VoucherService
+	notif   NotificationService
+	userPkg repositories.UserPackageRepository
 }
 
 func NewPaymentService(
 	payment repositories.PaymentRepository,
-	packageRepo repositories.PackageRepository,
+	pkg repositories.PackageRepository,
 	user repositories.UserRepository,
 	voucher VoucherService,
-	userPackageRepo repositories.UserPackageRepository,
-	notificationService NotificationService,
+	notif NotificationService,
+	userPkg repositories.UserPackageRepository,
 ) PaymentService {
 	return &paymentService{
-		payment:             payment,
-		packageRepo:         packageRepo,
-		user:                user,
-		voucher:             voucher,
-		userPackageRepo:     userPackageRepo,
-		notificationService: notificationService,
+		payment: payment,
+		pkg:     pkg,
+		user:    user,
+		voucher: voucher,
+		notif:   notif,
+		userPkg: userPkg,
 	}
 }
 
@@ -73,7 +73,7 @@ func buildLineItem(name string, unitAmount float64, quantity int64) *stripe.Chec
 func (s *paymentService) CreatePayment(userID string, req dto.CreatePaymentRequest) (*dto.CreatePaymentResponse, error) {
 	uid := uuid.MustParse(userID)
 
-	pkg, err := s.packageRepo.GetPackageByID(req.PackageID)
+	pkg, err := s.pkg.GetPackageByID(req.PackageID)
 	if err != nil {
 		return nil, customErr.ErrNotFound
 	}
@@ -162,7 +162,7 @@ func (s *paymentService) CreatePayment(userID string, req dto.CreatePaymentReque
 	}
 
 	if err := s.payment.CreatePayment(&payment); err != nil {
-		return nil, customErr.ErrInternalServer
+		return nil, customErr.NewInternal("Failed to create payment", err)
 	}
 
 	if payment.VoucherCode != nil && *payment.VoucherCode != "" {
@@ -175,10 +175,10 @@ func (s *paymentService) CreatePayment(userID string, req dto.CreatePaymentReque
 		UserID:  user.ID.String(),
 		Title:   "Pending Payments",
 		Type:    "system_message",
-		Message: fmt.Sprintf("Thank you %s, your purchasement with invoice no. %s is created. Please complete your payment", user.Profile.Fullname, invoice),
+		Message: fmt.Sprintf("Thank you %s, your purchasement with invoice no. %s is created. Please complete your payment", user.Fullname, invoice),
 	}
 
-	if err := s.notificationService.SendToUser(payload); err != nil {
+	if err := s.notif.SendToUser(payload); err != nil {
 		log.Printf("failed sending notification to user %s: %v\n", payload.UserID, err)
 	}
 
@@ -233,12 +233,12 @@ func (s *paymentService) StripeWebhookNotification(event stripe.Event) error {
 		),
 	}
 
-	if err := s.notificationService.SendToUser(payload); err != nil {
+	if err := s.notif.SendToUser(payload); err != nil {
 		log.Printf("failed sending notification to user %s: %v\n", payload.UserID, err)
 	}
 	// TODO: Use RabbitMQ to emit "payment_success" event for async email delivery (only in production with EDA)
 
-	pkg, err := s.packageRepo.GetPackageByID(payment.PackageID.String())
+	pkg, err := s.pkg.GetPackageByID(payment.PackageID.String())
 	if err != nil {
 		return customErr.ErrNotFound
 	}
@@ -246,7 +246,7 @@ func (s *paymentService) StripeWebhookNotification(event stripe.Event) error {
 	var existing models.UserPackage
 	now := time.Now().UTC()
 
-	err = s.userPackageRepo.GetActiveUserPackages(payment.UserID.String(), payment.PackageID.String(), &existing)
+	err = s.userPkg.GetActiveUserPackages(payment.UserID.String(), payment.PackageID.String(), &existing)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return customErr.NewInternal("failed checking existing user package", err)
 	}
@@ -262,7 +262,7 @@ func (s *paymentService) StripeWebhookNotification(event stripe.Event) error {
 			ExpiredAt:       &expired,
 			PurchasedAt:     now,
 		}
-		return s.userPackageRepo.CreateUserPackage(&newUP)
+		return s.userPkg.CreateUserPackage(&newUP)
 	}
 
 	existing.RemainingCredit += pkg.Credit
@@ -273,14 +273,14 @@ func (s *paymentService) StripeWebhookNotification(event stripe.Event) error {
 		existing.ExpiredAt = &exp
 	}
 	existing.PurchasedAt = now
-	return s.userPackageRepo.UpdateUserPackage(&existing)
+	return s.userPkg.UpdateUserPackage(&existing)
 }
 
 func (s *paymentService) GetPaymentsByUserID(userID string, params dto.PaymentQueryParam) ([]dto.PaymentListResponse, *dto.PaginationResponse, error) {
 
 	payments, total, err := s.payment.GetPaymentsByUserID(userID, params)
 	if err != nil {
-		return nil, nil, customErr.ErrNotFound
+		return nil, nil, customErr.NewNotFound("payment not found")
 	}
 
 	var results []dto.PaymentListResponse
@@ -306,7 +306,7 @@ func (s *paymentService) GetPaymentsByUserID(userID string, params dto.PaymentQu
 func (s *paymentService) GetAllUserPayments(params dto.PaymentQueryParam) ([]dto.PaymentListResponse, *dto.PaginationResponse, error) {
 	payments, total, err := s.payment.GetAllUserPayments(params)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, customErr.NewNotFound("no payments record")
 	}
 
 	var results []dto.PaymentListResponse
@@ -329,10 +329,10 @@ func (s *paymentService) GetAllUserPayments(params dto.PaymentQueryParam) ([]dto
 	return results, pagination, nil
 }
 
-func (s *paymentService) GetPaymentDetail(paymentID string) (dto.PaymentDetailResponse, error) {
+func (s *paymentService) GetPaymentDetail(paymentID string) (*dto.PaymentDetailResponse, error) {
 	payment, err := s.payment.GetPaymentByID(paymentID)
 	if err != nil {
-		return dto.PaymentDetailResponse{}, err
+		return nil, customErr.NewNotFound("payment not found")
 	}
 
 	result := dto.PaymentDetailResponse{
@@ -353,7 +353,7 @@ func (s *paymentService) GetPaymentDetail(paymentID string) (dto.PaymentDetailRe
 		PaidAt:          payment.PaidAt.Format(time.RFC3339),
 	}
 
-	return result, nil
+	return &result, nil
 }
 
 // ** khusus cron job update status to failed

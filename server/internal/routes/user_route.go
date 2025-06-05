@@ -8,17 +8,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func UserRoutes(r *gin.Engine, handler *handlers.UserHandler) {
+func UserRoutes(r *gin.Engine, h *handlers.UserHandler) {
 	user := r.Group("/api/users")
 	user.Use(middleware.AuthRequired(), middleware.RoleOnly("customer", "instructor"))
-	user.GET("/me", handler.GetProfile)
-	user.PUT("/me", handler.UpdateProfile)
-	user.PUT("/me/avatar", handler.UpdateAvatar)
+	user.GET("/me", h.GetProfile)
+	user.PUT("/me", h.UpdateProfile)
+	user.PUT("/me/avatar", h.UpdateAvatar)
 
 	admin := r.Group("/api/admin/users")
 	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
-	admin.GET("", handler.GetAllUsers)
-	admin.GET("/:id", handler.GetUserDetail)
-	admin.GET("/stats", handler.GetUserStats)
+	admin.GET("", h.GetAllUsers)
+	admin.GET("/:id", h.GetUserDetail)
+	admin.GET("/stats", h.GetUserStats)
 
 }

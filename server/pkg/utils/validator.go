@@ -102,9 +102,30 @@ func isURL(input string) bool {
 	return strings.HasPrefix(input, "http://") || strings.HasPrefix(input, "https://")
 }
 
-// Handler default untuk kesalahan binding
 func HandleBindError(c *gin.Context, message string) {
 	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 		"message": message,
 	})
+}
+func EmptyString(s *string) string {
+	if s != nil {
+		return *s
+	}
+	return ""
+}
+
+func ContainsInt(slice []int, value int) bool {
+	return slices.Contains(slice, value)
+}
+
+func SetIfNotEmpty(target *string, source string) {
+	if source != "" {
+		*target = source
+	}
+}
+
+func SetIfNotZero(target *int, source int) {
+	if source != 0 {
+		*target = source
+	}
 }

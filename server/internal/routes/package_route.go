@@ -7,17 +7,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func PackageRoutes(r *gin.Engine, handler *handlers.PackageHandler) {
+func PackageRoutes(r *gin.Engine, h *handlers.PackageHandler) {
 	pkg := r.Group("/api/packages")
 	{
 		// public endpoints
-		pkg.GET("", handler.GetAllPackages)
-		pkg.GET("/:id", handler.GetPackageByID)
+		pkg.GET("", h.GetAllPackages)
+		pkg.GET("/:id", h.GetPackageByID)
 
 		// admin-protected endpoints
 		admin := pkg.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
-		admin.POST("", handler.CreatePackage)
-		admin.PUT("/:id", handler.UpdatePackage)
-		admin.DELETE("/:id", middleware.RoleOnly("owner"), handler.DeletePackage)
+		admin.POST("", h.CreatePackage)
+		admin.PUT("/:id", h.UpdatePackage)
+		admin.DELETE("/:id", middleware.RoleOnly("owner"), h.DeletePackage)
 	}
 }

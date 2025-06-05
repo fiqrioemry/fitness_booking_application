@@ -97,8 +97,12 @@ func main() {
 	paymentService := services.NewPaymentService(paymentRepo, packageRepo, userRepo, voucherService, notificationService, userPackageRepo)
 	paymentHandler := handlers.NewPaymentHandler(paymentService)
 
+	scheduleRepo := repositories.NewClassScheduleRepository(db)
+	scheduleService := services.NewClassScheduleService(scheduleRepo)
+	scheduleHandler := handlers.NewClassScheduleHandler(scheduleService)
+
 	bookingRepo := repositories.NewBookingRepository(db)
-	bookingService := services.NewBookingService(bookingRepo)
+	bookingService := services.NewBookingService(bookingRepo, scheduleRepo)
 	bookingHandler := handlers.NewBookingHandler(bookingService)
 
 	reviewRepo := repositories.NewReviewRepository(db)
@@ -120,6 +124,7 @@ func main() {
 	routes.SubcategoryRoutes(r, subcategoryHandler)
 	routes.NotificationRoutes(r, notificationHandler)
 	routes.UserPackageRoutes(r, userPackageHandler)
+	routes.ScheduleRoutes(r, scheduleHandler)
 	routes.ReviewRoutes(r, reviewHandler)
 	routes.BookingRoutes(r, bookingHandler)
 

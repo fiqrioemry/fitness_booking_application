@@ -127,13 +127,6 @@ func (h *ClassScheduleHandler) GetInstructorSchedules(c *gin.Context) {
 		return
 	}
 
-	if param.Page == 0 {
-		param.Page = 1
-	}
-	if param.Limit == 0 {
-		param.Limit = 10
-	}
-
 	data, pagination, err := h.service.GetSchedulesByInstructor(userID, param)
 	if err != nil {
 		utils.HandleServiceError(c, err, err.Error())

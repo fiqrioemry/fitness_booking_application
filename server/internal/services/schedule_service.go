@@ -44,8 +44,6 @@ func NewClassScheduleService(
 	classRepo repositories.ClassRepository,
 	packageRepo repositories.PackageRepository,
 	bookingRepo repositories.BookingRepository,
-	templateRepo repositories.ScheduleTemplateRepository,
-	templateService ScheduleTemplateService,
 ) ClassScheduleService {
 	return &classScheduleService{
 		repo:            repo,

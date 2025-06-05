@@ -33,14 +33,14 @@ type bookingService struct {
 	schedule     repositories.ClassScheduleRepository
 }
 
-func NewBookingService(db *gorm.DB, booking repositories.BookingRepository, schedule repositories.ClassScheduleRepository, userPkg repositories.UserPackageRepository, pkg repositories.PackageRepository, notification NotificationService) BookingService {
+func NewBookingService(db *gorm.DB, booking repositories.BookingRepository, pkg repositories.PackageRepository, notification NotificationService, userPkg repositories.UserPackageRepository, schedule repositories.ClassScheduleRepository) BookingService {
 	return &bookingService{
 		db:           db,
 		booking:      booking,
-		schedule:     schedule,
-		userPkg:      userPkg,
 		pkg:          pkg,
 		notification: notification,
+		userPkg:      userPkg,
+		schedule:     schedule,
 	}
 }
 

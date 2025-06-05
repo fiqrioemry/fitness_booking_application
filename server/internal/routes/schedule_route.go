@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ClassScheduleRoutes(r *gin.Engine, h *handlers.ClassScheduleHandler) {
+func ScheduleRoutes(r *gin.Engine, h *handlers.ClassScheduleHandler) {
 	schedule := r.Group("/api/schedules")
 
 	// public endpoints

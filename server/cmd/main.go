@@ -102,7 +102,7 @@ func main() {
 	scheduleHandler := handlers.NewClassScheduleHandler(scheduleService)
 
 	bookingRepo := repositories.NewBookingRepository(db)
-	bookingService := services.NewBookingService(bookingRepo, scheduleRepo)
+	bookingService := services.NewBookingService(db, bookingRepo, packageRepo, notificationService, userPackageRepo, scheduleRepo)
 	bookingHandler := handlers.NewBookingHandler(bookingService)
 
 	reviewRepo := repositories.NewReviewRepository(db)

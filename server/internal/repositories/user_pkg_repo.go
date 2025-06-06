@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"server/internal/dto"
 	"server/internal/models"
 	"time"
@@ -56,10 +57,15 @@ func (r *userPackageRepository) GetUserPackagesByPackageIDs(packageIDs []uuid.UU
 }
 
 func (r *userPackageRepository) GetActiveUserPackages(userID, packageID string, result *models.UserPackage) error {
-	return r.db.
+	err := r.db.
 		Where("user_id = ? AND package_id = ? AND expired_at > ?", userID, packageID, time.Now()).
 		Order("purchased_at desc").
 		First(result).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil
+	}
+	return err
 }
 
 func (r *userPackageRepository) GetUserPackages(userID string, params dto.PackageQueryParam) ([]models.UserPackage, int64, error) {

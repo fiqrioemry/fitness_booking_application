@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"server/internal/models"
 
 	"gorm.io/gorm"
@@ -44,6 +45,9 @@ func (r *subcategoryRepository) UpdateSubcategory(subcategory *models.Subcategor
 func (r *subcategoryRepository) GetSubcategoryByID(id string) (*models.Subcategory, error) {
 	var subcategory models.Subcategory
 	err := r.db.First(&subcategory, "id = ?", id).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return &subcategory, err
 }
 

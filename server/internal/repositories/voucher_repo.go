@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"server/internal/models"
 	"time"
 
@@ -57,6 +58,11 @@ func (r *voucherRepository) GetValidVoucherByCode(code string) (*models.Voucher,
 	err := r.db.
 		Where("code = ? AND expired_at > NOW() AND quota > 0", code).
 		First(&voucher).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+
 	return &voucher, err
 }
 
@@ -80,5 +86,8 @@ func (r *voucherRepository) InsertUsedVoucher(userID, voucherID uuid.UUID) error
 func (r *voucherRepository) GetVoucherByID(id string) (*models.Voucher, error) {
 	var voucher models.Voucher
 	err := r.db.First(&voucher, "id = ?", id).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return &voucher, err
 }

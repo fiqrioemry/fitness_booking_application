@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"server/internal/models"
 
 	"gorm.io/gorm"
@@ -43,5 +44,8 @@ func (r *typeRepository) GetAllTypes() ([]models.Type, error) {
 func (r *typeRepository) GetTypeByID(id string) (*models.Type, error) {
 	var t models.Type
 	err := r.db.First(&t, "id = ?", id).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return &t, err
 }

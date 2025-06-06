@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"server/internal/models"
 
 	"gorm.io/gorm"
@@ -43,6 +44,9 @@ func (r *levelRepository) GetAllLevels() ([]models.Level, error) {
 func (r *levelRepository) GetLevelByID(id string) (*models.Level, error) {
 	var level models.Level
 	err := r.db.First(&level, "id = ?", id).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return &level, err
 
 }

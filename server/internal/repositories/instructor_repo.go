@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"server/internal/models"
 
 	"github.com/google/uuid"
@@ -46,6 +47,9 @@ func (r *instructorRepository) CreateInstructor(instructor *models.Instructor) e
 func (r *instructorRepository) GetInstructorByID(id string) (*models.Instructor, error) {
 	var instructor models.Instructor
 	err := r.db.Preload("User").First(&instructor, "id = ?", id).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return &instructor, err
 }
 
@@ -57,7 +61,9 @@ func (r *instructorRepository) UpdateRating(instructorID uuid.UUID, rating float
 
 func (r *instructorRepository) GetInstructorByUserID(userID string) (*models.Instructor, error) {
 	var instructor models.Instructor
-	err := r.db.Where("user_id = ?", userID).Find(&instructor).Error
+	err := r.db.Where("user_id = ?", userID).First(&instructor).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return &instructor, err
-
 }

@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"server/internal/models"
 
 	"gorm.io/gorm"
@@ -43,5 +44,8 @@ func (r *locationRepository) UpdateLocation(location *models.Location) error {
 func (r *locationRepository) GetLocationByID(id string) (*models.Location, error) {
 	var location models.Location
 	err := r.db.First(&location, "id = ?", id).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return &location, err
 }

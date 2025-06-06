@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"server/internal/dto"
 	"server/internal/models"
 
@@ -40,6 +41,9 @@ func (r *packageRepository) UpdatePackage(pkg *models.Package) error {
 func (r *packageRepository) GetPackageByID(id string) (*models.Package, error) {
 	var pkg models.Package
 	err := r.db.Preload("Classes").First(&pkg, "id = ?", id).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return &pkg, err
 }
 

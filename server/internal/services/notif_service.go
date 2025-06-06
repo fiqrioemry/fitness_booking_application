@@ -71,7 +71,7 @@ func (s *notificationService) UpdateSetting(userID string, req dto.UpdateNotific
 func (s *notificationService) GetAllNotifications(userID string) ([]dto.NotificationResponse, error) {
 	notifs, err := s.repo.GetAllBrowserNotifications(uuid.MustParse(userID))
 	if err != nil {
-		return nil, err
+		return nil, customErr.NewNotFound("Nofications not found")
 	}
 
 	var result []dto.NotificationResponse

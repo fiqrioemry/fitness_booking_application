@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"server/internal/dto"
 	"server/internal/models"
 	"time"
@@ -33,12 +34,18 @@ func (r *paymentRepository) CreatePayment(payment *models.Payment) error {
 func (r *paymentRepository) GetPaymentByID(id string) (*models.Payment, error) {
 	var payment models.Payment
 	err := r.db.First(&payment, "id = ?", id).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return &payment, err
 }
 
 func (r *paymentRepository) GetPaymentByOrderID(orderID string) (*models.Payment, error) {
 	var payment models.Payment
 	err := r.db.First(&payment, "id = ?", orderID).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return &payment, err
 }
 

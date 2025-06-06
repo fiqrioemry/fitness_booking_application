@@ -22,7 +22,7 @@ func (h *NotificationHandler) GetAllNotifications(c *gin.Context) {
 
 	notifications, err := h.service.GetAllNotifications(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to get notifications"})
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 
@@ -34,7 +34,7 @@ func (h *NotificationHandler) GetNotificationSettings(c *gin.Context) {
 
 	settings, err := h.service.GetSettingsByUser(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch settings"})
+		utils.HandleServiceError(c, err, err.Error())
 		return
 	}
 

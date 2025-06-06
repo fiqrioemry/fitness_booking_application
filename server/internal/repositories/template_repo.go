@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"server/internal/models"
 
 	"gorm.io/gorm"
@@ -49,5 +50,8 @@ func (r *scheduleTemplateRepository) CreateTemplate(template *models.ScheduleTem
 func (r *scheduleTemplateRepository) GetTemplateByID(id string) (*models.ScheduleTemplate, error) {
 	var template models.ScheduleTemplate
 	err := r.db.First(&template, "id = ?", id).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return &template, err
 }

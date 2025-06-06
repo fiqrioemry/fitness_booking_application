@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"server/internal/models"
 	"time"
 
@@ -56,7 +57,11 @@ func (r *notificationRepository) FindSetting(userID, typeID uuid.UUID, channel s
 	err := r.db.
 		Where("user_id = ? AND notification_type_id = ? AND channel = ?", userID, typeID, channel).
 		First(&setting).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return &setting, err
+
 }
 
 func (r *notificationRepository) UpdateNotificationSetting(setting *models.NotificationSetting) error {
@@ -99,6 +104,9 @@ func (r *notificationRepository) GetUsersWithEnabledNotification(typeCode string
 func (r *notificationRepository) GetTypeByCode(code string) (*models.NotificationType, error) {
 	var nt models.NotificationType
 	err := r.db.Where("code = ?", code).First(&nt).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return &nt, err
 }
 

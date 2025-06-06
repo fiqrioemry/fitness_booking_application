@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"server/internal/models"
 
 	"gorm.io/gorm"
@@ -24,8 +25,9 @@ func NewAuthRepository(db *gorm.DB) AuthRepository {
 
 func (r *authRepository) GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
-	if err := r.db.Where("email = ?", email).First(&user).Error; err != nil {
-		return nil, err
+	err := r.db.Where("email = ?", email).First(&user).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
 	}
 	return &user, nil
 }
@@ -44,8 +46,9 @@ func (r *authRepository) DeleteAllUserRefreshTokens(userID string) error {
 
 func (r *authRepository) FindRefreshToken(token string) (*models.Token, error) {
 	var t models.Token
-	if err := r.db.Where("token = ?", token).First(&t).Error; err != nil {
-		return nil, err
+	err := r.db.Where("token = ?", token).First(&t).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
 	}
 	return &t, nil
 }

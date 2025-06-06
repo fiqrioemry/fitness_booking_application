@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"server/internal/dto"
 	"server/internal/models"
 
@@ -94,8 +95,9 @@ func (r *bookingRepository) CreateBooking(booking *models.Booking) error {
 
 func (r *bookingRepository) GetBookingByID(userID, bookingID string) (*models.Booking, error) {
 	var booking models.Booking
-	if err := r.db.Preload("ClassSchedule").Preload("Attendance").Where("user_id = ?", userID).First(&booking, "id = ?", bookingID).Error; err != nil {
-		return nil, err
+	err := r.db.Preload("ClassSchedule").Preload("Attendance").Where("user_id = ?", userID).First(&booking, "id = ?", bookingID).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
 	}
 	return &booking, nil
 }
@@ -123,6 +125,9 @@ func (r *bookingRepository) FindByUserAndSchedule(userID, scheduleID string) (*m
 		Preload("ClassSchedule").
 		Where("user_id = ? AND class_schedule_id = ?", userID, scheduleID).
 		First(&booking).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return &booking, err
 }
 
@@ -133,7 +138,6 @@ func (r *bookingRepository) GetAllBookedWithScheduleAndClass() ([]models.Booking
 		Preload("ClassSchedule").
 		Where("status = ?", "booked").
 		Find(&bookings).Error
-
 	return bookings, err
 }
 

@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"server/internal/dto"
 	"server/internal/models"
 
@@ -44,18 +45,19 @@ func (r *classRepository) DeleteClassGalleryByID(id string) error {
 
 func (r *classRepository) GetClassByID(id string) (*models.Class, error) {
 	var class models.Class
-	if err := r.db.
+	err := r.db.
 		Preload("Type").
 		Preload("Level").
 		Preload("Category").
 		Preload("Subcategory").
 		Preload("Location").
 		Preload("Galleries").
-		First(&class, "id = ?", id).Error; err != nil {
-		return nil, err
-	}
+		First(&class, "id = ?", id).Error
 
-	return &class, nil
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return &class, err
 }
 
 func (r *classRepository) SaveClassGalleries(galleries []models.ClassGallery) error {

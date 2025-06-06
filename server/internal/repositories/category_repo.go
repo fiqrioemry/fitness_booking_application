@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"server/internal/models"
 
 	"gorm.io/gorm"
@@ -43,5 +44,8 @@ func (r *categoryRepository) GetAllCategories() ([]models.Category, error) {
 func (r *categoryRepository) GetCategoryByID(id string) (*models.Category, error) {
 	var category models.Category
 	err := r.db.First(&category, "id = ?", id).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return &category, err
 }

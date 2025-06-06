@@ -138,7 +138,7 @@ func ValidateScheduleNotInPast(date time.Time, hour, minute int) error {
 	scheduleTime := time.Date(date.Year(), date.Month(), date.Day(), hour, minute, 0, 0, loc)
 
 	if scheduleTime.Before(time.Now().In(loc)) {
-		return customErr.NewBadRequest("cannot modify schedule in the past")
+		return customErr.NewBadRequest("cannot create or modify schedule in the past")
 	}
 	return nil
 }

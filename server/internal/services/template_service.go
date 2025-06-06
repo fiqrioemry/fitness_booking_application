@@ -81,6 +81,7 @@ func containsInt(list []int, target int) bool {
 }
 
 func (s *scheduleTemplateService) CreateScheduleTemplate(req dto.CreateScheduleTemplateRequest) (string, error) {
+
 	now := time.Now().UTC()
 
 	endDate, err := utils.ParseDate(req.EndDate)
@@ -298,16 +299,24 @@ func (s *scheduleTemplateService) GenerateScheduleByTemplateID(templateID string
 		return fmt.Errorf("failed to parse days of week: %w", err)
 	}
 
-	today := time.Now().UTC().Truncate(24 * time.Hour)
-	end := today.AddDate(0, 1, 0)
-
 	var hasSuccess bool
 	var errors []string
 
-	for date := today; !date.After(end); date = date.AddDate(0, 0, 1) {
+	loc, _ := time.LoadLocation("Asia/Jakarta")
+	today := time.Now().In(loc).Truncate(24 * time.Hour)
+	end := today.AddDate(0, 1, 0)
+
+	// Start from tomorrow
+	for date := today.AddDate(0, 0, 1); !date.After(end); date = date.AddDate(0, 0, 1) {
+		fmt.Printf("🔍 Checking date: %s (Weekday: %d)\n", date.Format("2006-01-02"), date.Weekday())
+
 		if !utils.IsDayMatched(int(date.Weekday()), days) {
+			fmt.Println("⛔️ Skipped: not in template day list")
 			continue
 		}
+
+		// log additional info
+		fmt.Println("✅ Included: generating schedule")
 
 		schedule := models.ClassSchedule{
 			ID:             uuid.New(),
@@ -325,10 +334,13 @@ func (s *scheduleTemplateService) GenerateScheduleByTemplateID(templateID string
 		}
 
 		if err := s.schedule.CreateClassSchedule(&schedule); err != nil {
-			errors = append(errors, fmt.Sprintf("failed on %s: %v", date.Format("2006-01-02"), err))
+			errMsg := fmt.Sprintf("❌ Failed on %s: %v", date.Format("2006-01-02"), err)
+			fmt.Println(errMsg)
+			errors = append(errors, errMsg)
 			continue
 		}
 
+		fmt.Printf("📌 Created schedule for %s\n", date.Format("2006-01-02"))
 		hasSuccess = true
 	}
 
@@ -336,7 +348,7 @@ func (s *scheduleTemplateService) GenerateScheduleByTemplateID(templateID string
 		return fmt.Errorf("failed to generate any schedule: %v", errors)
 	}
 
-	now := time.Now().UTC()
+	now := time.Now().In(loc)
 	template.LastGeneratedAt = &now
 	if err := s.template.UpdateTemplate(template); err != nil {
 		return fmt.Errorf("schedule generated, but failed to update LastGeneratedAt: %w", err)
@@ -346,6 +358,7 @@ func (s *scheduleTemplateService) GenerateScheduleByTemplateID(templateID string
 		return fmt.Errorf("partial success: %v", errors)
 	}
 
+	fmt.Println("🎉 Finished generating schedules successfully.")
 	return nil
 }
 
@@ -410,9 +423,14 @@ func (s *scheduleTemplateService) CheckScheduleConflict(ID string, date time.Tim
 	newEnd := newStart.Add(time.Hour)
 
 	for _, s := range schedules {
-		if s.InstructorID != instructorID || !s.Date.Equal(date) {
+		if s.InstructorID != instructorID {
 			continue
 		}
+
+		if s.Date.Year() != date.Year() || s.Date.Month() != date.Month() || s.Date.Day() != date.Day() {
+			continue
+		}
+
 		existStart := time.Date(s.Date.Year(), s.Date.Month(), s.Date.Day(), s.StartHour, s.StartMinute, 0, 0, time.UTC)
 		existEnd := existStart.Add(time.Hour)
 

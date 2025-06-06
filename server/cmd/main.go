@@ -7,6 +7,7 @@ import (
 	"server/internal/handlers"
 	"server/internal/repositories"
 	"server/internal/routes"
+	"server/internal/seeders"
 	"server/internal/services"
 	"server/pkg/middleware"
 	"server/pkg/utils"
@@ -21,6 +22,8 @@ func main() {
 	config.InitConfiguration()
 	utils.InitLogger()
 	db := config.DB
+
+	seeders.ResetDatabase(db)
 
 	// ========== Gin Engine ==========
 	r := gin.Default()

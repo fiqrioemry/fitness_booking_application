@@ -13,6 +13,7 @@ import (
 	"server/pkg/utils"
 	"time"
 
+	"github.com/google/uuid"
 	"golang.org/x/oauth2"
 	"google.golang.org/api/idtoken"
 )
@@ -31,12 +32,13 @@ type AuthService interface {
 }
 
 type authService struct {
-	repo repositories.AuthRepository
-	user repositories.UserRepository
+	auth         repositories.AuthRepository
+	user         repositories.UserRepository
+	notification repositories.NotificationRepository
 }
 
-func NewAuthService(repo repositories.AuthRepository, user repositories.UserRepository) AuthService {
-	return &authService{repo, user}
+func NewAuthService(auth repositories.AuthRepository, user repositories.UserRepository, notification repositories.NotificationRepository) AuthService {
+	return &authService{auth: auth, user: user, notification: notification}
 }
 
 func (s *authService) SendOTP(email string) error {
@@ -67,7 +69,7 @@ func (s *authService) SendOTP(email string) error {
 }
 
 func (s *authService) Logout(refreshToken string) error {
-	return s.repo.DeleteAllUserRefreshTokens(refreshToken)
+	return s.auth.DeleteAllUserRefreshTokens(refreshToken)
 }
 
 func (s *authService) VerifyOTP(email, otp string) (*dto.AuthResponse, error) {
@@ -110,9 +112,11 @@ func (s *authService) VerifyOTP(email, otp string) (*dto.AuthResponse, error) {
 		Token:     refreshToken,
 		ExpiredAt: time.Now().Add(7 * 24 * time.Hour),
 	}
-	if err := s.repo.StoreRefreshToken(session); err != nil {
+	if err := s.auth.StoreRefreshToken(session); err != nil {
 		return nil, customErr.NewInternal("Failed to store refresh token", err)
 	}
+
+	s.generateDefaultSettingsForUser(user.ID)
 
 	return &dto.AuthResponse{
 		AccessToken:  accessToken,
@@ -141,7 +145,7 @@ func (s *authService) Login(req *dto.LoginRequest) (*dto.AuthResponse, error) {
 		return nil, customErr.NewTooManyRequest("Too many request, please try again in 30 minutes")
 	}
 
-	user, err := s.repo.GetUserByEmail(req.Email)
+	user, err := s.auth.GetUserByEmail(req.Email)
 	if err != nil || !utils.CheckPasswordHash(req.Password, user.Password) {
 		config.RedisClient.Incr(config.Ctx, redisKey)
 		config.RedisClient.Expire(config.Ctx, redisKey, 30*time.Minute)
@@ -164,7 +168,7 @@ func (s *authService) Login(req *dto.LoginRequest) (*dto.AuthResponse, error) {
 		Token:     refreshToken,
 		ExpiredAt: time.Now().Add(7 * 24 * time.Hour),
 	}
-	if err := s.repo.StoreRefreshToken(session); err != nil {
+	if err := s.auth.StoreRefreshToken(session); err != nil {
 		return nil, customErr.NewInternal("Failed to store refresh token", err)
 	}
 
@@ -175,7 +179,7 @@ func (s *authService) Login(req *dto.LoginRequest) (*dto.AuthResponse, error) {
 }
 
 func (s *authService) Register(req *dto.RegisterRequest) error {
-	user, err := s.repo.GetUserByEmail(req.Email)
+	user, err := s.auth.GetUserByEmail(req.Email)
 	if err == nil {
 		if user.Password == "-" {
 			return customErr.NewAlreadyExist("Email already registered")
@@ -206,6 +210,7 @@ func (s *authService) Register(req *dto.RegisterRequest) error {
 	if err != nil {
 		return customErr.ErrInternalServer
 	}
+
 	if err := config.RedisClient.Set(config.Ctx, "otp_data:"+req.Email, jsonStr, 30*time.Minute).Err(); err != nil {
 		return customErr.ErrInternalServer
 	}
@@ -217,7 +222,7 @@ func (s *authService) RefreshToken(refreshToken string) (*dto.AuthResponse, erro
 	if err != nil {
 		return nil, customErr.ErrUnauthorized
 	}
-	tokenModel, err := s.repo.FindRefreshToken(refreshToken)
+	tokenModel, err := s.auth.FindRefreshToken(refreshToken)
 	if err != nil {
 		return nil, customErr.NewNotFound("Refresh token not found")
 	}
@@ -238,7 +243,7 @@ func (s *authService) RefreshToken(refreshToken string) (*dto.AuthResponse, erro
 		return nil, customErr.ErrTokenGeneration
 	}
 
-	if err := s.repo.DeleteRefreshToken(refreshToken); err != nil {
+	if err := s.auth.DeleteRefreshToken(refreshToken); err != nil {
 		return nil, customErr.NewInternal("Failed to delete refresh token", err)
 	}
 	session := &models.Token{
@@ -246,7 +251,7 @@ func (s *authService) RefreshToken(refreshToken string) (*dto.AuthResponse, erro
 		Token:     newRefreshToken,
 		ExpiredAt: time.Now().Add(7 * 24 * time.Hour),
 	}
-	if err := s.repo.StoreRefreshToken(session); err != nil {
+	if err := s.auth.StoreRefreshToken(session); err != nil {
 		return nil, customErr.NewInternal("Failed to store new refresh token", err)
 	}
 
@@ -267,7 +272,7 @@ func (s *authService) GoogleSignIn(idToken string) (*dto.AuthResponse, error) {
 	}
 	name, _ := payload.Claims["name"].(string)
 
-	user, err := s.repo.GetUserByEmail(email)
+	user, err := s.auth.GetUserByEmail(email)
 	if err != nil {
 		user = &models.User{
 			Email:    email,
@@ -279,6 +284,8 @@ func (s *authService) GoogleSignIn(idToken string) (*dto.AuthResponse, error) {
 		if err := s.user.CreateUser(user); err != nil {
 			return nil, customErr.NewInternal("Failed to create user", err)
 		}
+
+		s.generateDefaultSettingsForUser(user.ID)
 	}
 
 	accessToken, err := utils.GenerateAccessToken(user.ID.String(), user.Role)
@@ -295,7 +302,7 @@ func (s *authService) GoogleSignIn(idToken string) (*dto.AuthResponse, error) {
 		Token:     refreshToken,
 		ExpiredAt: time.Now().Add(7 * 24 * time.Hour),
 	}
-	if err := s.repo.StoreRefreshToken(session); err != nil {
+	if err := s.auth.StoreRefreshToken(session); err != nil {
 		return nil, customErr.NewInternal("Failed to store refresh token", err)
 	}
 
@@ -321,4 +328,22 @@ func (s *authService) HandleGoogleOAuthCallback(code string) (*dto.AuthResponse,
 	}
 
 	return s.GoogleSignIn(rawIDToken)
+}
+
+// default setting for notification
+func (s *authService) generateDefaultSettingsForUser(userID uuid.UUID) {
+	notifTypes, _ := s.notification.GetAllNotificationTypes()
+
+	for _, nt := range notifTypes {
+		for _, channel := range []string{"email", "browser"} {
+			setting := models.NotificationSetting{
+				ID:                 uuid.New(),
+				UserID:             userID,
+				NotificationTypeID: nt.ID,
+				Channel:            channel,
+				Enabled:            nt.DefaultEnabled,
+			}
+			_ = s.notification.CreateNotificationSetting(&setting)
+		}
+	}
 }

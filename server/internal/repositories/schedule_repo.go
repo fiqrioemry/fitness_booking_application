@@ -166,7 +166,7 @@ func (r *classScheduleRepository) CloseScheduleWithCode(scheduleID uuid.UUID, co
 func (r *classScheduleRepository) GetAttendancesByScheduleID(scheduleID string) ([]models.Booking, error) {
 	var bookings []models.Booking
 	err := r.db.
-		Preload("User.Profile").
+		Preload("User").
 		Preload("Attendance").
 		Where("class_schedule_id = ?", scheduleID).
 		Find(&bookings).Error

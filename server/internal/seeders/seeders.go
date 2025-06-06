@@ -2,12 +2,14 @@ package seeders
 
 import (
 	"log"
+	"time"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
 	"server/internal/models"
+	"server/pkg/utils"
 )
 
 func SeedUsers(db *gorm.DB) {
@@ -499,4 +501,436 @@ func SeedInstructors(db *gorm.DB) {
 	} else {
 		log.Println("Successfully seeded instructors!")
 	}
+}
+
+func SeedPayments(db *gorm.DB) {
+	var count int64
+	db.Model(&models.Payment{}).Count(&count)
+	if count > 0 {
+		log.Println("Payments already seeded, skipping...")
+		return
+	}
+
+	// Get sample users
+	var customer1, customer2 models.User
+	if err := db.Preload("Profile").Where("email = ?", "customer1@fitness.com").First(&customer1).Error; err != nil {
+		log.Println("❌ Failed to find customer1@fitness.com:", err)
+		return
+	}
+	if err := db.Preload("Profile").Where("email = ?", "customer2@fitness.com").First(&customer2).Error; err != nil {
+		log.Println("❌ Failed to find customer2@fitness.com:", err)
+		return
+	}
+
+	// Get package
+	var pkg models.Package
+	if err := db.First(&pkg).Error; err != nil {
+		log.Println("❌ Failed to find package:", err)
+		return
+	}
+
+	now := time.Now().UTC()
+	taxRate := utils.GetTaxRate()
+	base := pkg.Price * (1 - pkg.Discount/100)
+	tax := base * taxRate
+	total := base + tax
+
+	// Seed payments
+	payments := []models.Payment{
+		createPayment(customer1, pkg, base, tax, total, now.AddDate(0, 0, -3), "success"),
+		createPayment(customer2, pkg, base, tax, total, now, "success"),
+		createPayment(customer2, pkg, base, tax, total, now, "success"),
+		createPayment(customer2, pkg, base, tax, total, now.AddDate(0, 0, -1), "success"),
+		createPayment(customer2, pkg, base, tax, total, now.AddDate(0, 0, -2), "success"),
+		createPayment(customer2, pkg, base, tax, total, now.AddDate(0, 0, -2), "failed"),
+	}
+
+	if err := db.Create(&payments).Error; err != nil {
+		log.Printf("❌ Failed seeding payments: %v", err)
+	} else {
+		log.Println("✅ Seeded 6 payments: 1 for customer01, 5 for customer02")
+	}
+}
+
+func createPayment(user models.User, pkg models.Package, base, tax, total float64, paidAt time.Time, status string) models.Payment {
+	id := uuid.New()
+	return models.Payment{
+		ID:            id,
+		UserID:        user.ID,
+		Email:         user.Email,
+		Fullname:      user.Fullname,
+		PackageID:     pkg.ID,
+		PackageName:   pkg.Name,
+		PaymentMethod: "bank_transfer",
+		BasePrice:     base,
+		Tax:           tax,
+		Total:         total,
+		Status:        status,
+		PaidAt:        paidAt,
+		InvoiceNumber: utils.GenerateInvoiceNumber(id),
+	}
+}
+
+func SeedUserPackages(db *gorm.DB) {
+	var count int64
+	db.Model(&models.UserPackage{}).Count(&count)
+	if count > 0 {
+		log.Println("UserPackages already seeded, skipping...")
+		return
+	}
+
+	var customer1, customer2 models.User
+	if err := db.Where("email = ?", "customer1@fitness.com").First(&customer1).Error; err != nil {
+		log.Println("Failed to find customer1@fitness.com")
+		return
+	}
+	if err := db.Where("email = ?", "customer2@fitness.com").First(&customer2).Error; err != nil {
+		log.Println("Failed to find customer2@fitness.com")
+		return
+	}
+
+	var pkg models.Package
+	if err := db.First(&pkg).Error; err != nil {
+		log.Println("Failed to find package")
+		return
+	}
+
+	now := time.Now().UTC()
+	threeDaysAgo := now.AddDate(0, 0, -3)
+	expired := threeDaysAgo.AddDate(0, 0, 30)
+
+	var userPackages []models.UserPackage
+
+	userPackages = append(userPackages, models.UserPackage{
+		ID:              uuid.New(),
+		UserID:          customer1.ID,
+		PackageID:       pkg.ID,
+		PackageName:     pkg.Name,
+		RemainingCredit: pkg.Credit,
+		PurchasedAt:     threeDaysAgo,
+		ExpiredAt:       &expired,
+	})
+
+	userPackages = append(userPackages, models.UserPackage{
+		ID:              uuid.New(),
+		UserID:          customer2.ID,
+		PackageID:       pkg.ID,
+		PackageName:     pkg.Name,
+		RemainingCredit: pkg.Credit,
+		PurchasedAt:     threeDaysAgo,
+		ExpiredAt:       &expired,
+	})
+
+	if err := db.Create(&userPackages).Error; err != nil {
+		log.Printf("Failed seeding user packages: %v", err)
+	} else {
+		log.Println("Seeded user packages successfully")
+	}
+}
+
+func SeedClassSchedules(db *gorm.DB) {
+	var user models.User
+	if err := db.Where("email = ?", "customer1@fitness.com").First(&user).Error; err != nil {
+		log.Println("User customer1@fitness.com not found")
+		return
+	}
+
+	var class models.Class
+	var instructor models.Instructor
+	if err := db.Preload("Location").First(&class).Error; err != nil {
+		log.Println("No class found")
+		return
+	}
+	if err := db.Preload("User.Profile").First(&instructor).Error; err != nil {
+		log.Println("No instructor found")
+		return
+	}
+
+	now := time.Now().UTC().Truncate(time.Minute)
+
+	threeDaysAgo := now.AddDate(0, 0, -3)
+
+	zoomLink := "https://zoom.us/j/92613838319?pwd=cTlscGI5cGlTU2IwZVN1b0FuR2d2QT09"
+	verificationCode := "123456"
+
+	schedulePast1 := models.ClassSchedule{
+		ClassID:          class.ID,
+		ClassName:        class.Title,
+		ClassImage:       class.Image,
+		Location:         class.Location.Name,
+		InstructorID:     instructor.ID,
+		InstructorName:   instructor.User.Fullname,
+		Date:             threeDaysAgo,
+		StartHour:        9,
+		StartMinute:      0,
+		IsOpened:         true,
+		Duration:         class.Duration,
+		Capacity:         10,
+		Booked:           1,
+		ZoomLink:         &zoomLink,
+		VerificationCode: &verificationCode,
+		Color:            "#f59e0b",
+	}
+	db.Create(&schedulePast1)
+
+	schedulePast2 := models.ClassSchedule{
+		ClassID:          class.ID,
+		ClassName:        class.Title,
+		ClassImage:       class.Image,
+		Location:         class.Location.Name,
+		InstructorID:     instructor.ID,
+		InstructorName:   instructor.User.Fullname,
+		Date:             threeDaysAgo,
+		StartHour:        13,
+		StartMinute:      0,
+		IsOpened:         true,
+		Duration:         class.Duration,
+		Capacity:         10,
+		Booked:           1,
+		ZoomLink:         &zoomLink,
+		VerificationCode: &verificationCode,
+		Color:            "#f97316",
+	}
+	db.Create(&schedulePast2)
+
+	loc, _ := time.LoadLocation("Asia/Jakarta")
+	nowLocal := time.Now().In(loc)
+	startTime := nowLocal.Add(1 * time.Hour)
+
+	dateOnly := time.Date(
+		nowLocal.Year(), nowLocal.Month(), nowLocal.Day(),
+		0, 0, 0, 0, time.UTC,
+	)
+
+	scheduleToday := models.ClassSchedule{
+		ID:             uuid.New(),
+		ClassID:        class.ID,
+		ClassName:      class.Title,
+		ClassImage:     class.Image,
+		InstructorID:   instructor.ID,
+		InstructorName: instructor.User.Fullname,
+		Location:       class.Location.Name,
+		Date:           dateOnly,
+		StartHour:      startTime.Hour(),
+		StartMinute:    startTime.Minute(),
+		Duration:       class.Duration,
+		Capacity:       10,
+		Booked:         1,
+		Color:          "#10b981",
+	}
+
+	db.Create(&scheduleToday)
+
+	CreateBookingWithAttendance(db, user, schedulePast1, "attended", true, true)
+	CreateBookingWithAttendance(db, user, schedulePast2, "entered", true, false)
+	CreateBookingWithAttendance(db, user, scheduleToday, "not-join", false, false)
+
+	log.Println("✅ Seeded ClassSchedules + Bookings + Attendance (past & today) safely.")
+}
+
+func CreateBookingWithAttendance(db *gorm.DB, user models.User, schedule models.ClassSchedule, status string, attended bool, reviewed bool) {
+	startTime := time.Date(schedule.Date.Year(), schedule.Date.Month(), schedule.Date.Day(),
+		schedule.StartHour, schedule.StartMinute, 0, 0, time.UTC)
+	endTime := startTime.Add(time.Duration(schedule.Duration) * time.Minute)
+
+	booking := models.Booking{
+		UserID:          user.ID,
+		ClassScheduleID: schedule.ID,
+		Status:          "booked",
+		CreatedAt:       startTime,
+	}
+
+	if err := db.Create(&booking).Error; err != nil {
+		log.Printf("❌ Failed to create booking for schedule %s: %v", schedule.ID.String(), err)
+		return
+	}
+
+	var checkedAt *time.Time
+	var verifiedAt *time.Time
+
+	if attended {
+		checkedAt = &startTime
+	}
+	if reviewed {
+		verifiedAt = &endTime
+	}
+
+	attendance := models.Attendance{
+		BookingID:  booking.ID,
+		Status:     status,
+		CheckedIn:  attended,
+		CheckedOut: reviewed,
+		IsReviewed: reviewed,
+		CheckedAt:  checkedAt,
+		VerifiedAt: verifiedAt,
+	}
+
+	if err := db.Create(&attendance).Error; err != nil {
+		log.Printf("❌ Failed to create attendance for booking %s: %v", booking.ID.String(), err)
+		return
+	}
+
+	log.Printf("✅ Attendance created: %s", attendance.ID.String())
+}
+
+func SeedReviews(db *gorm.DB) {
+	var count int64
+	db.Model(&models.Review{}).Count(&count)
+
+	if count > 0 {
+		log.Println("Reviews already seeded, skipping...")
+		return
+	}
+
+	var user models.User
+	if err := db.First(&user, "role = ?", "customer").Error; err != nil {
+		log.Println("Failed to find customer user:", err)
+		return
+	}
+
+	var classes []models.Class
+	if err := db.Limit(3).Find(&classes).Error; err != nil {
+		log.Println("Failed to fetch classes:", err)
+		return
+	}
+
+	if len(classes) == 0 {
+		log.Println("No classes found for review seeding.")
+		return
+	}
+
+	var reviews []models.Review
+	for i, class := range classes {
+		review := models.Review{
+			ID:      uuid.New(),
+			UserID:  user.ID,
+			ClassID: class.ID,
+			Rating:  4 + (i % 2),
+			Comment: "Great class experience!",
+		}
+		reviews = append(reviews, review)
+	}
+
+	if err := db.Create(&reviews).Error; err != nil {
+		log.Printf("failed seeding reviews: %v", err)
+	} else {
+		log.Println("Reviews seeding completed!")
+	}
+}
+
+func SeedNotificationTypes(db *gorm.DB) {
+	defaultTypes := []models.NotificationType{
+		{ID: uuid.New(), Code: "system_message", Title: "System Announcement", Category: "announcement", DefaultEnabled: false},
+		{ID: uuid.New(), Code: "class_reminder", Title: "Class Reminder", Category: "reminder", DefaultEnabled: false},
+		{ID: uuid.New(), Code: "promo_offer", Title: "New Promotion Available", Category: "promotion", DefaultEnabled: false},
+	}
+	for _, t := range defaultTypes {
+		db.FirstOrCreate(&t, "code = ?", t.Code)
+	}
+}
+
+func generateNotificationSettingsForUser(db *gorm.DB, user models.User) {
+	var notifTypes []models.NotificationType
+	if err := db.Find(&notifTypes).Error; err != nil {
+		log.Printf("Failed to get notification types for user %s: %v", user.Email, err)
+		return
+	}
+
+	for _, nt := range notifTypes {
+		for _, channel := range []string{"email", "browser"} {
+			setting := models.NotificationSetting{
+				ID:                 uuid.New(),
+				UserID:             user.ID,
+				NotificationTypeID: nt.ID,
+				Channel:            channel,
+				Enabled:            nt.DefaultEnabled,
+			}
+			if err := db.Create(&setting).Error; err != nil {
+				log.Printf("Failed to create notification setting for user %s: %v", user.Email, err)
+			}
+		}
+	}
+}
+
+func SeedDummyNotifications(db *gorm.DB) {
+	var user models.User
+	if err := db.Where("email = ?", "customer1@fitness.com").First(&user).Error; err != nil {
+		log.Println("customer1@fitness.com not found")
+		return
+	}
+
+	notifications := []models.Notification{
+		{
+			ID:       uuid.New(),
+			UserID:   user.ID,
+			TypeCode: "class_reminder",
+			Title:    "Upcoming Class Reminder",
+			Message:  "Don't forget your class starts in 1 hour!",
+			Channel:  "browser",
+			IsRead:   false,
+		},
+		{
+			ID:       uuid.New(),
+			UserID:   user.ID,
+			TypeCode: "promo_offer",
+			Title:    "Special Promo Just for You",
+			Message:  "Get 20% off your next class using code: FIT20",
+			Channel:  "browser",
+			IsRead:   false,
+		},
+	}
+
+	if err := db.Create(&notifications).Error; err != nil {
+		log.Printf("Failed to seed dummy notifications: %v", err)
+	} else {
+		log.Println("Dummy notifications for customer1@fitness.com seeded!")
+	}
+}
+func SeedVouchers(db *gorm.DB) {
+	var count int64
+	db.Model(&models.Voucher{}).Count(&count)
+	if count > 0 {
+		log.Println("Vouchers already seeded, skipping...")
+		return
+	}
+
+	now := time.Now().UTC()
+	expired := now.AddDate(0, 1, 0)
+
+	max1 := 30000.0
+	max2 := 50000.0
+
+	voucher1 := models.Voucher{
+		ID:           uuid.New(),
+		Code:         "FIT50",
+		Description:  "Dapatkan diskon 50% hingga 30.000",
+		DiscountType: "percentage",
+		Discount:     50,
+		MaxDiscount:  &max1,
+		Quota:        10,
+		IsReusable:   false,
+		ExpiredAt:    expired,
+		CreatedAt:    now,
+	}
+
+	voucher2 := models.Voucher{
+		ID:           uuid.New(),
+		Code:         "HEALTHY100K",
+		Description:  "Diskon langsung 100.000",
+		DiscountType: "fixed",
+		Discount:     100000,
+		MaxDiscount:  &max2,
+		Quota:        10,
+		IsReusable:   true,
+		ExpiredAt:    expired,
+		CreatedAt:    now,
+	}
+
+	if err := db.Create([]models.Voucher{voucher1, voucher2}).Error; err != nil {
+		log.Printf("Failed to seed vouchers: %v", err)
+		return
+	}
+
+	log.Println("Vouchers seeding completed!")
+
 }

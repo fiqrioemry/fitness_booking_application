@@ -29,15 +29,13 @@ func (r *scheduleTemplateRepository) DeleteTemplate(id string) error {
 
 func (r *scheduleTemplateRepository) GetAllTemplates() ([]models.ScheduleTemplate, error) {
 	var templates []models.ScheduleTemplate
-	err := r.db.Preload("Class").Preload("Instructor.User").Find(&templates).Error
+	err := r.db.Find(&templates).Error
 	return templates, err
 }
 func (r *scheduleTemplateRepository) GetActiveTemplates() ([]models.ScheduleTemplate, error) {
 	var templates []models.ScheduleTemplate
-	if err := r.db.Where("is_active = ?", true).Find(&templates).Error; err != nil {
-		return nil, err
-	}
-	return templates, nil
+	err := r.db.Where("is_active = ?", true).Find(&templates).Error
+	return templates, err
 }
 
 func (r *scheduleTemplateRepository) UpdateTemplate(template *models.ScheduleTemplate) error {
@@ -50,8 +48,6 @@ func (r *scheduleTemplateRepository) CreateTemplate(template *models.ScheduleTem
 
 func (r *scheduleTemplateRepository) GetTemplateByID(id string) (*models.ScheduleTemplate, error) {
 	var template models.ScheduleTemplate
-	if err := r.db.First(&template, "id = ?", id).Error; err != nil {
-		return nil, err
-	}
-	return &template, nil
+	err := r.db.First(&template, "id = ?", id).Error
+	return &template, err
 }

@@ -30,6 +30,28 @@ func IntSliceToJSON(data []int) datatypes.JSON {
 	return datatypes.JSON(bytes)
 }
 
+func IntSliceEqual(a, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	m := map[int]bool{}
+	for _, v := range a {
+		m[v] = true
+	}
+	for _, v := range b {
+		if !m[v] {
+			return false
+		}
+	}
+	return true
+}
+
+func JSONToIntSlice(jsonBytes []byte) []int {
+	var result []int
+	_ = json.Unmarshal(jsonBytes, &result)
+	return result
+}
+
 func ParseJSONToIntSlice(jsonStr string) []int {
 	var result []int
 	err := json.Unmarshal([]byte(jsonStr), &result)

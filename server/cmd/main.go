@@ -17,128 +17,111 @@ import (
 )
 
 func main() {
-	// config =================================
+	// ========== Configuration ==========
 	config.InitConfiguration()
 	utils.InitLogger()
-
-	// seeders
 	db := config.DB
-	// seeders.ResetDatabase(db)
 
+	// ========== Gin Engine ==========
 	r := gin.Default()
-	err := r.SetTrustedProxies(config.GetTrustedProxies())
-	if err != nil {
+	if err := r.SetTrustedProxies(config.GetTrustedProxies()); err != nil {
 		log.Fatalf("Failed to set trusted proxies: %v", err)
 	}
 
-	// middleware ======================
+	// ========== Middleware ==========
 	r.Use(
 		ginzap.Ginzap(utils.GetLogger(), time.RFC3339, true),
 		middleware.Recovery(),
 		middleware.CORS(),
-		middleware.RateLimiter(20, 60*time.Second),
+		middleware.RateLimiter(100, 60*time.Second),
 		middleware.LimitFileSize(12<<20),
 		middleware.APIKeyGateway([]string{"/api/auth/google", "/api/auth/google/callback"}),
 	)
-	// Inisialisasi Dependency for auth module
+
+	// ========== Repositories ==========
 	userRepo := repositories.NewUserRepository(db)
-	userService := services.NewUserService(userRepo)
-	userHandler := handlers.NewUserHandler(userService)
-
 	authRepo := repositories.NewAuthRepository(db)
-	authService := services.NewAuthService(authRepo, userRepo)
-	authHandler := handlers.NewAuthHandler(authService)
-
-	classRepo := repositories.NewClassRepository(db)
-	classService := services.NewClassService(classRepo)
-	classHandler := handlers.NewClassHandler(classService)
-
-	categoryRepo := repositories.NewCategoryRepository(db)
-	categoryService := services.NewCategoryService(categoryRepo)
-	categoryHandler := handlers.NewCategoryHandler(categoryService)
-
 	typeRepo := repositories.NewTypeRepository(db)
-	typeService := services.NewTypeService(typeRepo)
-	typeHandler := handlers.NewTypeHandler(typeService)
-
+	classRepo := repositories.NewClassRepository(db)
 	levelRepo := repositories.NewLevelRepository(db)
-	levelService := services.NewLevelService(levelRepo)
-	levelHandler := handlers.NewLevelHandler(levelService)
-
-	locationRepo := repositories.NewLocationRepository(db)
-	locationService := services.NewLocationService(locationRepo)
-	locationHandler := handlers.NewLocationHandler(locationService)
-
-	packageRepo := repositories.NewPackageRepository(db)
-	packageService := services.NewPackageService(packageRepo)
-	packageHandler := handlers.NewPackageHandler(packageService)
-
-	subcategoryRepo := repositories.NewSubcategoryRepository(db)
-	subcategoryService := services.NewSubcategoryService(subcategoryRepo)
-	subcategoryHandler := handlers.NewSubcategoryHandler(subcategoryService)
-
-	voucherRepo := repositories.NewVoucherRepository(db)
-	voucherService := services.NewVoucherService(voucherRepo)
-	voucherHandler := handlers.NewVoucherHandler(voucherService)
-
-	instructorRepo := repositories.NewInstructorRepository(db)
-	instructorService := services.NewInstructorService(instructorRepo, userRepo)
-	instructorHandler := handlers.NewInstructorHandler(instructorService)
-
-	notificationRepo := repositories.NewNotificationRepository(db)
-	notificationService := services.NewNotificationService(notificationRepo)
-	notificationHandler := handlers.NewNotificationHandler(notificationService)
-
-	userPackageRepo := repositories.NewUserPackageRepository(db)
-	userPackageService := services.NewUserPackageService(userPackageRepo)
-	userPackageHandler := handlers.NewUserPackageHandler(userPackageService)
-
+	reviewRepo := repositories.NewReviewRepository(db)
 	paymentRepo := repositories.NewPaymentRepository(db)
-	paymentService := services.NewPaymentService(paymentRepo, packageRepo, userRepo, voucherService, notificationService, userPackageRepo)
-	paymentHandler := handlers.NewPaymentHandler(paymentService)
-
 	bookingRepo := repositories.NewBookingRepository(db)
+	voucherRepo := repositories.NewVoucherRepository(db)
+	packageRepo := repositories.NewPackageRepository(db)
+	categoryRepo := repositories.NewCategoryRepository(db)
+	locationRepo := repositories.NewLocationRepository(db)
+	dashboardRepo := repositories.NewDashboardRepository(db)
+	instructorRepo := repositories.NewInstructorRepository(db)
 	scheduleRepo := repositories.NewClassScheduleRepository(db)
+	userPackageRepo := repositories.NewUserPackageRepository(db)
+	subcategoryRepo := repositories.NewSubcategoryRepository(db)
 	templateRepo := repositories.NewScheduleTemplateRepository(db)
+	notificationRepo := repositories.NewNotificationRepository(db)
 
+	// ========== inisialisasi services ==========
+	userService := services.NewUserService(userRepo)
+	typeService := services.NewTypeService(typeRepo)
+	levelService := services.NewLevelService(levelRepo)
+	classService := services.NewClassService(classRepo)
+	packageService := services.NewPackageService(packageRepo)
+	voucherService := services.NewVoucherService(voucherRepo)
+	authService := services.NewAuthService(authRepo, userRepo)
+	categoryService := services.NewCategoryService(categoryRepo)
+	locationService := services.NewLocationService(locationRepo)
+	dashboardService := services.NewDashboardService(dashboardRepo)
+	userPackageService := services.NewUserPackageService(userPackageRepo)
+	subcategoryService := services.NewSubcategoryService(subcategoryRepo)
+	notificationService := services.NewNotificationService(notificationRepo)
+	instructorService := services.NewInstructorService(instructorRepo, userRepo)
+	reviewService := services.NewReviewService(reviewRepo, bookingRepo, instructorRepo)
 	templateService := services.NewScheduleTemplateService(templateRepo, classRepo, instructorRepo, scheduleRepo)
 	bookingService := services.NewBookingService(db, bookingRepo, packageRepo, notificationService, userPackageRepo, scheduleRepo)
+	paymentService := services.NewPaymentService(paymentRepo, packageRepo, userRepo, voucherService, notificationService, userPackageRepo)
 	scheduleService := services.NewClassScheduleService(scheduleRepo, templateService, classRepo, instructorRepo, bookingRepo, packageRepo)
 
-	bookingHandler := handlers.NewBookingHandler(bookingService)
-	scheduleHandler := handlers.NewClassScheduleHandler(scheduleService)
-	templateHandler := handlers.NewScheduleTemplateHandler(templateService)
-
-	reviewRepo := repositories.NewReviewRepository(db)
-	reviewService := services.NewReviewService(reviewRepo, bookingRepo, instructorRepo)
+	// ========== inisialisasi handlers ==========
+	authHandler := handlers.NewAuthHandler(authService)
+	userHandler := handlers.NewUserHandler(userService)
+	typeHandler := handlers.NewTypeHandler(typeService)
+	levelHandler := handlers.NewLevelHandler(levelService)
+	classHandler := handlers.NewClassHandler(classService)
 	reviewHandler := handlers.NewReviewHandler(reviewService)
-
-	dashboardRepo := repositories.NewDashboardRepository(db)
-	dashboardService := services.NewDashboardService(dashboardRepo)
+	packageHandler := handlers.NewPackageHandler(packageService)
+	voucherHandler := handlers.NewVoucherHandler(voucherService)
+	paymentHandler := handlers.NewPaymentHandler(paymentService)
+	bookingHandler := handlers.NewBookingHandler(bookingService)
+	locationHandler := handlers.NewLocationHandler(locationService)
+	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	dashboardHandler := handlers.NewDashboardHandler(dashboardService)
+	scheduleHandler := handlers.NewClassScheduleHandler(scheduleService)
+	instructorHandler := handlers.NewInstructorHandler(instructorService)
+	templateHandler := handlers.NewScheduleTemplateHandler(templateService)
+	userPackageHandler := handlers.NewUserPackageHandler(userPackageService)
+	subcategoryHandler := handlers.NewSubcategoryHandler(subcategoryService)
+	notificationHandler := handlers.NewNotificationHandler(notificationService)
 
-	// Route Binding ==========================
+	// ========== inisialisasi routes ==========
 	routes.AuthRoutes(r, authHandler)
 	routes.UserRoutes(r, userHandler)
 	routes.TypeRoutes(r, typeHandler)
 	routes.ClassRoutes(r, classHandler)
 	routes.LevelRoutes(r, levelHandler)
+	routes.ReviewRoutes(r, reviewHandler)
 	routes.PackageRoutes(r, packageHandler)
-	routes.CategoryRoutes(r, categoryHandler)
 	routes.VoucherRoutes(r, voucherHandler)
 	routes.PaymentRoutes(r, paymentHandler)
+	routes.BookingRoutes(r, bookingHandler)
 	routes.LocationRoutes(r, locationHandler)
+	routes.CategoryRoutes(r, categoryHandler)
+	routes.TemplateRoutes(r, templateHandler)
+	routes.ScheduleRoutes(r, scheduleHandler)
+	routes.DashboardRoutes(r, dashboardHandler)
 	routes.InstructorRoutes(r, instructorHandler)
+	routes.UserPackageRoutes(r, userPackageHandler)
 	routes.SubcategoryRoutes(r, subcategoryHandler)
 	routes.NotificationRoutes(r, notificationHandler)
-	routes.UserPackageRoutes(r, userPackageHandler)
-	routes.ScheduleRoutes(r, scheduleHandler)
-	routes.ReviewRoutes(r, reviewHandler)
-	routes.BookingRoutes(r, bookingHandler)
-	routes.TemplateRoutes(r, templateHandler)
-	routes.DashboardRoutes(r, dashboardHandler)
 
-	// Start Server ===========================
 	port := os.Getenv("PORT")
 	log.Println("server running on port:", port)
 	log.Fatal(r.Run(":" + port))

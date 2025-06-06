@@ -4,6 +4,7 @@ import (
 	"server/internal/dto"
 	"server/internal/models"
 	"server/internal/repositories"
+	customErr "server/pkg/errors"
 	"server/pkg/utils"
 	"time"
 )
@@ -25,7 +26,7 @@ func (s *userPackageService) GetUserPackages(userID string, params dto.PackageQu
 
 	pkgs, total, err := s.repo.GetUserPackages(userID, params)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, customErr.NewNotFound("no user package found")
 	}
 
 	if len(pkgs) == 0 {
@@ -54,7 +55,7 @@ func (s *userPackageService) GetUserPackages(userID string, params dto.PackageQu
 func (s *userPackageService) GetUserPackagesByClassID(userID, classID string) ([]dto.UserPackageResponse, error) {
 	userPackages, err := s.repo.GetUserPackagesByClassID(userID, classID)
 	if err != nil {
-		return nil, err
+		return nil, customErr.NewNotFound("no user package found")
 	}
 
 	var result []dto.UserPackageResponse

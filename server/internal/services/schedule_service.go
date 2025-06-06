@@ -65,28 +65,21 @@ func (s *classScheduleService) CreateClassSchedule(req dto.CreateScheduleRequest
 		return err
 	}
 
-	loc, _ := time.LoadLocation("Asia/Jakarta")
-
-	newStartLocal := time.Date(
-		parsedDate.Year(), parsedDate.Month(), parsedDate.Day(),
-		req.StartHour, req.StartMinute, 0, 0, loc,
-	)
-
-	if newStartLocal.Before(time.Now().In(loc)) {
-		return fmt.Errorf("cannot create schedule in the past")
+	if err := utils.ValidateScheduleNotInPast(parsedDate, req.StartHour, req.StartMinute); err != nil {
+		return err
 	}
 
 	class, err := s.class.GetClassByID(req.ClassID)
 	if err != nil {
-		return fmt.Errorf("class not found: %w", err)
+		return customErr.NewNotFound("class not found")
 	}
 
 	instructor, err := s.instructor.GetInstructorByID(req.InstructorID)
 	if err != nil {
-		return fmt.Errorf("instructor not found: %w", err)
+		return customErr.NewNotFound("instructor not found")
 	}
 
-	err = s.CheckScheduleConflict(req.InstructorID, parsedDate, req.StartHour, req.StartMinute)
+	err = s.template.CheckInstructorConflict(req.InstructorID, parsedDate, req.StartHour, req.StartMinute)
 	if err != nil {
 		return customErr.NewConflict(err.Error())
 	}
@@ -109,7 +102,7 @@ func (s *classScheduleService) CreateClassSchedule(req dto.CreateScheduleRequest
 
 	err = s.schedule.CreateClassSchedule(&schedule)
 	if err != nil {
-		return customErr.NewConflict(err.Error())
+		return customErr.NewInternal("Failed to create schedule", err)
 	}
 
 	return nil
@@ -141,46 +134,57 @@ func (s *classScheduleService) CreateRecurringSchedule(req dto.CreateRecurringSc
 }
 
 func (s *classScheduleService) UpdateClassSchedule(id string, req dto.UpdateClassScheduleRequest) error {
-	schedule, err := s.schedule.GetClassScheduleByID(id)
-	if err != nil {
-		return fmt.Errorf("schedule not found")
-	}
-
-	class, err := s.class.GetClassByID(req.ClassID)
-	if err != nil {
-		return fmt.Errorf("class not found: %w", err)
-	}
-
-	instructor, err := s.instructor.GetInstructorByID(req.InstructorID)
-	if err != nil {
-		return fmt.Errorf("instructor not found: %w", err)
-	}
 
 	parsedDate, err := utils.ParseDate(req.Date)
 	if err != nil {
-		return fmt.Errorf("invalid date format")
+		return err
 	}
 
-	err = s.CheckScheduleConflict(req.InstructorID, parsedDate, req.StartHour, req.StartMinute)
+	if err := utils.ValidateScheduleNotInPast(parsedDate, req.StartHour, req.StartMinute); err != nil {
+		return err
+	}
+
+	schedule, err := s.schedule.GetClassScheduleByID(id)
 	if err != nil {
-		return customErr.NewConflict(err.Error())
+		return customErr.NewNotFound("schedule not found")
 	}
 
 	if req.Capacity < schedule.Booked {
 		return fmt.Errorf("capacity cannot be less than booked participant (%d)", schedule.Booked)
 	}
 
+	// only if class changed, do checking
+	if req.ClassID != schedule.ClassID.String() {
+		class, err := s.class.GetClassByID(req.ClassID)
+		if err != nil {
+			return customErr.NewNotFound("class not found")
+		}
+		schedule.ClassID = class.ID
+		schedule.ClassName = class.Title
+		schedule.ClassImage = class.Image
+		schedule.Duration = class.Duration
+	}
+
+	// only if instructor changed, do checking
+	if req.InstructorID != schedule.InstructorID.String() {
+		instructor, err := s.instructor.GetInstructorByID(req.InstructorID)
+		if err != nil {
+			return customErr.NewNotFound("instructor not found")
+		}
+		schedule.InstructorID = instructor.ID
+		schedule.InstructorName = instructor.User.Fullname
+	}
+
+	err = s.template.CheckInstructorConflict(req.InstructorID, parsedDate, req.StartHour, req.StartMinute)
+	if err != nil {
+		return customErr.NewConflict(err.Error())
+	}
+
 	schedule.Color = req.Color
 	schedule.Date = parsedDate
-	schedule.ClassID = class.ID
 	schedule.Capacity = req.Capacity
-	schedule.ClassName = class.Title
-	schedule.ClassImage = class.Image
 	schedule.StartHour = req.StartHour
-	schedule.Duration = class.Duration
-	schedule.InstructorID = instructor.ID
 	schedule.StartMinute = req.StartMinute
-	schedule.InstructorName = instructor.User.Fullname
 
 	if err := s.schedule.UpdateClassSchedule(schedule); err != nil {
 		return err
@@ -192,38 +196,38 @@ func (s *classScheduleService) UpdateClassSchedule(id string, req dto.UpdateClas
 func (s *classScheduleService) DeleteClassSchedule(id string) error {
 	schedule, err := s.schedule.GetClassScheduleByID(id)
 	if err != nil {
-		return fmt.Errorf("schedule not found")
+		return customErr.NewNotFound("schedule not found")
 	}
 
-	startTime := time.Date(
-		schedule.Date.Year(), schedule.Date.Month(), schedule.Date.Day(),
-		schedule.StartHour, schedule.StartMinute, 0, 0, time.Local,
-	)
-
-	if startTime.Before(time.Now().UTC()) {
-		return fmt.Errorf("cannot delete past or ongoing class schedule")
+	if err := utils.ValidateScheduleNotInPast(schedule.Date, schedule.StartHour, schedule.StartMinute); err != nil {
+		return err
 	}
 
 	isBooked, err := s.schedule.HasActiveBooking(schedule.ID)
 	if err != nil {
-		return fmt.Errorf("failed to check booking: %w", err)
+		return customErr.NewInternal("failed to check active booking", err)
 	}
 	if isBooked {
-		return fmt.Errorf("cannot delete schedule with active bookings")
+		return customErr.NewBadRequest("cannot delete schedule with active bookings")
 	}
 
-	return s.schedule.DeleteClassSchedule(id)
+	err = s.schedule.DeleteClassSchedule(id)
+	if err != nil {
+		return customErr.NewInternal("failed to delete schedule", err)
+	}
+
+	return nil
 }
 
 func (s *classScheduleService) GetClassScheduleByID(scheduleID, userID string) (*dto.ClassScheduleDetailResponse, error) {
 	schedule, err := s.schedule.GetClassScheduleByID(scheduleID)
 	if err != nil {
-		return nil, err
+		return nil, customErr.NewNotFound("schedule not found")
 	}
 
 	packages, err := s.packageRepo.GetPackagesByClassID(schedule.ClassID.String())
 	if err != nil {
-		return nil, err
+		return nil, customErr.NewNotFound("no packages found")
 	}
 
 	var pkgResponses []dto.PackageListResponse
@@ -263,7 +267,7 @@ func (s *classScheduleService) GetClassScheduleByID(scheduleID, userID string) (
 func (s *classScheduleService) GetSchedulesByFilter(filter dto.ClassScheduleQueryParam) ([]dto.ClassScheduleResponse, error) {
 	schedules, err := s.schedule.GetClassSchedulesWithFilter(filter)
 	if err != nil {
-		return nil, err
+		return nil, customErr.NewNotFound("no schedules found")
 	}
 
 	var result []dto.ClassScheduleResponse
@@ -293,7 +297,7 @@ func (s *classScheduleService) GetSchedulesByFilter(filter dto.ClassScheduleQuer
 func (s *classScheduleService) GetSchedulesWithBookingStatus(userID string) ([]dto.ClassScheduleResponse, error) {
 	schedules, err := s.schedule.GetClassSchedules()
 	if err != nil {
-		return nil, err
+		return nil, customErr.NewNotFound("no schedules found")
 	}
 
 	var result []dto.ClassScheduleResponse
@@ -326,7 +330,7 @@ func (s *classScheduleService) GetSchedulesByInstructor(userID string, params dt
 
 	instructor, err := s.instructor.GetInstructorByUserID(userID)
 	if err != nil {
-		return nil, nil, fmt.Errorf("instructor not found: %w with %s", err, instructor.ID)
+		return nil, nil, customErr.NewNotFound(fmt.Sprintf("instructor not found for user %s: %v", userID, err))
 	}
 
 	schedules, total, err := s.schedule.GetSchedulesByInstructorID(instructor.ID, params)
@@ -362,7 +366,7 @@ func (s *classScheduleService) GetSchedulesByInstructor(userID string, params dt
 func (s *classScheduleService) OpenClassSchedule(id string, req dto.OpenClassScheduleRequest) error {
 	schedule, err := s.schedule.GetClassScheduleByID(id)
 	if err != nil {
-		return fmt.Errorf("schedule not found")
+		return customErr.NewNotFound("no schedule found")
 	}
 	if schedule.IsOpened {
 		return fmt.Errorf("schedule already opened")
@@ -380,7 +384,7 @@ func (s *classScheduleService) OpenClassSchedule(id string, req dto.OpenClassSch
 func (s *classScheduleService) GetAttendancesForSchedule(scheduleID string) ([]dto.AttendanceWithUserResponse, error) {
 	bookings, err := s.schedule.GetAttendancesByScheduleID(scheduleID)
 	if err != nil {
-		return nil, err
+		return nil, customErr.NewNotFound("no attendance found")
 	}
 
 	var result []dto.AttendanceWithUserResponse
@@ -408,30 +412,4 @@ func (s *classScheduleService) GetAttendancesForSchedule(scheduleID string) ([]d
 	}
 
 	return result, nil
-}
-
-func (s *classScheduleService) CheckScheduleConflict(instructorID string, date time.Time, hour, minute int) error {
-	id := uuid.MustParse(instructorID)
-	schedules, err := s.schedule.GetClassSchedules()
-	if err != nil {
-		return err
-	}
-
-	newStart := time.Date(date.Year(), date.Month(), date.Day(), hour, minute, 0, 0, time.UTC)
-	newEnd := newStart.Add(time.Hour)
-
-	for _, s := range schedules {
-		if s.InstructorID != id || !s.Date.Equal(date) {
-			continue
-		}
-		existStart := time.Date(s.Date.Year(), s.Date.Month(), s.Date.Day(), s.StartHour, s.StartMinute, 0, 0, time.UTC)
-		existEnd := existStart.Add(time.Hour)
-
-		if newStart.Before(existEnd) && existStart.Before(newEnd) {
-			return fmt.Errorf("instructor %s is already booked on %s at %02d:%02d",
-				s.InstructorName, date.Format("2006-01-02"), hour, minute)
-		}
-	}
-
-	return nil
 }

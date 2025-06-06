@@ -6,8 +6,11 @@ import (
 	"server/internal/dto"
 	"server/internal/models"
 	"server/internal/repositories"
+	customErr "server/pkg/errors"
 	"server/pkg/utils"
 	"time"
+
+	"slices"
 
 	"github.com/google/uuid"
 )
@@ -21,6 +24,11 @@ type ScheduleTemplateService interface {
 	GetAllTemplates() ([]dto.ScheduleTemplateResponse, error)
 	CreateScheduleTemplate(req dto.CreateScheduleTemplateRequest) (string, error)
 	UpdateScheduleTemplate(id string, req dto.UpdateScheduleTemplateRequest) error
+
+	// conflict check
+	CheckInstructorConflict(ID string, date time.Time, hour, minute int) error
+	CheckScheduleConflict(ID string, date time.Time, hour, minute int, schedules []models.ClassSchedule) error
+	CheckTemplateConflict(ID string, date time.Time, hour, minute int, templates []models.ScheduleTemplate) error
 }
 
 type scheduleTemplateService struct {
@@ -42,7 +50,7 @@ func NewScheduleTemplateService(
 func (s *scheduleTemplateService) GetAllTemplates() ([]dto.ScheduleTemplateResponse, error) {
 	templates, err := s.template.GetAllTemplates()
 	if err != nil {
-		return nil, err
+		return nil, customErr.NewNotFound("no templates found")
 	}
 
 	var result []dto.ScheduleTemplateResponse
@@ -52,9 +60,9 @@ func (s *scheduleTemplateService) GetAllTemplates() ([]dto.ScheduleTemplateRespo
 		resp := dto.ScheduleTemplateResponse{
 			ID:             t.ID.String(),
 			ClassID:        t.ClassID.String(),
-			ClassName:      t.Class.Title,
+			ClassName:      t.ClassName,
 			InstructorID:   t.InstructorID.String(),
-			InstructorName: t.Instructor.User.Fullname,
+			InstructorName: t.InstructorName,
 			DayOfWeeks:     days,
 			StartHour:      t.StartHour,
 			StartMinute:    t.StartMinute,
@@ -69,12 +77,7 @@ func (s *scheduleTemplateService) GetAllTemplates() ([]dto.ScheduleTemplateRespo
 }
 
 func containsInt(list []int, target int) bool {
-	for _, v := range list {
-		if v == target {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(list, target)
 }
 
 func (s *scheduleTemplateService) CreateScheduleTemplate(req dto.CreateScheduleTemplateRequest) (string, error) {
@@ -91,12 +94,17 @@ func (s *scheduleTemplateService) CreateScheduleTemplate(req dto.CreateScheduleT
 
 	class, err := s.class.GetClassByID(req.ClassID)
 	if err != nil {
-		return "", fmt.Errorf("class not found: %w", err)
+		return "", customErr.NewNotFound("class not found")
 	}
 
 	instructor, err := s.instructor.GetInstructorByID(req.InstructorID)
 	if err != nil {
-		return "", fmt.Errorf("instructor not found: %w", err)
+		return "", customErr.NewNotFound(fmt.Sprintf("instructor not found: %v", err))
+	}
+
+	templates, err := s.template.GetAllTemplates()
+	if err != nil {
+		return "", customErr.NewInternal("failed to fetch schedule templates", err)
 	}
 
 	for date := now; !date.After(endDate); date = date.AddDate(0, 0, 1) {
@@ -105,9 +113,26 @@ func (s *scheduleTemplateService) CreateScheduleTemplate(req dto.CreateScheduleT
 			continue
 		}
 
-		if err := s.CheckTemplateConflict(req.InstructorID, date, req.StartHour, req.StartMinute); err != nil {
-			return "", err
+		if err := s.CheckTemplateConflict(req.InstructorID, date, req.StartHour, req.StartMinute, templates); err != nil {
+			return "", customErr.NewConflict(err.Error())
 		}
+	}
+
+	schedules, err := s.schedule.GetClassSchedules()
+	if err != nil {
+		return "", customErr.NewInternal("failed to fetch class schedules", err)
+	}
+
+	for date := now; !date.After(endDate); date = date.AddDate(0, 0, 1) {
+		weekday := int(date.Weekday())
+		if !containsInt(req.DayOfWeeks, weekday) {
+			continue
+		}
+
+		if err := s.CheckScheduleConflict(req.InstructorID, date, req.StartHour, req.StartMinute, schedules); err != nil {
+			return "", customErr.NewConflict(err.Error())
+		}
+
 	}
 
 	template := models.ScheduleTemplate{
@@ -129,7 +154,7 @@ func (s *scheduleTemplateService) CreateScheduleTemplate(req dto.CreateScheduleT
 
 	err = s.template.CreateTemplate(&template)
 	if err != nil {
-		return "", fmt.Errorf("failed to create template: %w", err)
+		return "", customErr.NewInternal("failed to create template", err)
 	}
 
 	return template.ID.String(), nil
@@ -138,59 +163,93 @@ func (s *scheduleTemplateService) CreateScheduleTemplate(req dto.CreateScheduleT
 func (s *scheduleTemplateService) UpdateScheduleTemplate(id string, req dto.UpdateScheduleTemplateRequest) error {
 	template, err := s.template.GetTemplateByID(id)
 	if err != nil {
-		return err
+		return customErr.NewNotFound(fmt.Sprintf("template not found: %v", err))
 	}
-
 	if template.IsActive {
-		return fmt.Errorf("cannot update an active template, please stop it first")
+		return customErr.NewBadRequest("cannot update an active template, please stop it first")
 	}
 
-	class, err := s.class.GetClassByID(req.ClassID)
-	if err != nil {
-		return fmt.Errorf("class not found: %w", err)
-	}
-
-	instructor, err := s.instructor.GetInstructorByID(req.InstructorID)
-	if err != nil {
-		return fmt.Errorf("instructor not found: %w", err)
-	}
-
-	now := time.Now().UTC()
 	endDate, err := utils.ParseDate(req.EndDate)
 	if err != nil {
-		return err
+		return customErr.NewBadRequest("invalid end date format")
 	}
 
-	for date := now; !date.After(endDate); date = date.AddDate(0, 0, 1) {
-		weekday := int(date.Weekday())
-		if !containsInt(req.DayOfWeeks, weekday) {
-			continue
+	needsConflictCheck := false
+
+	// only if class changed
+	if req.ClassID != template.ClassID.String() {
+		class, err := s.class.GetClassByID(req.ClassID)
+		if err != nil {
+			return customErr.NewNotFound("class not found")
+		}
+		template.ClassID = class.ID
+		template.ClassName = class.Title
+		template.ClassImage = class.Image
+		needsConflictCheck = true
+	}
+
+	// only if instructor changed
+	if req.InstructorID != template.InstructorID.String() {
+		instructor, err := s.instructor.GetInstructorByID(req.InstructorID)
+		if err != nil {
+			return customErr.NewNotFound("instructor not found")
+		}
+		template.InstructorID = instructor.ID
+		template.InstructorName = instructor.User.Fullname
+		needsConflictCheck = true
+	}
+
+	// only if schedule rules changed
+	if req.StartHour != template.StartHour || req.StartMinute != template.StartMinute ||
+		!utils.IntSliceEqual(req.DayOfWeeks, utils.JSONToIntSlice(template.DayOfWeeks)) {
+		needsConflictCheck = true
+	}
+
+	if needsConflictCheck {
+		templates, err := s.template.GetAllTemplates()
+		if err != nil {
+			return customErr.NewInternal("failed to fetch schedule templates", err)
+		}
+		schedules, err := s.schedule.GetClassSchedules()
+		if err != nil {
+			return customErr.NewInternal("failed to fetch class schedules", err)
 		}
 
-		if err := s.CheckTemplateConflict(req.InstructorID, date, req.StartHour, req.StartMinute); err != nil {
-			return err
+		now := time.Now().UTC()
+		for date := now; !date.After(endDate); date = date.AddDate(0, 0, 1) {
+			weekday := int(date.Weekday())
+			if !containsInt(req.DayOfWeeks, weekday) {
+				continue
+			}
+			if err := s.CheckTemplateConflict(req.InstructorID, date, req.StartHour, req.StartMinute, templates); err != nil {
+				return customErr.NewConflict(err.Error())
+			}
+			if err := s.CheckScheduleConflict(req.InstructorID, date, req.StartHour, req.StartMinute, schedules); err != nil {
+				return customErr.NewConflict(err.Error())
+			}
 		}
 	}
 
-	template.ClassID = class.ID
-	template.ClassName = class.Title
-	template.InstructorID = instructor.ID
-	template.InstructorName = instructor.User.Fullname
-	template.DayOfWeeks = utils.IntSliceToJSON(req.DayOfWeeks)
+	// always update these regardless of conflict
+	template.EndDate = endDate
+	template.Capacity = req.Capacity
 	template.StartHour = req.StartHour
 	template.StartMinute = req.StartMinute
-	template.Capacity = req.Capacity
-	template.EndDate = endDate
+	template.DayOfWeeks = utils.IntSliceToJSON(req.DayOfWeeks)
 
 	if err := s.template.UpdateTemplate(template); err != nil {
-		return err
+		return customErr.NewInternal("failed to update template", err)
 	}
 
 	return nil
 }
 
 func (s *scheduleTemplateService) DeleteTemplate(id string) error {
-	return s.template.DeleteTemplate(id)
+	err := s.template.DeleteTemplate(id)
+	if err != nil {
+		return customErr.NewInternal("failed to delete template", err)
+	}
+	return nil
 }
 
 func (s *scheduleTemplateService) RunTemplate(id string) error {
@@ -201,6 +260,7 @@ func (s *scheduleTemplateService) RunTemplate(id string) error {
 	if template.IsActive {
 		return fmt.Errorf("template is already active")
 	}
+
 	template.IsActive = true
 	return s.template.UpdateTemplate(template)
 }
@@ -208,47 +268,18 @@ func (s *scheduleTemplateService) RunTemplate(id string) error {
 func (s *scheduleTemplateService) StopTemplate(id string) error {
 	template, err := s.template.GetTemplateByID(id)
 	if err != nil {
-		return err
+		return customErr.NewNotFound("template not found")
 	}
 	if !template.IsActive {
-		return fmt.Errorf("template is already inactive")
+		return customErr.NewBadRequest("template is already inactive")
 	}
+
 	template.IsActive = false
-	return s.template.UpdateTemplate(template)
-}
 
-func (s *scheduleTemplateService) CheckTemplateConflict(instructorID string, date time.Time, hour, minute int) error {
-	id := uuid.MustParse(instructorID)
-	templates, err := s.template.GetAllTemplates()
+	err = s.template.UpdateTemplate(template)
 	if err != nil {
-		return err
+		return customErr.NewInternal("failed to update template", err)
 	}
-
-	weekday := int(date.Weekday())
-	newStart := time.Date(date.Year(), date.Month(), date.Day(), hour, minute, 0, 0, time.UTC)
-	newEnd := newStart.Add(time.Hour)
-
-	for _, t := range templates {
-		if t.InstructorID != id {
-			continue
-		}
-		var tplDays []int
-		if err := json.Unmarshal(t.DayOfWeeks, &tplDays); err != nil {
-			continue
-		}
-		if !utils.IsDayMatched(weekday, tplDays) {
-			continue
-		}
-
-		tplStart := time.Date(date.Year(), date.Month(), date.Day(), t.StartHour, t.StartMinute, 0, 0, time.UTC)
-		tplEnd := tplStart.Add(time.Hour)
-
-		if newStart.Before(tplEnd) && tplStart.Before(newEnd) {
-			return fmt.Errorf("instructor %s is already booked on %s at %02d:%02d (from template)",
-				t.InstructorName, date.Format("2006-01-02"), hour, minute)
-		}
-	}
-
 	return nil
 }
 
@@ -278,11 +309,6 @@ func (s *scheduleTemplateService) GenerateScheduleByTemplateID(templateID string
 			continue
 		}
 
-		instructorID := template.InstructorID.String()
-		if err := s.CheckTemplateConflict(instructorID, date, template.StartHour, template.StartMinute); err != nil {
-			errors = append(errors, fmt.Sprintf("conflict on %s: %v", date.Format("2006-01-02"), err))
-			continue
-		}
 		schedule := models.ClassSchedule{
 			ID:             uuid.New(),
 			ClassID:        template.ClassID,
@@ -323,35 +349,99 @@ func (s *scheduleTemplateService) GenerateScheduleByTemplateID(templateID string
 	return nil
 }
 
+func (s *scheduleTemplateService) CheckInstructorConflict(ID string, date time.Time, hour, minute int) error {
+	schedules, err := s.schedule.GetClassSchedules()
+	if err != nil {
+		return customErr.NewInternal("failed to fetch class schedules", err)
+	}
+
+	err = s.CheckScheduleConflict(ID, date, hour, minute, schedules)
+	if err != nil {
+		return customErr.NewConflict(err.Error())
+	}
+
+	templates, err := s.template.GetAllTemplates()
+	if err != nil {
+		return customErr.NewInternal("failed to fetch schedule templates", err)
+	}
+
+	err = s.CheckTemplateConflict(ID, date, hour, minute, templates)
+	if err != nil {
+		return customErr.NewConflict(err.Error())
+	}
+
+	return nil
+}
+
+func (s *scheduleTemplateService) CheckTemplateConflict(ID string, date time.Time, hour, minute int, templates []models.ScheduleTemplate) error {
+	instructorID := uuid.MustParse(ID)
+	weekday := int(date.Weekday())
+	newStart := time.Date(date.Year(), date.Month(), date.Day(), hour, minute, 0, 0, time.UTC)
+	newEnd := newStart.Add(time.Hour)
+
+	for _, t := range templates {
+		if t.InstructorID != instructorID {
+			continue
+		}
+		var tplDays []int
+		if err := json.Unmarshal(t.DayOfWeeks, &tplDays); err != nil {
+			continue
+		}
+		if !utils.IsDayMatched(weekday, tplDays) {
+			continue
+		}
+
+		tplStart := time.Date(date.Year(), date.Month(), date.Day(), t.StartHour, t.StartMinute, 0, 0, time.UTC)
+		tplEnd := tplStart.Add(time.Hour)
+
+		if newStart.Before(tplEnd) && tplStart.Before(newEnd) {
+			return fmt.Errorf("instructor %s is already booked on %s at %02d:%02d (from template)",
+				t.InstructorName, date.Format("2006-01-02"), hour, minute)
+		}
+	}
+
+	return nil
+}
+
+func (s *scheduleTemplateService) CheckScheduleConflict(ID string, date time.Time, hour, minute int, schedules []models.ClassSchedule) error {
+	instructorID := uuid.MustParse(ID)
+
+	newStart := time.Date(date.Year(), date.Month(), date.Day(), hour, minute, 0, 0, time.UTC)
+	newEnd := newStart.Add(time.Hour)
+
+	for _, s := range schedules {
+		if s.InstructorID != instructorID || !s.Date.Equal(date) {
+			continue
+		}
+		existStart := time.Date(s.Date.Year(), s.Date.Month(), s.Date.Day(), s.StartHour, s.StartMinute, 0, 0, time.UTC)
+		existEnd := existStart.Add(time.Hour)
+
+		if newStart.Before(existEnd) && existStart.Before(newEnd) {
+			return fmt.Errorf("instructor %s is already booked on %s at %02d:%02d",
+				s.InstructorName, date.Format("2006-01-02"), hour, minute)
+		}
+	}
+
+	return nil
+}
+
 // for cron job
 func (s *scheduleTemplateService) AutoGenerateSchedules() error {
 	templates, err := s.template.GetActiveTemplates()
 	if err != nil {
-		return fmt.Errorf("failed to fetch templates: %w", err)
+		return customErr.NewInternal("failed to fetch templates", err)
 	}
 
 	if len(templates) == 0 {
-		return fmt.Errorf("no active schedule templates found")
+		return nil
 	}
-
-	var anySuccess bool
-	var errs []string
 
 	for _, template := range templates {
-		err := s.GenerateScheduleByTemplateID(template.ID.String())
-		if err != nil {
-			errs = append(errs, fmt.Sprintf("template %s: %v", template.ID.String(), err))
-		} else {
-			anySuccess = true
+		if err := s.GenerateScheduleByTemplateID(template.ID.String()); err != nil {
+			fmt.Printf("failed to generate for template %s: %v\n", template.ID, err)
+			continue
 		}
-	}
 
-	if !anySuccess {
-		return fmt.Errorf("no schedules generated: %v", errs)
-	}
-
-	if len(errs) > 0 {
-		return fmt.Errorf("some schedules generated, with errors: %v", errs)
 	}
 
 	return nil

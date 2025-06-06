@@ -6,8 +6,11 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"slices"
+
+	customErr "server/pkg/errors"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -128,4 +131,14 @@ func SetIfNotZero(target *int, source int) {
 	if source != 0 {
 		*target = source
 	}
+}
+
+func ValidateScheduleNotInPast(date time.Time, hour, minute int) error {
+	loc, _ := time.LoadLocation("Asia/Jakarta")
+	scheduleTime := time.Date(date.Year(), date.Month(), date.Day(), hour, minute, 0, 0, loc)
+
+	if scheduleTime.Before(time.Now().In(loc)) {
+		return customErr.NewBadRequest("cannot modify schedule in the past")
+	}
+	return nil
 }

@@ -8,12 +8,12 @@ import (
 )
 
 func BookingRoutes(r *gin.Engine, h *handlers.BookingHandler) {
-	booking := r.Group("/api/bookings")
-	// customer-protected endpoints
-	booking.Use(middleware.AuthRequired(), middleware.RoleOnly("customer"))
-	booking.POST("", h.CreateBooking)
-	booking.GET("", h.GetMyBookings)
-	booking.GET("/:id", h.GetBookingDetail)
-	booking.POST("/:id/check-in", h.CheckinBookedClass)
-	booking.POST("/:id/check-out", h.CheckoutBookedClass)
+	customer := r.Group("/api/bookings")
+	// customer-endpoint
+	customer.Use(middleware.AuthRequired(), middleware.RoleOnly("customer"))
+	customer.POST("", h.CreateBooking)
+	customer.GET("", h.GetMyBookings)
+	customer.GET("/:id", h.GetBookingDetail)
+	customer.POST("/:id/check-in", h.CheckinBookedClass)
+	customer.POST("/:id/check-out", h.CheckoutBookedClass)
 }

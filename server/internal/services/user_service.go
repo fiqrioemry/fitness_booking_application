@@ -1,11 +1,14 @@
 package services
 
 import (
+	"errors"
 	"server/internal/dto"
 	"server/internal/repositories"
 	customErr "server/pkg/errors"
 	"server/pkg/utils"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type UserService interface {
@@ -40,12 +43,15 @@ func (s *userService) GetUserStats() (*dto.UserStatsResponse, error) {
 
 func (s *userService) UpdateAvatar(userID string, req dto.UpdateAvatarRequest) error {
 	user, err := s.repo.GetUserByID(userID)
-	if err != nil {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return customErr.NewNotFound("user not found")
+	}
+	if err != nil {
+		return customErr.NewInternal("failed to get user", err)
 	}
 
 	if user.Avatar != "" && user.Avatar != req.AvatarURL && !isDiceBear(user.Avatar) {
-		_ = utils.DeleteFromCloudinary(user.Avatar) // ignore error
+		_ = utils.DeleteFromCloudinary(user.Avatar)
 	}
 
 	user.Avatar = req.AvatarURL
@@ -57,8 +63,11 @@ func (s *userService) UpdateAvatar(userID string, req dto.UpdateAvatarRequest) e
 
 func (s *userService) UpdateProfile(userID string, req dto.UpdateUserDetailRequest) error {
 	user, err := s.repo.GetUserByID(userID)
-	if err != nil {
+	switch {
+	case errors.Is(err, gorm.ErrRecordNotFound):
 		return customErr.NewNotFound("user not found")
+	case err != nil:
+		return customErr.NewInternal("failed to get user", err)
 	}
 
 	user.Bio = req.Bio
@@ -105,8 +114,11 @@ func (s *userService) GetAllUsers(params dto.UserQueryParam) ([]dto.UserListResp
 
 func (s *userService) GetUserDetail(id string) (*dto.UserDetailResponse, error) {
 	user, err := s.repo.GetUserByID(id)
-	if err != nil {
+	switch {
+	case errors.Is(err, gorm.ErrRecordNotFound):
 		return nil, customErr.NewNotFound("user not found")
+	case err != nil:
+		return nil, customErr.NewInternal("failed to get user", err)
 	}
 
 	var lastLogin string

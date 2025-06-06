@@ -8,16 +8,14 @@ import (
 )
 
 func PackageRoutes(r *gin.Engine, h *handlers.PackageHandler) {
-	pkg := r.Group("/api/packages")
-	{
-		// public endpoints
-		pkg.GET("", h.GetAllPackages)
-		pkg.GET("/:id", h.GetPackageByID)
+	// public-endpoints
+	r.GET("/api/packages", h.GetAllPackages)
+	r.GET("/api/packages/:id", h.GetPackageByID)
 
-		// admin-protected endpoints
-		admin := pkg.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
-		admin.POST("", h.CreatePackage)
-		admin.PUT("/:id", h.UpdatePackage)
-		admin.DELETE("/:id", middleware.RoleOnly("owner"), h.DeletePackage)
-	}
+	// admin-endpoints
+	admin := r.Group("/api/admin/packages")
+	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
+	admin.POST("", h.CreatePackage)
+	admin.PUT("/:id", h.UpdatePackage)
+	admin.DELETE("/:id", h.DeletePackage)
 }

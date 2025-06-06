@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"errors"
 	"server/internal/dto"
 	"server/internal/models"
 	"time"
@@ -37,14 +36,7 @@ func (r *userRepository) UpdateUser(user *models.User) error {
 func (r *userRepository) GetUserByID(userID string) (*models.User, error) {
 	var user models.User
 	err := r.db.Preload("Tokens").First(&user, "id = ?", userID).Error
-
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	return &user, nil
+	return &user, err
 }
 
 func (r *userRepository) GetUserStats() (int64, int64, int64, int64, int64, error) {

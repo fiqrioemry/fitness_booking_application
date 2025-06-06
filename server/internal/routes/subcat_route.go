@@ -1,3 +1,4 @@
+// internal/routes/subcategory_route.go
 package routes
 
 import (
@@ -8,14 +9,16 @@ import (
 )
 
 func SubcategoryRoutes(r *gin.Engine, h *handlers.SubcategoryHandler) {
-	subcategory := r.Group("/api/subcategories")
+	// public-endpoints
+	s := r.Group("/api/subcategories")
+	s.GET("", h.GetAllSubcategories)
+	s.GET("/:id", h.GetSubcategoryByID)
+	s.GET("/category/:categoryId", h.GetSubcategoriesByCategoryID)
 
-	subcategory.GET("", h.GetAllSubcategories)
-	subcategory.GET("/:id", h.GetSubcategoryByID)
-	subcategory.GET("/category/:categoryId", h.GetSubcategoriesByCategoryID)
-
-	admin := subcategory.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
+	// admin-endpoints
+	admin := r.Group("/api/admin/subcategories")
+	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.POST("", h.CreateSubcategory)
 	admin.PUT("/:id", h.UpdateSubcategory)
-	admin.DELETE("/:id", middleware.RoleOnly("owner"), h.DeleteSubcategory)
+	admin.DELETE("/:id", h.DeleteSubcategory)
 }

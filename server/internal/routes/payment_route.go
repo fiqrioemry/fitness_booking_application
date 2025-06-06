@@ -8,16 +8,19 @@ import (
 )
 
 func PaymentRoutes(r *gin.Engine, h *handlers.PaymentHandler) {
+	// webhook-endpoints
 	r.POST("/api/payments/stripe/notifications", h.HandlePaymentNotifications)
 
-	payments := r.Group("/api/payments")
-	payments.Use(middleware.AuthRequired())
-	payments.POST("", h.CreatePayment)
-	payments.GET("/me", h.GetMyTransactions)
-	payments.GET("/me/:id", h.GetPaymentDetail)
+	// customer-endpoints
+	customer := r.Group("/api/payments")
+	customer.Use(middleware.AuthRequired(), middleware.RoleOnly("customer"))
+	customer.POST("", h.CreatePayment)
+	customer.GET("/me", h.GetMyTransactions)
+	customer.GET("/me/:id", h.GetPaymentDetail)
 
-	admin := payments.Use(middleware.RoleOnly("admin"))
+	// admin-endpoints
+	admin := r.Group("/api/admin/payments")
+	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.GET("", h.GetAllUserPayments)
 	admin.GET("/:id", h.GetPaymentDetail)
-
 }

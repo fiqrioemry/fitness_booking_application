@@ -8,14 +8,14 @@ import (
 )
 
 func InstructorRoutes(r *gin.Engine, h *handlers.InstructorHandler) {
-	// public endpoints
-	instructor := r.Group("/api/instructors")
-	instructor.GET("", h.GetAllInstructors)
-	instructor.GET("/:id", h.GetInstructorByID)
+	// public-endpoints
+	r.GET("/api/instructors", h.GetAllInstructors)
+	r.GET("/api/instructors/:id", h.GetInstructorByID)
 
-	// admin-protected endpoints
-	admin := instructor.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
+	// admin-endpoints
+	admin := r.Group("/api/admin/instructors")
+	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.POST("", h.CreateInstructor)
 	admin.PUT("/:id", h.UpdateInstructor)
-	admin.DELETE("/:id", middleware.RoleOnly("owner"), h.DeleteInstructor)
+	admin.DELETE("/:id", h.DeleteInstructor)
 }

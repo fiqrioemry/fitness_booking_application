@@ -8,14 +8,13 @@ import (
 )
 
 func ClassRoutes(r *gin.Engine, h *handlers.ClassHandler) {
-	class := r.Group("/api/classes")
+	// public-endpoints
+	r.GET("/api/classes", h.GetAllClasses)
+	r.GET("/api/classes/:id", h.GetClassByID)
 
-	// public endpoints
-	class.GET("", h.GetAllClasses)
-	class.GET("/:id", h.GetClassByID)
-
-	// admin-protected endpoints
-	admin := class.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
+	// admin-endpoints
+	admin := r.Group("/api/admin/classes")
+	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.POST("", h.CreateClass)
 	admin.PUT("/:id", h.UpdateClass)
 	admin.POST("/:id/gallery", h.UploadClassGallery)

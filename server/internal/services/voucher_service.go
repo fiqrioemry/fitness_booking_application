@@ -31,10 +31,10 @@ func NewVoucherService(repo repositories.VoucherRepository) VoucherService {
 
 func (s *voucherService) DeleteVoucher(id string) error {
 	_, err := s.repo.GetVoucherByID(id)
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return customErr.ErrNotFound
-	}
-	if err != nil {
+	switch {
+	case errors.Is(err, gorm.ErrRecordNotFound):
+		return customErr.NewNotFound("voucher not found")
+	case err != nil:
 		return customErr.NewInternal("failed to get voucher by ID", err)
 	}
 
@@ -94,11 +94,11 @@ func (s *voucherService) GetAllVouchers() ([]dto.VoucherResponse, error) {
 
 func (s *voucherService) DecreaseQuota(userID uuid.UUID, code string) error {
 	voucher, err := s.repo.GetByCode(code)
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return customErr.ErrNotFound
-	}
-	if err != nil {
-		return customErr.NewInternal("failed to get voucher by code", err)
+	switch {
+	case errors.Is(err, gorm.ErrRecordNotFound):
+		return customErr.NewNotFound("voucher code not found")
+	case err != nil:
+		return customErr.NewInternal("failed to get voucher", err)
 	}
 
 	if !voucher.IsReusable {
@@ -123,10 +123,10 @@ func (s *voucherService) UpdateVoucher(id string, req dto.UpdateVoucherRequest) 
 	}
 
 	voucher, err := s.repo.GetVoucherByID(id)
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return customErr.ErrNotFound
-	}
-	if err != nil {
+	switch {
+	case errors.Is(err, gorm.ErrRecordNotFound):
+		return customErr.NewNotFound("voucher not found")
+	case err != nil:
 		return customErr.NewInternal("failed to get voucher", err)
 	}
 
@@ -146,10 +146,10 @@ func (s *voucherService) UpdateVoucher(id string, req dto.UpdateVoucherRequest) 
 
 func (s *voucherService) ApplyVoucher(req dto.ApplyVoucherRequest) (*dto.ApplyVoucherResponse, error) {
 	voucher, err := s.repo.GetValidVoucherByCode(req.Code)
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	switch {
+	case errors.Is(err, gorm.ErrRecordNotFound):
 		return nil, customErr.NewBadRequest("invalid or expired voucher")
-	}
-	if err != nil {
+	case err != nil:
 		return nil, customErr.NewInternal("failed to fetch voucher", err)
 	}
 

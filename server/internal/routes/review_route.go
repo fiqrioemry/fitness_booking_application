@@ -1,3 +1,4 @@
+// internal/routes/review_route.go
 package routes
 
 import (
@@ -8,9 +9,11 @@ import (
 )
 
 func ReviewRoutes(r *gin.Engine, h *handlers.ReviewHandler) {
-	review := r.Group("/api/reviews")
-	review.Use(middleware.AuthRequired())
-
-	review.POST("/:id", h.CreateReviewFromBookingID)
+	// public-endpoints
 	r.GET("/api/reviews/:classId", h.GetReviewsByClass)
+
+	review := r.Group("/api/reviews")
+	// customer-endpoints
+	review.Use(middleware.AuthRequired(), middleware.RoleOnly("customer"))
+	review.POST("/:id", h.CreateReviewFromBookingID)
 }

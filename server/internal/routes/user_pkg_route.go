@@ -9,7 +9,8 @@ import (
 
 func UserPackageRoutes(r *gin.Engine, h *handlers.UserPackageHandler) {
 	user := r.Group("/api/user-packages")
-	user.Use(middleware.AuthRequired())
+	// customer-endpoints
+	user.Use(middleware.AuthRequired(), middleware.RoleOnly("customer"))
 	user.GET("", h.GetUserPackages)
 	user.GET("/class/:id", h.GetUserPackagesByClassID)
 }

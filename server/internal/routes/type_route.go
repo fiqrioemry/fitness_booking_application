@@ -1,3 +1,4 @@
+// internal/routes/type_route.go
 package routes
 
 import (
@@ -8,13 +9,15 @@ import (
 )
 
 func TypeRoutes(r *gin.Engine, h *handlers.TypeHandler) {
-	typeGroup := r.Group("/api/types")
+	// public access
+	t := r.Group("/api/types")
+	t.GET("", h.GetAllTypes)
+	t.GET("/:id", h.GetTypeByID)
 
-	typeGroup.GET("", h.GetAllTypes)
-	typeGroup.GET("/:id", h.GetTypeByID)
-
-	admin := typeGroup.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
+	// admin-endpoints
+	admin := r.Group("/api/admin/types")
+	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.POST("", h.CreateType)
 	admin.PUT("/:id", h.UpdateType)
-	admin.DELETE("/:id", middleware.RoleOnly("owner"), h.DeleteType)
+	admin.DELETE("/:id", h.DeleteType)
 }

@@ -2,6 +2,7 @@ package seeders
 
 import (
 	"log"
+	"math/rand"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,7 +20,6 @@ func SeedUsers(db *gorm.DB) {
 		Email:    "admin@fitness.com",
 		Password: string(password),
 		Role:     "admin",
-
 		Fullname: "Fitness Booking Admin",
 		Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=admin",
 	}
@@ -29,7 +29,6 @@ func SeedUsers(db *gorm.DB) {
 			Email:    "customer1@fitness.com",
 			Password: string(password),
 			Role:     "customer",
-
 			Fullname: "Helena Mourise",
 			Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=helena",
 			Gender:   "female",
@@ -58,6 +57,46 @@ func SeedUsers(db *gorm.DB) {
 			Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=EM",
 			Gender:   "female",
 		},
+		{
+			Email:    "brandon.tan@fitness.com",
+			Password: string(password),
+			Role:     "customer",
+			Fullname: "Brandon Tan",
+			Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=BT",
+			Gender:   "male",
+		},
+		{
+			Email:    "yuki.sato@fitness.com",
+			Password: string(password),
+			Role:     "customer",
+			Fullname: "Yuki Sato",
+			Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=YS",
+			Gender:   "female",
+		},
+		{
+			Email:    "elena.morrisaga@fitness.com",
+			Password: string(password),
+			Role:     "customer",
+			Fullname: "Elena Morris",
+			Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=EM",
+			Gender:   "female",
+		},
+		{
+			Email:    "elvis.presley@fitness.com",
+			Password: string(password),
+			Role:     "customer",
+			Fullname: "Elvis Presley",
+			Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=BT",
+			Gender:   "male",
+		},
+		{
+			Email:    "david.jovovich@fitness.com",
+			Password: string(password),
+			Role:     "customer",
+			Fullname: "David Jovovich",
+			Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=BT",
+			Gender:   "male",
+		},
 	}
 
 	instructorUsers := []models.User{
@@ -67,6 +106,7 @@ func SeedUsers(db *gorm.DB) {
 			Role:     "instructor",
 			Fullname: "Nurmalasari Permata",
 			Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=AB",
+			Gender:   "female",
 		},
 		{
 			Email:    "instructor2@fitness.com",
@@ -74,6 +114,7 @@ func SeedUsers(db *gorm.DB) {
 			Role:     "instructor",
 			Fullname: "Eisenberg Josephine",
 			Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=ZA",
+			Gender:   "female",
 		},
 		{
 			Email:    "instructor3@fitness.com",
@@ -81,6 +122,7 @@ func SeedUsers(db *gorm.DB) {
 			Role:     "instructor",
 			Fullname: "David Lee",
 			Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=GH",
+			Gender:   "male",
 		},
 		{
 			Email:    "instructor4@fitness.com",
@@ -88,6 +130,7 @@ func SeedUsers(db *gorm.DB) {
 			Role:     "instructor",
 			Fullname: "Ellena Morris",
 			Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=GH",
+			Gender:   "female",
 		},
 	}
 
@@ -101,17 +144,16 @@ func SeedUsers(db *gorm.DB) {
 		log.Println("Failed to seed instructors:", err)
 	}
 
+	allUsers := []models.User{adminUser}
+	allUsers = append(allUsers, customerUsers...)
+	allUsers = append(allUsers, instructorUsers...)
+
+	for _, user := range allUsers {
+		generateNotificationSettingsForUser(db, user)
+	}
+
 	log.Println("User seeding completed with notification settings!")
 }
-
-var (
-	YogaCategoryID           = uuid.MustParse("11111111-1111-1111-1111-111111111111")
-	PilatesCategoryID        = uuid.MustParse("22222222-2222-2222-2222-222222222222")
-	CardioCategoryID         = uuid.MustParse("33333333-3333-3333-3333-333333333333")
-	StrengthTrainingCategory = uuid.MustParse("44444444-4444-4444-4444-444444444444")
-	MartialArtsCategoryID    = uuid.MustParse("55555555-5555-5555-5555-555555555555")
-)
-
 func SeedCategories(db *gorm.DB) {
 	var count int64
 	db.Model(&models.Category{}).Count(&count)
@@ -122,11 +164,11 @@ func SeedCategories(db *gorm.DB) {
 	}
 
 	categories := []models.Category{
-		{ID: YogaCategoryID, Name: "Yoga"},
-		{ID: PilatesCategoryID, Name: "Pilates"},
-		{ID: CardioCategoryID, Name: "Cardio"},
-		{ID: StrengthTrainingCategory, Name: "Strength Training"},
-		{ID: MartialArtsCategoryID, Name: "Martial Arts"},
+		{ID: uuid.New(), Name: "Yoga"},
+		{ID: uuid.New(), Name: "Pilates"},
+		{ID: uuid.New(), Name: "Cardio"},
+		{ID: uuid.New(), Name: "Strength Training"},
+		{ID: uuid.New(), Name: "Martial Arts"},
 	}
 
 	if err := db.Create(&categories).Error; err != nil {
@@ -136,55 +178,47 @@ func SeedCategories(db *gorm.DB) {
 	}
 }
 
-var (
-	// Yoga
-	HathaYogaID   = uuid.MustParse("11111111-aaaa-aaaa-aaaa-111111111111")
-	VinyasaYogaID = uuid.MustParse("11111111-bbbb-bbbb-bbbb-111111111111")
-
-	// Pilates
-	MatPilatesID      = uuid.MustParse("22222222-aaaa-aaaa-aaaa-222222222222")
-	ReformerPilatesID = uuid.MustParse("22222222-bbbb-bbbb-bbbb-222222222222")
-
-	// Cardio
-	HIITID         = uuid.MustParse("33333333-aaaa-aaaa-aaaa-333333333333")
-	ZumbaID        = uuid.MustParse("33333333-bbbb-bbbb-bbbb-333333333333")
-	AerobicDanceID = uuid.MustParse("33333333-cccc-cccc-cccc-333333333333")
-
-	// Martial Arts
-	BoxingID     = uuid.MustParse("55555555-aaaa-aaaa-aaaa-555555555555")
-	MuayThaiID   = uuid.MustParse("55555555-bbbb-bbbb-bbbb-555555555555")
-	KickboxingID = uuid.MustParse("55555555-cccc-cccc-cccc-555555555555")
-)
-
 func SeedSubcategories(db *gorm.DB) {
 	var count int64
 	db.Model(&models.Subcategory{}).Count(&count)
+
 	if count > 0 {
 		log.Println("Subcategories already seeded, skipping...")
 		return
 	}
 
-	categoryMap := map[string]uuid.UUID{
-		"Yoga":         uuid.MustParse("11111111-1111-1111-1111-111111111111"),
-		"Pilates":      uuid.MustParse("22222222-2222-2222-2222-222222222222"),
-		"Cardio":       uuid.MustParse("33333333-3333-3333-3333-333333333333"),
-		"Martial Arts": uuid.MustParse("55555555-5555-5555-5555-555555555555"),
+	subcategoryData := map[string][]string{
+		"Yoga":         {"Hatha Yoga", "Vinyasa Yoga"},
+		"Pilates":      {"Mat Pilates", "Reformer Pilates"},
+		"Cardio":       {"HIIT", "Zumba", "Aerobic Dance"},
+		"Martial Arts": {"Boxing", "Muay Thai", "Kickboxing"},
 	}
 
-	subcategories := []models.Subcategory{
-		{ID: HathaYogaID, Name: "Hatha Yoga", CategoryID: categoryMap["Yoga"]},
-		{ID: VinyasaYogaID, Name: "Vinyasa Yoga", CategoryID: categoryMap["Yoga"]},
+	var categories []models.Category
+	if err := db.Find(&categories).Error; err != nil {
+		log.Printf("failed to fetch categories: %v", err)
+		return
+	}
 
-		{ID: MatPilatesID, Name: "Mat Pilates", CategoryID: categoryMap["Pilates"]},
-		{ID: ReformerPilatesID, Name: "Reformer Pilates", CategoryID: categoryMap["Pilates"]},
+	categoryMap := make(map[string]uuid.UUID)
+	for _, c := range categories {
+		categoryMap[c.Name] = c.ID
+	}
 
-		{ID: HIITID, Name: "HIIT", CategoryID: categoryMap["Cardio"]},
-		{ID: ZumbaID, Name: "Zumba", CategoryID: categoryMap["Cardio"]},
-		{ID: AerobicDanceID, Name: "Aerobic Dance", CategoryID: categoryMap["Cardio"]},
-
-		{ID: BoxingID, Name: "Boxing", CategoryID: categoryMap["Martial Arts"]},
-		{ID: MuayThaiID, Name: "Muay Thai", CategoryID: categoryMap["Martial Arts"]},
-		{ID: KickboxingID, Name: "Kickboxing", CategoryID: categoryMap["Martial Arts"]},
+	var subcategories []models.Subcategory
+	for categoryName, subList := range subcategoryData {
+		categoryID, exists := categoryMap[categoryName]
+		if !exists {
+			log.Printf("category %s not found, skipping subcategories...", categoryName)
+			continue
+		}
+		for _, sub := range subList {
+			subcategories = append(subcategories, models.Subcategory{
+				ID:         uuid.New(),
+				Name:       sub,
+				CategoryID: categoryID,
+			})
+		}
 	}
 
 	if err := db.Create(&subcategories).Error; err != nil {
@@ -193,12 +227,6 @@ func SeedSubcategories(db *gorm.DB) {
 		log.Println("Subcategories seeding completed!")
 	}
 }
-
-var (
-	GroupClassID   = uuid.MustParse("77777777-aaaa-aaaa-aaaa-777777777777")
-	PrivateClassID = uuid.MustParse("77777777-bbbb-bbbb-bbbb-777777777777")
-	VirtualClassID = uuid.MustParse("77777777-cccc-cccc-cccc-777777777777")
-)
 
 func SeedTypes(db *gorm.DB) {
 	var count int64
@@ -210,9 +238,9 @@ func SeedTypes(db *gorm.DB) {
 	}
 
 	types := []models.Type{
-		{ID: GroupClassID, Name: "Group Class"},
-		{ID: PrivateClassID, Name: "Private Class"},
-		{ID: VirtualClassID, Name: "Virtual Class"},
+		{ID: uuid.New(), Name: "Group Class"},
+		{ID: uuid.New(), Name: "Private Class"},
+		{ID: uuid.New(), Name: "Virtual Class"},
 	}
 
 	if err := db.Create(&types).Error; err != nil {
@@ -221,12 +249,6 @@ func SeedTypes(db *gorm.DB) {
 		log.Println("Successfully seeded types!")
 	}
 }
-
-var (
-	LevelBeginnerID     = uuid.MustParse("88888888-aaaa-aaaa-aaaa-888888888888")
-	LevelIntermediateID = uuid.MustParse("88888888-bbbb-bbbb-bbbb-888888888888")
-	LevelAdvancedID     = uuid.MustParse("88888888-cccc-cccc-cccc-888888888888")
-)
 
 func SeedLevels(db *gorm.DB) {
 	var count int64
@@ -238,9 +260,9 @@ func SeedLevels(db *gorm.DB) {
 	}
 
 	levels := []models.Level{
-		{ID: LevelBeginnerID, Name: "Beginner"},
-		{ID: LevelIntermediateID, Name: "Intermediate"},
-		{ID: LevelAdvancedID, Name: "Advanced"},
+		{ID: uuid.New(), Name: "Beginner"},
+		{ID: uuid.New(), Name: "Advanced"},
+		{ID: uuid.New(), Name: "Intermediate"},
 	}
 
 	if err := db.Create(&levels).Error; err != nil {
@@ -249,11 +271,6 @@ func SeedLevels(db *gorm.DB) {
 		log.Println("Successfully seeded levels!")
 	}
 }
-
-var (
-	SweatUpStudioAID = uuid.MustParse("99999999-aaaa-aaaa-aaaa-999999999999")
-	SweatUpStudioBID = uuid.MustParse("99999999-bbbb-bbbb-bbbb-999999999999")
-)
 
 func SeedLocations(db *gorm.DB) {
 	var count int64
@@ -266,13 +283,11 @@ func SeedLocations(db *gorm.DB) {
 
 	locations := []models.Location{
 		{
-			ID:          SweatUpStudioAID,
 			Name:        "Sweat Up Studio A",
 			Address:     "123 Fitness St, New York, NY",
 			GeoLocation: "40.712776,-74.005974",
 		},
 		{
-			ID:          SweatUpStudioBID,
 			Name:        "Sweat Up Studio B",
 			Address:     "456 Gym Ave, Los Angeles, CA",
 			GeoLocation: "34.052235,-118.243683",
@@ -294,11 +309,11 @@ func SeedClasses(db *gorm.DB) {
 		return
 	}
 
+	var categories []models.Category
+	var subcategories []models.Subcategory
 	var types []models.Type
 	var levels []models.Level
 	var locations []models.Location
-	var categories []models.Category
-	var subcategories []models.Subcategory
 
 	db.Find(&categories)
 	db.Find(&subcategories)
@@ -464,6 +479,121 @@ func SeedClassGalleries(db *gorm.DB) {
 	}
 }
 
+func SeedPackages(db *gorm.DB) {
+	rand.Seed(time.Now().UTC().UnixNano())
+
+	var count int64
+	db.Model(&models.Package{}).Count(&count)
+	if count > 0 {
+		log.Println("Packages already seeded, skipping...")
+		return
+	}
+
+	var classes []models.Class
+	if err := db.Preload("Category").Find(&classes).Error; err != nil {
+		log.Fatalf("Failed fetching classes: %v", err)
+	}
+
+	categoryClasses := map[string][]models.Class{}
+	for _, class := range classes {
+		categoryClasses[class.Category.Name] = append(categoryClasses[class.Category.Name], class)
+	}
+
+	packages := []models.Package{
+		{
+			Name:           "Yoga Wellness Trial",
+			Description:    "Try 1 Yoga class to relieve stress and boost flexibility.",
+			Price:          120000,
+			Credit:         1,
+			Discount:       20,
+			Expired:        14,
+			AdditionalList: []string{"Valid for 14 days after first booking."},
+			Image:          "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1748043621/yoga-wellness_ueqi65.webp",
+			IsActive:       true,
+		},
+		{
+			Name:           "Pilates Core Pack (5x)",
+			Description:    "Enjoy 5 Mat/Reformer Pilates sessions to build core strength and posture.",
+			Price:          600000,
+			Credit:         5,
+			Discount:       10,
+			Expired:        60,
+			AdditionalList: []string{"Valid for 2 months", "Non-refundable"},
+			Image:          "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1748043619/pilates-core_reeqdu.webp",
+			IsActive:       true,
+		},
+		{
+			Name:           "Cardio Burnout Pass (10x)",
+			Description:    "Get your heart pumping with 10 sessions of HIIT, Zumba, and Aerobic workouts.",
+			Price:          1000000,
+			Credit:         10,
+			Discount:       15,
+			Expired:        120,
+			AdditionalList: []string{"Valid for 4 months", "Non-refundable"},
+			Image:          "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1748043620/cardio-burner_fi0nhe.webp",
+			IsActive:       true,
+		},
+		{
+			Name:           "Combat Starter (1x)",
+			Description:    "Experience our Martial Arts class in one exciting session.",
+			Price:          150000,
+			Credit:         1,
+			Discount:       0,
+			Expired:        14,
+			AdditionalList: []string{"Valid for 14 days after booking."},
+			Image:          "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1748043620/combat-starter_wdrrxk.webp",
+			IsActive:       true,
+		},
+		{
+			Name:           "Warrior Pack (5x)",
+			Description:    "Boost your skills with 5 sessions of Boxing, Muay Thai, or Kickboxing.",
+			Price:          650000,
+			Credit:         5,
+			Discount:       5,
+			Expired:        60,
+			AdditionalList: []string{"Valid for 2 months", "No refunds after activation."},
+			Image:          "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1748043619/warior-pack_dmpnoa.webp",
+			IsActive:       true,
+		},
+	}
+
+	if err := db.Create(&packages).Error; err != nil {
+		log.Printf("Failed seeding packages: %v", err)
+		return
+	}
+	log.Println("Successfully seeded packages!")
+
+	packageClassMap := map[string]string{
+		"Yoga Wellness Trial":       "Yoga",
+		"Pilates Core Pack (5x)":    "Pilates",
+		"Cardio Burnout Pass (10x)": "Cardio",
+		"Combat Starter (1x)":       "Martial Arts",
+		"Warrior Pack (5x)":         "Martial Arts",
+	}
+
+	for i, pkg := range packages {
+		categoryName := packageClassMap[pkg.Name]
+		classList := categoryClasses[categoryName]
+
+		if len(classList) == 0 {
+			log.Printf("⚠️ No class found for category: %s", categoryName)
+			continue
+		}
+
+		n := min(2+rand.Intn(3), len(classList))
+		rand.Shuffle(len(classList), func(i, j int) { classList[i], classList[j] = classList[j], classList[i] })
+		selected := classList[:n]
+
+		if err := db.Model(&packages[i]).Association("Classes").Replace(&selected); err != nil {
+			log.Printf(" Failed associating package %s: %v", pkg.Name, err)
+		} else {
+			log.Printf("Associated %d classes to package %s", len(selected), pkg.Name)
+		}
+	}
+
+	log.Println("Package-Class association per category completed!")
+}
+
 func SeedInstructors(db *gorm.DB) {
 	var count int64
 	db.Model(&models.Instructor{}).Count(&count)
@@ -514,18 +644,18 @@ func SeedPayments(db *gorm.DB) {
 	// Get sample users
 	var customer1, customer2 models.User
 	if err := db.Preload("Profile").Where("email = ?", "customer1@fitness.com").First(&customer1).Error; err != nil {
-		log.Println("❌ Failed to find customer1@fitness.com:", err)
+		log.Println("Failed to find customer1@fitness.com:", err)
 		return
 	}
 	if err := db.Preload("Profile").Where("email = ?", "customer2@fitness.com").First(&customer2).Error; err != nil {
-		log.Println("❌ Failed to find customer2@fitness.com:", err)
+		log.Println("Failed to find customer2@fitness.com:", err)
 		return
 	}
 
 	// Get package
 	var pkg models.Package
 	if err := db.First(&pkg).Error; err != nil {
-		log.Println("❌ Failed to find package:", err)
+		log.Println("Failed to find package:", err)
 		return
 	}
 
@@ -546,9 +676,9 @@ func SeedPayments(db *gorm.DB) {
 	}
 
 	if err := db.Create(&payments).Error; err != nil {
-		log.Printf("❌ Failed seeding payments: %v", err)
+		log.Printf("Failed seeding payments: %v", err)
 	} else {
-		log.Println("✅ Seeded 6 payments: 1 for customer01, 5 for customer02")
+		log.Println("Seeded 6 payments: 1 for customer01, 5 for customer02")
 	}
 }
 
@@ -725,7 +855,7 @@ func SeedClassSchedules(db *gorm.DB) {
 	CreateBookingWithAttendance(db, user, schedulePast2, "entered", true, false)
 	CreateBookingWithAttendance(db, user, scheduleToday, "not-join", false, false)
 
-	log.Println("✅ Seeded ClassSchedules + Bookings + Attendance (past & today) safely.")
+	log.Println("Seeded ClassSchedules + Bookings + Attendance (past & today) safely.")
 }
 
 func CreateBookingWithAttendance(db *gorm.DB, user models.User, schedule models.ClassSchedule, status string, attended bool, reviewed bool) {
@@ -741,7 +871,7 @@ func CreateBookingWithAttendance(db *gorm.DB, user models.User, schedule models.
 	}
 
 	if err := db.Create(&booking).Error; err != nil {
-		log.Printf("❌ Failed to create booking for schedule %s: %v", schedule.ID.String(), err)
+		log.Printf("Failed to create booking for schedule %s: %v", schedule.ID.String(), err)
 		return
 	}
 
@@ -766,11 +896,11 @@ func CreateBookingWithAttendance(db *gorm.DB, user models.User, schedule models.
 	}
 
 	if err := db.Create(&attendance).Error; err != nil {
-		log.Printf("❌ Failed to create attendance for booking %s: %v", booking.ID.String(), err)
+		log.Printf("Failed to create attendance for booking %s: %v", booking.ID.String(), err)
 		return
 	}
 
-	log.Printf("✅ Attendance created: %s", attendance.ID.String())
+	log.Printf("Attendance created: %s", attendance.ID.String())
 }
 
 func SeedReviews(db *gorm.DB) {

@@ -20,7 +20,7 @@ type ScheduleTemplateService interface {
 	RunTemplate(id string) error
 	StopTemplate(id string) error
 	DeleteTemplate(id string) error
-	GenerateScheduleByTemplateID(templateID string) error
+	GenerateScheduleByTemplateID(id string) error
 	GetAllTemplates() ([]dto.ScheduleTemplateResponse, error)
 	CreateScheduleTemplate(req dto.CreateScheduleTemplateRequest) (string, error)
 	UpdateScheduleTemplate(id string, req dto.UpdateScheduleTemplateRequest) error
@@ -284,8 +284,8 @@ func (s *scheduleTemplateService) StopTemplate(id string) error {
 	return nil
 }
 
-func (s *scheduleTemplateService) GenerateScheduleByTemplateID(templateID string) error {
-	template, err := s.template.GetTemplateByID(templateID)
+func (s *scheduleTemplateService) GenerateScheduleByTemplateID(id string) error {
+	template, err := s.template.GetTemplateByID(id)
 	if err != nil {
 		return fmt.Errorf("failed to fetch template: %w", err)
 	}
@@ -306,17 +306,13 @@ func (s *scheduleTemplateService) GenerateScheduleByTemplateID(templateID string
 	today := time.Now().In(loc).Truncate(24 * time.Hour)
 	end := today.AddDate(0, 1, 0)
 
-	// Start from tomorrow
 	for date := today.AddDate(0, 0, 1); !date.After(end); date = date.AddDate(0, 0, 1) {
-		fmt.Printf("🔍 Checking date: %s (Weekday: %d)\n", date.Format("2006-01-02"), date.Weekday())
+		fmt.Printf("checking date: %s (Weekday: %d)\n", date.Format("2006-01-02"), date.Weekday())
 
 		if !utils.IsDayMatched(int(date.Weekday()), days) {
-			fmt.Println("⛔️ Skipped: not in template day list")
+			fmt.Println("Skipped: not in template day list")
 			continue
 		}
-
-		// log additional info
-		fmt.Println("✅ Included: generating schedule")
 
 		schedule := models.ClassSchedule{
 			ID:             uuid.New(),
@@ -334,13 +330,11 @@ func (s *scheduleTemplateService) GenerateScheduleByTemplateID(templateID string
 		}
 
 		if err := s.schedule.CreateClassSchedule(&schedule); err != nil {
-			errMsg := fmt.Sprintf("❌ Failed on %s: %v", date.Format("2006-01-02"), err)
-			fmt.Println(errMsg)
+			errMsg := fmt.Sprintf("Failed on %s: %v", date.Format("2006-01-02"), err)
 			errors = append(errors, errMsg)
 			continue
 		}
 
-		fmt.Printf("📌 Created schedule for %s\n", date.Format("2006-01-02"))
 		hasSuccess = true
 	}
 
@@ -358,7 +352,7 @@ func (s *scheduleTemplateService) GenerateScheduleByTemplateID(templateID string
 		return fmt.Errorf("partial success: %v", errors)
 	}
 
-	fmt.Println("🎉 Finished generating schedules successfully.")
+	fmt.Println(" generating schedules successfully.")
 	return nil
 }
 

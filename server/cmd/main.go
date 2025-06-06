@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"server/internal/config"
+	"server/internal/cron"
 	"server/internal/handlers"
 	"server/internal/repositories"
 	"server/internal/routes"
@@ -103,6 +104,12 @@ func main() {
 	userPackageHandler := handlers.NewUserPackageHandler(userPackageService)
 	subcategoryHandler := handlers.NewSubcategoryHandler(subcategoryService)
 	notificationHandler := handlers.NewNotificationHandler(notificationService)
+
+	// ========== inisialisasi cron job =========
+
+	cronManager := cron.NewCronManager(paymentService, templateService, notificationService, bookingService)
+	cronManager.RegisterJobs()
+	cronManager.Start()
 
 	// ========== inisialisasi routes ==========
 	routes.AuthRoutes(r, authHandler)

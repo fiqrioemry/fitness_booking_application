@@ -220,7 +220,6 @@ type Subcategory struct {
 	CategoryID uuid.UUID      `gorm:"type:char(36);not null" json:"categoryId"`
 	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
 
-	// relasi
 	Category Category `gorm:"foreignKey:CategoryID"`
 }
 

@@ -314,11 +314,11 @@ func (s *paymentService) GetAllUserPayments(params dto.PaymentQueryParam) ([]dto
 		results = append(results, dto.PaymentListResponse{
 			ID:            p.ID.String(),
 			UserID:        p.UserID.String(),
+			PackageID:     p.PackageID.String(),
+			PackageName:   p.PackageName,
 			InvoiceNumber: p.InvoiceNumber,
 			Email:         p.Email,
 			Fullname:      p.Fullname,
-			PackageID:     p.PackageID.String(),
-			PackageName:   p.PackageName,
 			Total:         p.Total,
 			PaymentMethod: p.PaymentMethod,
 			Status:        p.Status,

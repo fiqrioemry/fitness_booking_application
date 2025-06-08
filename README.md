@@ -17,7 +17,7 @@ The platform became a key internal system for managing memberships, schedules, b
 - Enable customers to browse and book fitness classes based on time, instructor, and location  
 - Support one-time and recurring class scheduling with automated generation  
 - Implement role-based dashboards (customer, instructor, admin)  
-- Handle class check-ins and attendance with QR code validation  
+- Handle class check-ins and attendance with code validation  
 - Integrate payments via Stripe or Midtrans  
 - Send real-time and scheduled reminders via email or in-app notification  
 

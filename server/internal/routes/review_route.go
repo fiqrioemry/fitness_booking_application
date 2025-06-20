@@ -10,9 +10,9 @@ import (
 
 func ReviewRoutes(r *gin.RouterGroup, h *handlers.ReviewHandler) {
 	// public-endpoints
-	r.GET("/api/v1/reviews/:classId", h.GetReviewsByClass)
+	r.GET("/reviews/:classId", h.GetReviewsByClass)
 
-	review := r.Group("/api/v1/reviews")
+	review := r.Group("/reviews")
 	// customer-endpoints
 	review.Use(middleware.AuthRequired(), middleware.RoleOnly("customer"))
 	review.POST("/:id", h.CreateReviewFromBookingID)

@@ -8,7 +8,7 @@ import (
 )
 
 func UserPackageRoutes(r *gin.RouterGroup, h *handlers.UserPackageHandler) {
-	user := r.Group("/api/v1/user-packages")
+	user := r.Group("user-packages")
 	// customer-endpoints
 	user.Use(middleware.AuthRequired(), middleware.RoleOnly("customer"))
 	user.GET("", h.GetUserPackages)

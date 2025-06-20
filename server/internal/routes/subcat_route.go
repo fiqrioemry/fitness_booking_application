@@ -10,13 +10,13 @@ import (
 
 func SubcategoryRoutes(r *gin.RouterGroup, h *handlers.SubcategoryHandler) {
 	// public-endpoints
-	s := r.Group("/api/v1/subcategories")
+	s := r.Group("/subcategories")
 	s.GET("", h.GetAllSubcategories)
 	s.GET("/:id", h.GetSubcategoryByID)
 	s.GET("/category/:categoryId", h.GetSubcategoriesByCategoryID)
 
 	// admin-endpoints
-	admin := r.Group("/api/v1/admin/subcategories")
+	admin := r.Group("/admin/subcategories")
 	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.POST("", h.CreateSubcategory)
 	admin.PUT("/:id", h.UpdateSubcategory)

@@ -8,7 +8,7 @@ import (
 )
 
 func BookingRoutes(r *gin.RouterGroup, h *handlers.BookingHandler) {
-	customer := r.Group("/api/v1/bookings")
+	customer := r.Group("/bookings")
 	// customer-endpoint
 	customer.Use(middleware.AuthRequired(), middleware.RoleOnly("customer"))
 	customer.POST("", h.CreateBooking)

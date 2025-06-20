@@ -9,7 +9,7 @@ import (
 )
 
 func AuthRoutes(r *gin.RouterGroup, h *handlers.AuthHandler) {
-	auth := r.Group("/api/v1/auth")
+	auth := r.Group("/auth")
 
 	// public-endpoints
 	auth.POST("/login", h.Login)

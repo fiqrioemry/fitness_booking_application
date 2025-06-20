@@ -9,11 +9,11 @@ import (
 
 func ClassRoutes(r *gin.RouterGroup, h *handlers.ClassHandler) {
 	// public-endpoints
-	r.GET("/api/v1/classes", h.GetAllClasses)
-	r.GET("/api/v1/classes/:id", h.GetClassByID)
+	r.GET("/classes", h.GetAllClasses)
+	r.GET("/classes/:id", h.GetClassByID)
 
 	// admin-endpoints
-	admin := r.Group("/api/v1/admin/classes")
+	admin := r.Group("/admin/classes")
 	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.POST("", h.CreateClass)
 	admin.PUT("/:id", h.UpdateClass)

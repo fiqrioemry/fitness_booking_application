@@ -9,11 +9,11 @@ import (
 
 func PackageRoutes(r *gin.RouterGroup, h *handlers.PackageHandler) {
 	// public-endpoints
-	r.GET("/api/v1/packages", h.GetAllPackages)
-	r.GET("/api/v1/packages/:id", h.GetPackageByID)
+	r.GET("/packages", h.GetAllPackages)
+	r.GET("/packages/:id", h.GetPackageByID)
 
 	// admin-endpoints
-	admin := r.Group("/api/v1/admin/packages")
+	admin := r.Group("/admin/packages")
 	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.POST("", h.CreatePackage)
 	admin.PUT("/:id", h.UpdatePackage)

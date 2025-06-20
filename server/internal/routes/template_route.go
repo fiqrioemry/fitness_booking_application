@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func TemplateRoutes(r *gin.Engine, handler *handlers.ScheduleTemplateHandler) {
-	admin := r.Group("/api/admin/schedule-templates")
+func TemplateRoutes(r *gin.RouterGroup, handler *handlers.ScheduleTemplateHandler) {
+	admin := r.Group("/api/v1/admin/schedule-templates")
 	// admin-endpoints
 	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.GET("", handler.GetAllTemplates)

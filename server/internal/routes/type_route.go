@@ -8,14 +8,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func TypeRoutes(r *gin.Engine, h *handlers.TypeHandler) {
-	// public access
-	t := r.Group("/api/types")
+func TypeRoutes(r *gin.RouterGroup, h *handlers.TypeHandler) {
+	// public-endpoints
+	t := r.Group("/api/v1/types")
 	t.GET("", h.GetAllTypes)
 	t.GET("/:id", h.GetTypeByID)
 
 	// admin-endpoints
-	admin := r.Group("/api/admin/types")
+	admin := r.Group("/api/v1/admin/types")
 	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.POST("", h.CreateType)
 	admin.PUT("/:id", h.UpdateType)

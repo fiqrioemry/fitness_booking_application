@@ -8,11 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ReviewRoutes(r *gin.Engine, h *handlers.ReviewHandler) {
+func ReviewRoutes(r *gin.RouterGroup, h *handlers.ReviewHandler) {
 	// public-endpoints
-	r.GET("/api/reviews/:classId", h.GetReviewsByClass)
+	r.GET("/api/v1/reviews/:classId", h.GetReviewsByClass)
 
-	review := r.Group("/api/reviews")
+	review := r.Group("/api/v1/reviews")
 	// customer-endpoints
 	review.Use(middleware.AuthRequired(), middleware.RoleOnly("customer"))
 	review.POST("/:id", h.CreateReviewFromBookingID)

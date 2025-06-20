@@ -7,15 +7,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func VoucherRoutes(r *gin.Engine, h *handlers.VoucherHandler) {
+func VoucherRoutes(r *gin.RouterGroup, h *handlers.VoucherHandler) {
 	// public-endpoints
-	voucher := r.Group("/api/vouchers")
+	voucher := r.Group("/vouchers")
 	voucher.POST("/apply", h.ApplyVoucher)
 	voucher.Use(middleware.AuthRequired(), middleware.RoleOnly("customer"))
 	voucher.GET("", h.GetAllVouchers)
 
 	// admin-endpoints
-	admin := r.Group("/api/admin/vouchers")
+	admin := r.Group("/admin/vouchers")
 	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.POST("", h.CreateVoucher)
 	admin.PUT("/:id", h.UpdateVoucher)

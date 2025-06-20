@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func BookingRoutes(r *gin.Engine, h *handlers.BookingHandler) {
-	customer := r.Group("/api/bookings")
+func BookingRoutes(r *gin.RouterGroup, h *handlers.BookingHandler) {
+	customer := r.Group("/api/v1/bookings")
 	// customer-endpoint
 	customer.Use(middleware.AuthRequired(), middleware.RoleOnly("customer"))
 	customer.POST("", h.CreateBooking)

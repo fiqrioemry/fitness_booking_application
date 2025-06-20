@@ -68,6 +68,7 @@ func (s *bookingService) CreateBooking(userID, packageID, scheduleID string) err
 	}
 
 	bookingID := uuid.New()
+
 	attendanceID := uuid.New()
 
 	err = s.db.Transaction(func(tx *gorm.DB) error {

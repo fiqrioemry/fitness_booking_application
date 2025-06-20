@@ -365,6 +365,6 @@ func (s *paymentService) ExpireOldPendingPayments() error {
 	if rows == 0 {
 		return fmt.Errorf("no expired pending payments found")
 	}
-	fmt.Printf("✅ %d pending payments marked as failed\n", rows)
+	fmt.Printf("%d pending payments marked as failed\n", rows)
 	return nil
 }

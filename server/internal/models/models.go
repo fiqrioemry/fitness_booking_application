@@ -30,8 +30,6 @@ type Token struct {
 	ID        uuid.UUID `gorm:"type:char(36);primaryKey" json:"id"`
 	UserID    uuid.UUID `gorm:"type:char(36);index;not null" json:"userId"`
 	Token     string    `gorm:"type:text;not null" json:"token"`
-	UserAgent string
-	IP        string
 	ExpiredAt time.Time `json:"expiredAt"`
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 }

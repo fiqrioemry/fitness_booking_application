@@ -52,6 +52,11 @@ services:
     container_name: redis-fitness
     ports:
       - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
     networks:
       - fitness_net
 

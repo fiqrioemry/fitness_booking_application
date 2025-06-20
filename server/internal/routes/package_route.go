@@ -7,13 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func PackageRoutes(r *gin.Engine, h *handlers.PackageHandler) {
+func PackageRoutes(r *gin.RouterGroup, h *handlers.PackageHandler) {
 	// public-endpoints
-	r.GET("/api/packages", h.GetAllPackages)
-	r.GET("/api/packages/:id", h.GetPackageByID)
+	r.GET("/api/v1/packages", h.GetAllPackages)
+	r.GET("/api/v1/packages/:id", h.GetPackageByID)
 
 	// admin-endpoints
-	admin := r.Group("/api/admin/packages")
+	admin := r.Group("/api/v1/admin/packages")
 	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.POST("", h.CreatePackage)
 	admin.PUT("/:id", h.UpdatePackage)

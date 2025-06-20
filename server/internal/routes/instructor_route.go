@@ -7,13 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InstructorRoutes(r *gin.Engine, h *handlers.InstructorHandler) {
+func InstructorRoutes(r *gin.RouterGroup, h *handlers.InstructorHandler) {
 	// public-endpoints
-	r.GET("/api/instructors", h.GetAllInstructors)
-	r.GET("/api/instructors/:id", h.GetInstructorByID)
+	r.GET("/api/v1/instructors", h.GetAllInstructors)
+	r.GET("/api/v1/instructors/:id", h.GetInstructorByID)
 
 	// admin-endpoints
-	admin := r.Group("/api/admin/instructors")
+	admin := r.Group("/api/v1/admin/instructors")
 	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.POST("", h.CreateInstructor)
 	admin.PUT("/:id", h.UpdateInstructor)

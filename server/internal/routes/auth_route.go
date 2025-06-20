@@ -8,8 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AuthRoutes(r *gin.Engine, h *handlers.AuthHandler) {
-	auth := r.Group("/api/auth")
+func AuthRoutes(r *gin.RouterGroup, h *handlers.AuthHandler) {
+	auth := r.Group("/api/v1/auth")
 
 	// public-endpoints
 	auth.POST("/login", h.Login)

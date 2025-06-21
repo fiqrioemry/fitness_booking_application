@@ -1,0 +1,158 @@
+{
+  "info": {
+    "name": "Fitness Booking - Instructor API",
+    "_postman_id": "55667788-dddd-eeee-ffff-445566778899",
+    "description": "Postman collection to test Instructor endpoints (public & admin).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Instructors",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/instructors",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "instructors"
+          ]
+        },
+        "description": "Public - Mengambil daftar seluruh instruktur aktif."
+      },
+      "response": [
+        {
+          "name": "200 OK - Success",
+          "status": "OK",
+          "code": 200,
+          "body": "[\n  {\n    \"id\": \"instr-uuid-1\",\n    \"userId\": \"user-uuid\",\n    \"fullname\": \"Dewi Ananda\",\n    \"avatar\": \"https://cdn.example.com/avatar.png\",\n    \"experience\": 5,\n    \"specialties\": \"Yoga, Pilates\",\n    \"certifications\": \"Certified Yoga Instructor\",\n    \"rating\": 4.8,\n    \"totalClass\": 12\n  }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Get Instructor by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/instructors/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "instructors",
+            ":id"
+          ]
+        },
+        "description": "Public - Mendapatkan detail 1 instruktur berdasarkan ID."
+      },
+      "response": [
+        {
+          "name": "200 OK - Success",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"id\": \"instr-uuid-1\",\n  \"userId\": \"user-uuid\",\n  \"fullname\": \"Dewi Ananda\",\n  \"avatar\": \"https://cdn.example.com/avatar.png\",\n  \"experience\": 5,\n  \"specialties\": \"Yoga, Pilates\",\n  \"certifications\": \"Certified Yoga Instructor\",\n  \"rating\": 4.8,\n  \"totalClass\": 12\n}"
+        }
+      ]
+    },
+    {
+      "name": "Create Instructor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/instructors",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "instructors"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"user-uuid\",\n  \"experience\": 3,\n  \"specialties\": \"HIIT, Cardio\",\n  \"certifications\": \"NASM Certified\"\n}"
+        },
+        "description": "Admin - Menambahkan instruktur baru."
+      }
+    },
+    {
+      "name": "Update Instructor",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/instructors/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "instructors",
+            ":id"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"user-uuid\",\n  \"experience\": 4,\n  \"specialties\": \"Strength Training\",\n  \"certifications\": \"ACE Certified\"\n}"
+        },
+        "description": "Admin - Memperbarui data instruktur."
+      }
+    },
+    {
+      "name": "Delete Instructor",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/instructors/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "instructors",
+            ":id"
+          ]
+        },
+        "description": "Admin - Menghapus data instruktur."
+      }
+    }
+  ]
+}

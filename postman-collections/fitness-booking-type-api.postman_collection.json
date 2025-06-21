@@ -1,0 +1,142 @@
+{
+  "info": {
+    "name": "Fitness Booking - Type API",
+    "_postman_id": "ff112233-4455-6677-8899-aabbccddeeff",
+    "description": "Postman collection to test Type endpoints (public & admin).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Types",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/types",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "types"
+          ]
+        },
+        "description": "Public - Mendapatkan semua jenis kelas yang tersedia."
+      }
+    },
+    {
+      "name": "Get Type by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/types/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "types",
+            ":id"
+          ]
+        },
+        "description": "Public - Mendapatkan data jenis kelas berdasarkan ID."
+      }
+    },
+    {
+      "name": "Create Type",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/types",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "types"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Indoor\"\n}"
+        },
+        "description": "Admin - Menambahkan jenis kelas baru."
+      }
+    },
+    {
+      "name": "Update Type",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/types/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "types",
+            ":id"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Outdoor\"\n}"
+        },
+        "description": "Admin - Mengubah jenis kelas berdasarkan ID."
+      }
+    },
+    {
+      "name": "Delete Type",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/types/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "types",
+            ":id"
+          ]
+        },
+        "description": "Admin - Menghapus jenis kelas berdasarkan ID."
+      }
+    }
+  ]
+}

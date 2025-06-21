@@ -1,0 +1,64 @@
+{
+  "info": {
+    "name": "Fitness Booking - Review API",
+    "_postman_id": "bbccddeeff-1234-5678-9999-000011112222",
+    "description": "Postman collection to test Review endpoints for public and customer users.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Reviews by Class ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/reviews/:classId",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "reviews",
+            ":classId"
+          ]
+        },
+        "description": "Public - Mendapatkan semua review dari sebuah kelas berdasarkan ID."
+      }
+    },
+    {
+      "name": "Create Review from Booking ID",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/reviews/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "reviews",
+            ":id"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Kelasnya sangat menyenangkan dan instruktur sangat informatif.\"\n}"
+        },
+        "description": "Customer - Memberikan review terhadap kelas berdasarkan ID booking (hanya bisa jika sudah hadir)."
+      }
+    }
+  ]
+}

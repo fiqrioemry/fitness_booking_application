@@ -1,0 +1,139 @@
+{
+  "info": {
+    "name": "Fitness Booking - Schedule Template API",
+    "_postman_id": "eef01122-aabb-ccdd-eeff-001122334455",
+    "description": "Postman collection to test Schedule Template endpoints (admin only).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Schedule Templates",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/schedule-templates",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "schedule-templates"
+          ]
+        },
+        "description": "Admin - Mendapatkan semua jadwal berulang (template)."
+      }
+    },
+    {
+      "name": "Update Schedule Template",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/schedule-templates/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "schedule-templates",
+            ":id"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"classId\": \"class-uuid\",\n  \"instructorId\": \"instr-uuid\",\n  \"dayOfWeeks\": [\n    1,\n    3\n  ],\n  \"startHour\": 8,\n  \"startMinute\": 0,\n  \"capacity\": 15,\n  \"endDate\": \"2025-08-30\"\n}"
+        },
+        "description": "Admin - Mengubah data template jadwal kelas berulang."
+      }
+    },
+    {
+      "name": "Run Schedule Template",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/schedule-templates/:id/run",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "schedule-templates",
+            ":id",
+            "run"
+          ]
+        },
+        "description": "Admin - Menjalankan template untuk mulai membuat jadwal kelas mingguan."
+      }
+    },
+    {
+      "name": "Stop Schedule Template",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/schedule-templates/:id/stop",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "schedule-templates",
+            ":id",
+            "stop"
+          ]
+        },
+        "description": "Admin - Menghentikan sementara template agar tidak membuat jadwal otomatis."
+      }
+    },
+    {
+      "name": "Delete Schedule Template",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/schedule-templates/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "schedule-templates",
+            ":id"
+          ]
+        },
+        "description": "Admin - Menghapus template jadwal berulang berdasarkan ID."
+      }
+    }
+  ]
+}

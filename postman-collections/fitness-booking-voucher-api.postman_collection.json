@@ -1,0 +1,150 @@
+{
+  "info": {
+    "name": "Fitness Booking - Voucher API",
+    "_postman_id": "aabbccdd-3344-5566-7788-9900aabbccdd",
+    "description": "Postman collection to test Voucher endpoints (public, customer & admin).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Apply Voucher (Public)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/vouchers/apply",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "vouchers",
+            "apply"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code\": \"DISKON50\",\n  \"total\": 100000\n}"
+        },
+        "description": "Public - Menerapkan voucher ke transaksi."
+      }
+    },
+    {
+      "name": "Get All Vouchers (Customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/vouchers",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "vouchers"
+          ]
+        },
+        "description": "Customer - Mendapatkan semua voucher yang tersedia untuk user."
+      }
+    },
+    {
+      "name": "Create Voucher",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/vouchers",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "vouchers"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code\": \"DISKON50\",\n  \"description\": \"Diskon 50% akhir tahun\",\n  \"discountType\": \"percentage\",\n  \"discount\": 50,\n  \"maxDiscount\": 30000,\n  \"quota\": 100,\n  \"isReusable\": false,\n  \"expiredAt\": \"2025-12-31\"\n}"
+        },
+        "description": "Admin - Membuat voucher baru."
+      }
+    },
+    {
+      "name": "Update Voucher",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/vouchers/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "vouchers",
+            ":id"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"Diskon tahun baru\",\n  \"discountType\": \"fixed\",\n  \"discount\": 20000,\n  \"maxDiscount\": null,\n  \"quota\": 200,\n  \"isReusable\": true,\n  \"expiredAt\": \"2026-01-15\"\n}"
+        },
+        "description": "Admin - Update data voucher berdasarkan ID."
+      }
+    },
+    {
+      "name": "Delete Voucher",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/vouchers/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "vouchers",
+            ":id"
+          ]
+        },
+        "description": "Admin - Menghapus voucher berdasarkan ID."
+      }
+    }
+  ]
+}

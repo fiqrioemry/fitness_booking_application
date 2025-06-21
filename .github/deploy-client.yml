@@ -1,0 +1,46 @@
+name: Deploy Frontend to Shared Hosting
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "client/**"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        working-directory: ./client
+        run: npm ci
+
+      - name: Generate .env file
+        working-directory: ./client
+        run: |
+          echo "VITE_API_SERVICES=${{ secrets.VITE_API_SERVICES }}" >> .env
+          echo "VITE_MIDTRANS_PUBLIC_KEY=${{ secrets.VITE_MIDTRANS_PUBLIC_KEY }}" >> .env
+          echo "VITE_MIDTRANS_URL=${{ secrets.VITE_MIDTRANS_URL }}" >> .env
+          echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}" >> .env
+          echo "VITE_API_KEY=${{ secrets.VITE_API_KEY }}" >> .env
+
+      - name: Build project
+        working-directory: ./client
+        run: npm run build
+
+      - name: Deploy to FTP server
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: client/dist/
+          server-dir: /public_html/sweatup/

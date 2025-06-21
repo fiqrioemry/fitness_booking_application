@@ -1,0 +1,80 @@
+{
+  "info": {
+    "name": "Fitness Booking - Dashboard API",
+    "_postman_id": "44556677-bbbb-cccc-dddd-334455667788",
+    "description": "Postman collection to test Admin Dashboard endpoints for summary and revenue.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Dashboard Summary",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/dashboard/summary",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "dashboard",
+            "summary"
+          ]
+        },
+        "description": "Admin - Mendapatkan ringkasan data total user, kelas, booking, dan lainnya."
+      },
+      "response": [
+        {
+          "name": "200 OK - Success",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"totalUsers\": 100,\n  \"totalInstructors\": 10,\n  \"totalClasses\": 25,\n  \"totalBookings\": 300,\n  \"totalPayments\": 250,\n  \"totalRevenue\": 50000000,\n  \"activePackages\": 12,\n  \"totalAttendance\": 270,\n  \"absentAttendance\": 20,\n  \"attendedAttendance\": 250\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Revenue Stats",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/dashboard/revenue?range=daily",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "dashboard",
+            "revenue"
+          ],
+          "query": [
+            {
+              "key": "range",
+              "value": "daily"
+            }
+          ]
+        },
+        "description": "Admin - Mendapatkan statistik revenue berdasarkan range (daily, monthly, yearly)."
+      },
+      "response": [
+        {
+          "name": "200 OK - Success",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"range\": \"daily\",\n  \"totalRevenue\": 2000000,\n  \"revenueSeries\": [\n    {\n      \"date\": \"2025-06-01\",\n      \"total\": 500000\n    },\n    {\n      \"date\": \"2025-06-02\",\n      \"total\": 750000\n    },\n    {\n      \"date\": \"2025-06-03\",\n      \"total\": 750000\n    }\n  ]\n}"
+        }
+      ]
+    }
+  ]
+}

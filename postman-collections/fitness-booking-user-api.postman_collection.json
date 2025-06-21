@@ -1,0 +1,172 @@
+{
+  "info": {
+    "name": "Fitness Booking - User API",
+    "_postman_id": "99887766-aabb-ccdd-eeff-112233445566",
+    "description": "Postman collection to test User profile and admin user management endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get My Profile",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/users/me",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "users",
+            "me"
+          ]
+        },
+        "description": "Customer/Instructor - Mendapatkan data profil user saat ini."
+      }
+    },
+    {
+      "name": "Update My Profile",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/users/me",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "users",
+            "me"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullname\": \"Ahmad Fiqri\",\n  \"birthday\": \"1994-08-17\",\n  \"gender\": \"male\",\n  \"phone\": \"081234567890\",\n  \"bio\": \"Saya adalah peserta aktif kelas yoga.\"\n}"
+        },
+        "description": "Customer/Instructor - Memperbarui data profil user."
+      }
+    },
+    {
+      "name": "Update Avatar",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/users/me/avatar",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "users",
+            "me",
+            "avatar"
+          ]
+        },
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "avatar",
+              "type": "file"
+            }
+          ]
+        },
+        "description": "Customer/Instructor - Mengunggah avatar profil baru."
+      }
+    },
+    {
+      "name": "Get All Users (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/users",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "users"
+          ]
+        },
+        "description": "Admin - Mendapatkan semua user dengan filter, sort, dan pagination."
+      }
+    },
+    {
+      "name": "Get User Detail (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/users/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "users",
+            ":id"
+          ]
+        },
+        "description": "Admin - Mendapatkan detail 1 user berdasarkan ID."
+      }
+    },
+    {
+      "name": "Get User Stats (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/users/stats",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "users",
+            "stats"
+          ]
+        },
+        "description": "Admin - Mendapatkan statistik total user."
+      }
+    }
+  ]
+}

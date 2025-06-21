@@ -1,0 +1,158 @@
+{
+  "info": {
+    "name": "Fitness Booking - Category API",
+    "_postman_id": "22334455-cccc-dddd-eeee-998877665544",
+    "description": "Postman collection to test Category endpoints with public and admin routes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Categories",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/categories",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "categories"
+          ]
+        },
+        "description": "Public - Mengambil seluruh daftar kategori aktif."
+      },
+      "response": [
+        {
+          "name": "200 OK - Success",
+          "status": "OK",
+          "code": 200,
+          "body": "[\n  {\n    \"id\": \"cat-uuid-1\",\n    \"name\": \"Fitness\"\n  },\n  {\n    \"id\": \"cat-uuid-2\",\n    \"name\": \"Yoga\"\n  }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Get Category by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/categories/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "categories",
+            ":id"
+          ]
+        },
+        "description": "Public - Mengambil detail kategori berdasarkan ID."
+      },
+      "response": [
+        {
+          "name": "200 OK - Success",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"id\": \"cat-uuid-1\",\n  \"name\": \"Fitness\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Create Category",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/categories",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "categories"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Strength Training\"\n}"
+        },
+        "description": "Admin - Menambahkan kategori baru."
+      }
+    },
+    {
+      "name": "Update Category",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/categories/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "categories",
+            ":id"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Updated Category Name\"\n}"
+        },
+        "description": "Admin - Memperbarui nama kategori berdasarkan ID."
+      }
+    },
+    {
+      "name": "Delete Category",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/categories/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "categories",
+            ":id"
+          ]
+        },
+        "description": "Owner - Menghapus kategori berdasarkan ID."
+      }
+    }
+  ]
+}

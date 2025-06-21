@@ -1,0 +1,158 @@
+{
+  "info": {
+    "name": "Fitness Booking - Location API",
+    "_postman_id": "77889900-bbbb-cccc-dddd-667788990011",
+    "description": "Postman collection to test Location endpoints (public & admin).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Locations",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/locations",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "locations"
+          ]
+        },
+        "description": "Public - Mengambil daftar semua lokasi studio atau kelas."
+      },
+      "response": [
+        {
+          "name": "200 OK - Success",
+          "status": "OK",
+          "code": 200,
+          "body": "[\n  {\n    \"id\": \"loc-uuid-1\",\n    \"name\": \"Studio A\",\n    \"address\": \"Jl. Sudirman No. 1, Jakarta\",\n    \"geoLocation\": \"-6.200000,106.816666\"\n  }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Get Location by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/locations/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "locations",
+            ":id"
+          ]
+        },
+        "description": "Public - Mendapatkan detail lokasi berdasarkan ID."
+      },
+      "response": [
+        {
+          "name": "200 OK - Success",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"id\": \"loc-uuid-1\",\n  \"name\": \"Studio A\",\n  \"address\": \"Jl. Sudirman No. 1, Jakarta\",\n  \"geoLocation\": \"-6.200000,106.816666\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Create Location",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/locations",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "locations"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Studio B\",\n  \"address\": \"Jl. Gatot Subroto No. 12, Jakarta\",\n  \"geoLocation\": \"-6.210000,106.820000\"\n}"
+        },
+        "description": "Admin - Menambahkan lokasi baru."
+      }
+    },
+    {
+      "name": "Update Location",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/locations/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "locations",
+            ":id"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Updated Studio B\",\n  \"address\": \"Jl. Gatot Subroto No. 12, Jakarta Selatan\",\n  \"geoLocation\": \"-6.210500,106.820500\"\n}"
+        },
+        "description": "Admin - Mengubah data lokasi berdasarkan ID."
+      }
+    },
+    {
+      "name": "Delete Location",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/locations/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "locations",
+            ":id"
+          ]
+        },
+        "description": "Admin - Menghapus lokasi berdasarkan ID."
+      }
+    }
+  ]
+}

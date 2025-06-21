@@ -1,0 +1,141 @@
+{
+  "info": {
+    "name": "Fitness Booking - Notification API",
+    "_postman_id": "88990011-abcd-efgh-ijkl-778899001122",
+    "description": "Postman collection to test Notification endpoints for customers, instructors, and admin.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Notification Settings",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/notifications/settings",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "notifications",
+            "settings"
+          ]
+        },
+        "description": "Customer/Instructor - Mendapatkan pengaturan notifikasi pengguna."
+      }
+    },
+    {
+      "name": "Update Notification Setting",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/notifications/settings",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "notifications",
+            "settings"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"typeId\": \"notif-type-uuid\",\n  \"channel\": \"email\",\n  \"enabled\": true\n}"
+        },
+        "description": "Customer/Instructor - Memperbarui pengaturan notifikasi (email/browser)."
+      }
+    },
+    {
+      "name": "Get All Notifications",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/notifications",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "notifications"
+          ]
+        },
+        "description": "Customer/Instructor - Melihat semua notifikasi (inbox)."
+      }
+    },
+    {
+      "name": "Mark All Notifications as Read",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/notifications/read",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "notifications",
+            "read"
+          ]
+        },
+        "description": "Customer/Instructor - Menandai seluruh notifikasi sebagai dibaca."
+      }
+    },
+    {
+      "name": "Admin Broadcast Notification",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/notifications/broadcast",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "notifications",
+            "broadcast"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"typeCode\": \"promo\",\n  \"title\": \"Promo Akhir Tahun!\",\n  \"message\": \"Dapatkan diskon hingga 50% untuk semua paket!\"\n}"
+        },
+        "description": "Admin - Mengirimkan notifikasi broadcast ke semua user."
+      }
+    }
+  ]
+}

@@ -1,0 +1,162 @@
+{
+  "info": {
+    "name": "Fitness Booking - Payment API",
+    "_postman_id": "aabbccdd-1122-3344-5566-77889900abcd",
+    "description": "Postman collection to test Payment endpoints including webhook, customer, and admin operations.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Stripe Webhook Notification",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/payments/stripe/notifications",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "payments",
+            "stripe",
+            "notifications"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"evt_test_webhook\",\n  \"type\": \"checkout.session.completed\",\n  \"data\": {\n    \"object\": {\n      \"id\": \"cs_test_123\"\n    }\n  }\n}"
+        },
+        "description": "Webhook - Menerima notifikasi dari Stripe saat pembayaran berhasil."
+      }
+    },
+    {
+      "name": "Create Payment (Customer)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/payments",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "payments"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"packageId\": \"pkg-uuid-123\",\n  \"voucherCode\": \"PROMO123\"\n}"
+        },
+        "description": "Customer - Membuat pembayaran baru untuk paket yang dipilih."
+      }
+    },
+    {
+      "name": "Get My Transactions",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/payments/me",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "payments",
+            "me"
+          ]
+        },
+        "description": "Customer - Melihat semua riwayat pembayaran milik user."
+      }
+    },
+    {
+      "name": "Get My Payment Detail",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/payments/me/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "payments",
+            "me",
+            ":id"
+          ]
+        },
+        "description": "Customer - Mendapatkan detail 1 transaksi pembayaran."
+      }
+    },
+    {
+      "name": "Get All Payments (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/payments",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "payments"
+          ]
+        },
+        "description": "Admin - Mendapatkan semua pembayaran dari seluruh user (dengan filter & sort)."
+      }
+    },
+    {
+      "name": "Get Payment Detail (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/payments/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "payments",
+            ":id"
+          ]
+        },
+        "description": "Admin - Mendapatkan detail 1 transaksi pembayaran dari user."
+      }
+    }
+  ]
+}

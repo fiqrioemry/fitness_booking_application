@@ -1,0 +1,166 @@
+{
+  "info": {
+    "name": "Fitness Booking - Subcategory API",
+    "_postman_id": "ddeeff00-1122-3344-5566-778899aabbcc",
+    "description": "Postman collection to test Subcategory endpoints (public & admin).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Subcategories",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/subcategories",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "subcategories"
+          ]
+        },
+        "description": "Public - Mendapatkan semua subkategori yang tersedia."
+      }
+    },
+    {
+      "name": "Get Subcategory by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/subcategories/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "subcategories",
+            ":id"
+          ]
+        },
+        "description": "Public - Mendapatkan detail subkategori berdasarkan ID."
+      }
+    },
+    {
+      "name": "Get Subcategories by Category ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/subcategories/category/:categoryId",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "subcategories",
+            "category",
+            ":categoryId"
+          ]
+        },
+        "description": "Public - Mendapatkan semua subkategori dari suatu kategori."
+      }
+    },
+    {
+      "name": "Create Subcategory",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/subcategories",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "subcategories"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Pilates\",\n  \"categoryId\": \"cat-uuid-1\"\n}"
+        },
+        "description": "Admin - Menambahkan subkategori baru."
+      }
+    },
+    {
+      "name": "Update Subcategory",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/subcategories/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "subcategories",
+            ":id"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Updated Pilates\",\n  \"categoryId\": \"cat-uuid-1\"\n}"
+        },
+        "description": "Admin - Memperbarui subkategori berdasarkan ID."
+      }
+    },
+    {
+      "name": "Delete Subcategory",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/subcategories/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "subcategories",
+            ":id"
+          ]
+        },
+        "description": "Admin - Menghapus subkategori berdasarkan ID."
+      }
+    }
+  ]
+}

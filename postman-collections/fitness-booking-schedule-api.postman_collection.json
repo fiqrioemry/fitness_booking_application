@@ -1,0 +1,278 @@
+{
+  "info": {
+    "name": "Fitness Booking - Class Schedule API",
+    "_postman_id": "ccddeeff-2345-6789-aaaa-bbccddeeff00",
+    "description": "Postman collection to test Class Schedule endpoints (public, customer, instructor, and admin).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Class Schedules",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/schedules",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "schedules"
+          ]
+        },
+        "description": "Public - Mengambil semua jadwal kelas tersedia."
+      }
+    },
+    {
+      "name": "Get My Schedule Status",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/schedules/status",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "schedules",
+            "status"
+          ]
+        },
+        "description": "Customer - Mendapatkan semua jadwal kelas dengan status booking."
+      }
+    },
+    {
+      "name": "Get Schedule By ID (Customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/schedules/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "schedules",
+            ":id"
+          ]
+        },
+        "description": "Customer - Mendapatkan detail dari 1 jadwal kelas."
+      }
+    },
+    {
+      "name": "Get Instructor Schedules",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/instructor/schedules",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "instructor",
+            "schedules"
+          ]
+        },
+        "description": "Instructor - Melihat semua jadwal mengajar."
+      }
+    },
+    {
+      "name": "Open Class Schedule",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/instructor/schedules/:id/open",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "instructor",
+            "schedules",
+            ":id",
+            "open"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"verificationCode\": \"123456\",\n  \"zoomLink\": \"https://zoom.us/class-001\"\n}"
+        },
+        "description": "Instructor - Membuka kelas agar bisa diikuti peserta."
+      }
+    },
+    {
+      "name": "Get Class Attendances",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/instructor/schedules/:id/attendance",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "instructor",
+            "schedules",
+            ":id",
+            "attendance"
+          ]
+        },
+        "description": "Instructor - Melihat data kehadiran peserta pada kelas tertentu."
+      }
+    },
+    {
+      "name": "Create Class Schedule",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/schedules",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "schedules"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"classId\": \"class-uuid\",\n  \"instructorId\": \"instr-uuid\",\n  \"date\": \"2025-06-10\",\n  \"startHour\": 10,\n  \"startMinute\": 0,\n  \"capacity\": 15,\n  \"color\": \"#FF0000\"\n}"
+        },
+        "description": "Admin - Menambahkan jadwal kelas (non-recurring)."
+      }
+    },
+    {
+      "name": "Create Recurring Class Schedule",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/schedules/recurring",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "schedules",
+            "recurring"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"classId\": \"class-uuid\",\n  \"instructorId\": \"instr-uuid\",\n  \"startHour\": 9,\n  \"startMinute\": 0,\n  \"dayOfWeeks\": [\n    1,\n    3,\n    5\n  ],\n  \"capacity\": 20,\n  \"color\": \"#00FF00\",\n  \"endDate\": \"2025-08-31\"\n}"
+        },
+        "description": "Admin - Menambahkan jadwal berulang mingguan."
+      }
+    },
+    {
+      "name": "Update Class Schedule",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/schedules/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "schedules",
+            ":id"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"classId\": \"class-uuid\",\n  \"instructorId\": \"instr-uuid\",\n  \"date\": \"2025-07-01\",\n  \"startHour\": 11,\n  \"startMinute\": 30,\n  \"capacity\": 10,\n  \"color\": \"#0000FF\"\n}"
+        },
+        "description": "Admin - Mengubah data jadwal kelas."
+      }
+    },
+    {
+      "name": "Delete Class Schedule",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/schedules/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "schedules",
+            ":id"
+          ]
+        },
+        "description": "Admin - Menghapus jadwal kelas berdasarkan ID."
+      }
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "info": {
+    "name": "Fitness Booking - Auth API",
+    "_postman_id": "bbcc1122-ddee-3344-5566-778899aaff00",
+    "description": "Postman collection to test Authentication endpoints (login, register, OTP, token, Google OAuth).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/auth/register",
+          "host": ["{{BASEURL}}"],
+          "path": ["auth", "register"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"fullname\": \"Ahmad Fiqri\"\n}"
+        },
+        "description": "Register user baru dan kirim OTP ke email."
+      }
+    },
+    {
+      "name": "Send OTP",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/auth/send-otp",
+          "host": ["{{BASEURL}}"],
+          "path": ["auth", "send-otp"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user@example.com\"\n}"
+        },
+        "description": "Kirim ulang OTP ke email yang belum diverifikasi."
+      }
+    },
+    {
+      "name": "Verify OTP",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/auth/verify-otp",
+          "host": ["{{BASEURL}}"],
+          "path": ["auth", "verify-otp"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"123456\"\n}"
+        },
+        "description": "Verifikasi OTP dan aktifkan akun."
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/auth/login",
+          "host": ["{{BASEURL}}"],
+          "path": ["auth", "login"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+        },
+        "description": "Login dan mendapatkan token akses & refresh."
+      }
+    },
+    {
+      "name": "Refresh Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/auth/refresh-token",
+          "host": ["{{BASEURL}}"],
+          "path": ["auth", "refresh-token"]
+        },
+        "description": "Mendapatkan access token baru dengan refresh token (via cookie)."
+      }
+    },
+    {
+      "name": "Logout",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/auth/logout",
+          "host": ["{{BASEURL}}"],
+          "path": ["auth", "logout"]
+        },
+        "description": "Logout user dan menghapus cookie token."
+      }
+    },
+    {
+      "name": "Get Authenticated User",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/auth/me",
+          "host": ["{{BASEURL}}"],
+          "path": ["auth", "me"]
+        },
+        "description": "Mendapatkan profil user yang sedang login."
+      }
+    },
+    {
+      "name": "Google OAuth Redirect",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{BASEURL}}/auth/google",
+          "host": ["{{BASEURL}}"],
+          "path": ["auth", "google"]
+        },
+        "description": "Redirect ke halaman login Google."
+      }
+    },
+    {
+      "name": "Google OAuth Callback",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{BASEURL}}/auth/google/callback",
+          "host": ["{{BASEURL}}"],
+          "path": ["auth", "google", "callback"]
+        },
+        "description": "Callback dari Google OAuth setelah user login."
+      }
+    }
+  ]
+}

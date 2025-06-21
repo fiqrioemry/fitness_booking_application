@@ -1,0 +1,244 @@
+{
+  "info": {
+    "name": "Fitness Booking - Booking API",
+    "_postman_id": "12345678-aaaa-bbbb-cccc-1234567890ab",
+    "description": "Postman collection to test Booking endpoints with required headers and sample bodies.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Booking",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/bookings",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "bookings"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"packageId\": \"example-package-id\",\n  \"scheduleId\": \"example-schedule-id\"\n}"
+        },
+        "description": "Customer melakukan booking kelas dengan memasukkan packageId dan scheduleId."
+      }
+    },
+    {
+      "name": "Get My Bookings",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/bookings",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "bookings"
+          ]
+        },
+        "description": "Customer melihat daftar semua booking yang sudah dilakukan."
+      },
+      "response": [
+        {
+          "name": "Get My Bookings - Example Response",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{x-api-key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASEURL}}/bookings",
+              "host": [
+                "{{BASEURL}}"
+              ],
+              "path": [
+                "bookings"
+              ]
+            },
+            "description": "Customer melihat daftar semua booking yang sudah dilakukan."
+          },
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"bookings\": [\n    {\n      \"id\": \"booking-uuid-1\",\n      \"bookingStatus\": \"booked\",\n      \"classId\": \"class-uuid\",\n      \"className\": \"Morning Yoga\",\n      \"classImage\": \"https://cdn.example.com/images/yoga.png\",\n      \"instructorName\": \"Dewi Ananda\",\n      \"duration\": 60,\n      \"date\": \"2025-06-10\",\n      \"startHour\": 9,\n      \"startMinute\": 0,\n      \"location\": \"Studio A, Jakarta\",\n      \"bookedAt\": \"2025-06-05T10:45:00Z\",\n      \"isOpen\": true\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"limit\": 10\n}"
+        },
+        {
+          "name": "401 Unauthorized",
+          "status": "Unauthorized",
+          "code": 401,
+          "body": "{\n  \"message\": \"unauthorized\"\n}"
+        },
+        {
+          "name": "403 Forbidden",
+          "status": "Forbidden",
+          "code": 403,
+          "body": "{\n  \"message\": \"forbidden\"\n}"
+        },
+        {
+          "name": "404 Not Found",
+          "status": "Not Found",
+          "code": 404,
+          "body": "{\n  \"message\": \"booking not found\"\n}"
+        },
+        {
+          "name": "500 Internal Server Error",
+          "status": "Internal Server Error",
+          "code": 500,
+          "body": "{\n  \"message\": \"internal server error\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Booking Detail",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/bookings/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "bookings",
+            ":id"
+          ]
+        },
+        "description": "Customer melihat detail dari 1 booking kelas yang telah dilakukan."
+      },
+      "response": [
+        {
+          "name": "Get Booking Detail - Example Response",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{x-api-key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASEURL}}/bookings/:id",
+              "host": [
+                "{{BASEURL}}"
+              ],
+              "path": [
+                "bookings",
+                ":id"
+              ]
+            },
+            "description": "Customer melihat detail dari 1 booking kelas yang telah dilakukan."
+          },
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"id\": \"booking-uuid-1\",\n  \"scheduleId\": \"schedule-uuid\",\n  \"classId\": \"class-uuid\",\n  \"className\": \"Morning Yoga\",\n  \"classImage\": \"https://cdn.example.com/images/yoga.png\",\n  \"instructorName\": \"Dewi Ananda\",\n  \"date\": \"2025-06-10\",\n  \"startHour\": 9,\n  \"startMinute\": 0,\n  \"duration\": 60,\n  \"checkedIn\": true,\n  \"checkedOut\": false,\n  \"zoomLink\": \"https://zoom.us/123456789\",\n  \"attendanceStatus\": \"attended\",\n  \"isReviewed\": false,\n  \"isOpen\": true,\n  \"checkedAt\": \"2025-06-10T08:50:00Z\",\n  \"verifiedAt\": \"2025-06-10T10:00:00Z\"\n}"
+        },
+        {
+          "name": "401 Unauthorized",
+          "status": "Unauthorized",
+          "code": 401,
+          "body": "{\n  \"message\": \"unauthorized\"\n}"
+        },
+        {
+          "name": "403 Forbidden",
+          "status": "Forbidden",
+          "code": 403,
+          "body": "{\n  \"message\": \"forbidden\"\n}"
+        },
+        {
+          "name": "404 Not Found",
+          "status": "Not Found",
+          "code": 404,
+          "body": "{\n  \"message\": \"booking not found\"\n}"
+        },
+        {
+          "name": "500 Internal Server Error",
+          "status": "Internal Server Error",
+          "code": 500,
+          "body": "{\n  \"message\": \"internal server error\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Check-In to Class",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/bookings/:id/check-in",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "bookings",
+            ":id",
+            "check-in"
+          ]
+        },
+        "description": "Customer melakukan check-in ke kelas yang telah dibooking."
+      }
+    },
+    {
+      "name": "Check-Out from Class",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/bookings/:id/check-out",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "bookings",
+            ":id",
+            "check-out"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"verificationCode\": \"123456\"\n}"
+        },
+        "description": "Customer melakukan check-out dari kelas menggunakan kode verifikasi yang diberikan instruktur."
+      }
+    }
+  ]
+}

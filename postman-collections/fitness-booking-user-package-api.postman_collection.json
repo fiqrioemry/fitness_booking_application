@@ -1,0 +1,56 @@
+{
+  "info": {
+    "name": "Fitness Booking - User Package API",
+    "_postman_id": "aa112233-bbcc-ddee-ff00-112233445566",
+    "description": "Postman collection to test User Package endpoints (customer only).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All User Packages",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/user-packages",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "user-packages"
+          ]
+        },
+        "description": "Customer - Mendapatkan semua paket yang dimiliki oleh user saat ini."
+      }
+    },
+    {
+      "name": "Get User Packages by Class ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/user-packages/class/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "user-packages",
+            "class",
+            ":id"
+          ]
+        },
+        "description": "Customer - Mendapatkan semua paket user yang relevan dengan kelas tertentu."
+      }
+    }
+  ]
+}

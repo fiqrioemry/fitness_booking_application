@@ -1,0 +1,222 @@
+{
+  "info": {
+    "name": "Fitness Booking - Package API",
+    "_postman_id": "99001122-abcd-efef-abcd-123456789abc",
+    "description": "Postman collection to test Package endpoints (public & admin).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Packages",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/packages",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "packages"
+          ]
+        },
+        "description": "Public - Mendapatkan daftar semua paket yang tersedia."
+      }
+    },
+    {
+      "name": "Get Package by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/packages/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "packages",
+            ":id"
+          ]
+        },
+        "description": "Public - Mendapatkan detail paket berdasarkan ID."
+      }
+    },
+    {
+      "name": "Create Package",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/packages",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "packages"
+          ]
+        },
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "name",
+              "value": "Gold Plan",
+              "type": "text"
+            },
+            {
+              "key": "description",
+              "value": "Unlimited access",
+              "type": "text"
+            },
+            {
+              "key": "price",
+              "value": "250000",
+              "type": "text"
+            },
+            {
+              "key": "credit",
+              "value": "10",
+              "type": "text"
+            },
+            {
+              "key": "expired",
+              "value": "30",
+              "type": "text"
+            },
+            {
+              "key": "discount",
+              "value": "10",
+              "type": "text"
+            },
+            {
+              "key": "classIds",
+              "value": "class-uuid-1",
+              "type": "text"
+            },
+            {
+              "key": "image",
+              "type": "file"
+            }
+          ]
+        },
+        "description": "Admin - Membuat paket baru dengan upload gambar dan input form data."
+      }
+    },
+    {
+      "name": "Update Package",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/packages/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "packages",
+            ":id"
+          ]
+        },
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "name",
+              "value": "Gold Plan Updated",
+              "type": "text"
+            },
+            {
+              "key": "description",
+              "value": "Updated access",
+              "type": "text"
+            },
+            {
+              "key": "price",
+              "value": "300000",
+              "type": "text"
+            },
+            {
+              "key": "credit",
+              "value": "12",
+              "type": "text"
+            },
+            {
+              "key": "expired",
+              "value": "60",
+              "type": "text"
+            },
+            {
+              "key": "discount",
+              "value": "15",
+              "type": "text"
+            },
+            {
+              "key": "classIds",
+              "value": "class-uuid-1",
+              "type": "text"
+            },
+            {
+              "key": "image",
+              "type": "file"
+            }
+          ]
+        },
+        "description": "Admin - Mengupdate data paket berdasarkan ID."
+      }
+    },
+    {
+      "name": "Delete Package",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/packages/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "packages",
+            ":id"
+          ]
+        },
+        "description": "Admin - Menghapus paket berdasarkan ID."
+      }
+    }
+  ]
+}

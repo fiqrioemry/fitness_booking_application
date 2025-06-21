@@ -1,0 +1,31 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "server/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{secrets.VPS_PRIVATE_KEY}}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p ${{secrets.VPS_PORT}} ${{secrets.VPS_HOST}} >> ~/.ssh/known_hosts
+
+      - name: Deploy via SSH
+        run: |
+          ssh -p ${{secrets.VPS_PORT}} -i ~/.ssh/id_ed25519 ${{secrets.VPS_USER}}@${{secrets.VPS_HOST}} << 'EOF'
+            cd /home/project/sweatup-app-server/server
+            git pull origin main
+            ./deploy.sh
+          EOF

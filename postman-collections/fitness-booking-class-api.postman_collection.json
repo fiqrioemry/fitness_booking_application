@@ -1,0 +1,286 @@
+{
+  "info": {
+    "name": "Fitness Booking - Class API",
+    "_postman_id": "33445566-aaaa-bbbb-cccc-123456789abc",
+    "description": "Postman collection to test Class endpoints with public and admin routes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Classes",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/classes",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "classes"
+          ]
+        },
+        "description": "Public - Mengambil daftar semua kelas (dengan filter, sort, pagination jika tersedia)."
+      },
+      "response": [
+        {
+          "name": "200 OK - Success",
+          "status": "OK",
+          "code": 200,
+          "body": "[\n  {\n    \"id\": \"class-uuid-1\",\n    \"title\": \"Morning Yoga\",\n    \"image\": \"https://cdn.example.com/images/yoga.png\",\n    \"isActive\": true,\n    \"duration\": 60,\n    \"description\": \"A beginner-friendly yoga session.\",\n    \"additional\": [\n      \"mat\",\n      \"towel\"\n    ],\n    \"typeId\": \"type-id\",\n    \"levelId\": \"level-id\",\n    \"locationId\": \"location-id\",\n    \"categoryId\": \"cat-id\",\n    \"subcategoryId\": \"subcat-id\",\n    \"createdAt\": \"2025-06-01T10:00:00Z\"\n  }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Get Class by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/classes/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "classes",
+            ":id"
+          ]
+        },
+        "description": "Public - Mendapatkan detail 1 kelas berdasarkan ID."
+      },
+      "response": [
+        {
+          "name": "200 OK - Success",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"id\": \"class-uuid-1\",\n  \"title\": \"Morning Yoga\",\n  \"image\": \"https://cdn.example.com/images/yoga.png\",\n  \"isActive\": true,\n  \"duration\": 60,\n  \"description\": \"A beginner-friendly yoga session.\",\n  \"additional\": [\n    \"mat\",\n    \"towel\"\n  ],\n  \"type\": \"Indoor\",\n  \"level\": \"Beginner\",\n  \"location\": \"Studio A\",\n  \"category\": \"Fitness\",\n  \"subcategory\": \"Yoga\",\n  \"galleries\": [],\n  \"createdAt\": \"2025-06-01T10:00:00Z\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Create Class",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/classes",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "classes"
+          ]
+        },
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "title",
+              "value": "Yoga for Beginners",
+              "type": "text"
+            },
+            {
+              "key": "description",
+              "value": "Gentle yoga class",
+              "type": "text"
+            },
+            {
+              "key": "typeId",
+              "value": "type-uuid",
+              "type": "text"
+            },
+            {
+              "key": "levelId",
+              "value": "level-uuid",
+              "type": "text"
+            },
+            {
+              "key": "locationId",
+              "value": "location-uuid",
+              "type": "text"
+            },
+            {
+              "key": "categoryId",
+              "value": "category-uuid",
+              "type": "text"
+            },
+            {
+              "key": "subcategoryId",
+              "value": "subcategory-uuid",
+              "type": "text"
+            },
+            {
+              "key": "duration",
+              "value": "60",
+              "type": "text"
+            },
+            {
+              "key": "image",
+              "type": "file"
+            }
+          ]
+        },
+        "description": "Admin - Membuat kelas baru (menggunakan multipart/form-data)."
+      }
+    },
+    {
+      "name": "Update Class",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/classes/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "classes",
+            ":id"
+          ]
+        },
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "title",
+              "value": "Updated Yoga",
+              "type": "text"
+            },
+            {
+              "key": "description",
+              "value": "Updated Description",
+              "type": "text"
+            },
+            {
+              "key": "typeId",
+              "value": "type-uuid",
+              "type": "text"
+            },
+            {
+              "key": "levelId",
+              "value": "level-uuid",
+              "type": "text"
+            },
+            {
+              "key": "locationId",
+              "value": "location-uuid",
+              "type": "text"
+            },
+            {
+              "key": "categoryId",
+              "value": "category-uuid",
+              "type": "text"
+            },
+            {
+              "key": "subcategoryId",
+              "value": "subcategory-uuid",
+              "type": "text"
+            },
+            {
+              "key": "duration",
+              "value": "60",
+              "type": "text"
+            },
+            {
+              "key": "image",
+              "type": "file"
+            }
+          ]
+        },
+        "description": "Admin - Memperbarui kelas berdasarkan ID (multipart)."
+      }
+    },
+    {
+      "name": "Upload Class Gallery",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/classes/:id/gallery",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "classes",
+            ":id",
+            "gallery"
+          ]
+        },
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "images",
+              "type": "file"
+            }
+          ]
+        },
+        "description": "Admin - Upload gambar tambahan ke galeri kelas."
+      }
+    },
+    {
+      "name": "Delete Class",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/classes/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "classes",
+            ":id"
+          ]
+        },
+        "description": "Admin - Menghapus kelas berdasarkan ID."
+      }
+    }
+  ]
+}

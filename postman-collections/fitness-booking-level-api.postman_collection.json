@@ -1,0 +1,158 @@
+{
+  "info": {
+    "name": "Fitness Booking - Level API",
+    "_postman_id": "66778899-aaaa-bbbb-cccc-556677889900",
+    "description": "Postman collection to test Level endpoints (public & admin).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Levels",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/levels",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "levels"
+          ]
+        },
+        "description": "Public - Mengambil daftar semua level instruktur atau kelas."
+      },
+      "response": [
+        {
+          "name": "200 OK - Success",
+          "status": "OK",
+          "code": 200,
+          "body": "[\n  {\n    \"id\": \"lvl-uuid-1\",\n    \"name\": \"Beginner\"\n  },\n  {\n    \"id\": \"lvl-uuid-2\",\n    \"name\": \"Advanced\"\n  }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Get Level by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/levels/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "levels",
+            ":id"
+          ]
+        },
+        "description": "Public - Mendapatkan data level berdasarkan ID."
+      },
+      "response": [
+        {
+          "name": "200 OK - Success",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"id\": \"lvl-uuid-1\",\n  \"name\": \"Beginner\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Create Level",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/levels",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "levels"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Intermediate\"\n}"
+        },
+        "description": "Admin - Menambahkan level baru."
+      }
+    },
+    {
+      "name": "Update Level",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/levels/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "levels",
+            ":id"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Advanced Level\"\n}"
+        },
+        "description": "Admin - Mengubah data level berdasarkan ID."
+      }
+    },
+    {
+      "name": "Delete Level",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{x-api-key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{BASEURL}}/admin/levels/:id",
+          "host": [
+            "{{BASEURL}}"
+          ],
+          "path": [
+            "admin",
+            "levels",
+            ":id"
+          ]
+        },
+        "description": "Admin - Menghapus level berdasarkan ID."
+      }
+    }
+  ]
+}

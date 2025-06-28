@@ -72,10 +72,10 @@ To address this, I built a fullstack web application using Go (Gin) for the back
 
 - **Golang** (Gin Framework)
 - **GORM** (ORM for MySQL)
+- **Cloudinary** (File Storage)
 - **MySQL** (Main database)
 - **Redis** (Caching & token store)
 - **Stripe** (Payment gateway)
-- **RabbitMQ** (Event-driven notification)
 - **JWT Auth** (Access & Refresh Token)
 
 ### 6.3 Deployment

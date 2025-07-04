@@ -1,0 +1,30 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: fitness_app
+    expose:
+      - "5001"
+    env_file:
+      - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fitness.rule=Host(`sweatup-api.ahmadfiqrioemry.com`)"
+      - "traefik.http.services.fitness.loadbalancer.server.port=5001"
+      - "traefik.http.routers.fitness.entrypoints=websecure"
+      - "traefik.http.routers.fitness.tls.certresolver=letsencrypt"
+
+    healthcheck:
+      test:
+        ["CMD-SHELL", "wget -q --spider http://localhost:5001/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - shared-net
+
+networks:
+  shared-net:
+    external: true

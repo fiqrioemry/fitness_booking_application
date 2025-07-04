@@ -1,0 +1,226 @@
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 72 100% 60%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 70%;
+
+    --accent: 72 100% 60%;
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 25%;
+    --ring: 72 100% 60%;
+
+    --chart-1: 72 100% 60%;
+    --chart-2: 0 0% 100%;
+    --chart-3: 0 0% 50%;
+    --chart-4: 144 50% 50%;
+    --chart-5: 300 60% 60%;
+
+    --sidebar-background: 0 0% 5%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 72 100% 60%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 25%;
+    --sidebar-ring: 72 100% 60%;
+
+    --radius: 1rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground text-sm md:text-base;
+  }
+
+  h1 {
+    @apply text-2xl md:text-3xl font-bold uppercase;
+  }
+
+  h2 {
+    @apply text-xl md:text-2xl font-semibold capitalize;
+  }
+
+  h3 {
+    @apply text-lg md:text-xl font-semibold capitalize;
+  }
+
+  h4 {
+    @apply text-base md:text-lg font-medium capitalize;
+  }
+
+  h5 {
+    @apply text-xs md:text-sm font-medium capitalize;
+  }
+  h6 {
+    @apply text-xs text-destructive;
+  }
+}
+@layer base {
+  .text-subtitle {
+    @apply text-sm text-muted-foreground;
+  }
+
+  .text-highlight {
+    @apply text-sm font-medium text-primary;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-primary-foreground hover:opacity-90;
+  }
+
+  .btn-secondary {
+    @apply btn bg-secondary text-secondary-foreground hover:bg-muted;
+  }
+
+  .btn-danger {
+    @apply btn bg-destructive text-destructive-foreground hover:opacity-90;
+  }
+
+  .btn-outline {
+    @apply btn border border-border text-foreground hover:bg-muted;
+  }
+
+  .btn-disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+
+  .input {
+    @apply w-full px-3 py-3 text-base rounded-md bg-background border border-input placeholder:text-muted-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring;
+  }
+
+  .input-error {
+    @apply border-destructive focus:border-destructive focus:ring-destructive;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-foreground mb-1;
+  }
+
+  .error-message {
+    @apply text-destructive text-sm mt-1;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply badge bg-green-100 text-green-800;
+  }
+
+  .badge-warning {
+    @apply badge bg-yellow-100 text-yellow-800;
+  }
+
+  .badge-danger {
+    @apply badge bg-red-100 text-red-800;
+  }
+
+  .card {
+    @apply rounded-lg shadow-md border border-border bg-card p-4 text-card-foreground;
+  }
+
+  .card-hover {
+    @apply transition-transform hover:shadow-lg hover:-translate-y-1;
+  }
+
+  .skeleton {
+    @apply bg-muted animate-pulse rounded;
+  }
+
+  .section {
+    @apply max-w-7xl mx-auto w-full px-4 py-8 space-y-6;
+  }
+
+  .divider {
+    @apply border-t border-border my-6;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+::-webkit-scrollbar {
+  display: none;
+}
+
+.rbc-calendar {
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .rbc-time-view {
+    min-width: 700px;
+  }
+}
+
+.rbc-time-view,
+.rbc-timeslot-group,
+.rbc-day-slot,
+.rbc-time-slot,
+.rbc-time-header,
+.rbc-time-header-cell,
+.rbc-time-header-content,
+.rbc-time-content {
+  box-sizing: border-box !important;
+}
+
+/* Optional: rapikan event */
+.rbc-event {
+  padding: 2px 4px;
+  font-size: 12px;
+  border-radius: 4px;
+}
+.rbc-allday-cell {
+  display: none !important;
+}
+
+.rbc-today {
+  background-color: hsl(var(--primary) / 0.05) !important;
+  transition: background-color 0.3s ease;
+}
+
+[data-sonner-toast] {
+  width: auto !important;
+  max-width: 90vw;
+  white-space: normal;
+  word-break: break-word;
+}

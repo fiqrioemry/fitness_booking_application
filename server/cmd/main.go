@@ -4,11 +4,14 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"server/internal/bootstrap"
+
 	"server/internal/config"
 	"server/internal/cron"
+	"server/internal/handlers"
+	"server/internal/repositories"
 	"server/internal/routes"
 	"server/internal/seeders"
+	"server/internal/services"
 	"server/pkg/middleware"
 	"server/pkg/utils"
 	"time"
@@ -26,9 +29,9 @@ func main() {
 	seeders.ResetDatabase(db)
 
 	// ========== initialisasi layer ============
-	repo := bootstrap.InitRepositories(db)
-	s := bootstrap.InitServices(repo, db)
-	h := bootstrap.InitHandlers(s)
+	repo := repositories.InitRepositories(db)
+	s := services.InitServices(repo, db)
+	h := handlers.InitHandlers(s)
 
 	// ========== inisialisasi cron job =========
 	cronManager := cron.NewCronManager(s.PaymentService, s.TemplateService, s.NotificationService, s.BookingService)

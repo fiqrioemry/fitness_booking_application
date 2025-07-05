@@ -1,12 +1,12 @@
 package routes
 
 import (
-	"server/internal/bootstrap"
+	"server/internal/handlers"
 
 	"github.com/gin-gonic/gin"
 )
 
-func InitRoutes(r *gin.Engine, h *bootstrap.Handlers) {
+func InitRoutes(r *gin.Engine, h *handlers.Handlers) {
 	api := r.Group("/api/v1")
 
 	// ========= Authentication & User Management ========

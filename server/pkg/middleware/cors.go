@@ -10,7 +10,7 @@ import (
 func CORS() gin.HandlerFunc {
 	envOrigins := os.Getenv("ALLOWED_ORIGINS")
 	allowedOrigins := make(map[string]bool)
-	for _, origin := range strings.Split(envOrigins, ",") {
+	for origin := range strings.SplitSeq(envOrigins, ",") {
 		allowedOrigins[strings.TrimSpace(origin)] = true
 	}
 

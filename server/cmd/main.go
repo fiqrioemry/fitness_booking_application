@@ -50,7 +50,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{
 			"status":    "success",
 			"message":   "Welcome to sweatup API",
-			"version":   "1.4.0",
+			"version":   "1.5.0",
 			"ip":        c.ClientIP(),
 			"userAgent": c.GetHeader("User-Agent"),
 		})
@@ -59,6 +59,7 @@ func main() {
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status":    "healthy",
+			"message":   "Server is running smoothly",
 			"timestamp": utils.NowISO(),
 			"uptime":    utils.GetUptime(),
 		})

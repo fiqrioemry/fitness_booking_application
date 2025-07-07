@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { useSelectOptions } from "@/hooks/useSelectOptions";
 
 export const SearchFilterSelection = ({ paramKey, label, data }) => {
-  const { data: options = [], isLoading } = useSelectOptions(data);
+  const { data: options, isLoading, isError } = useSelectOptions(data);
   const [searchParams, setSearchParams] = useSearchParams();
   const selected = searchParams.get(paramKey) || "";
 
@@ -18,6 +18,10 @@ export const SearchFilterSelection = ({ paramKey, label, data }) => {
   };
 
   if (isLoading) return <Skeleton className="h-9 rounded-md" />;
+  if (isError)
+    return (
+      <div className="text-sm text-muted-foreground">Error loading options</div>
+    );
 
   return (
     <div className="space-y-1">
@@ -33,11 +37,15 @@ export const SearchFilterSelection = ({ paramKey, label, data }) => {
         className="input bg-background text-foreground border border-input focus:ring focus:ring-ring disabled:bg-muted disabled:text-muted-foreground"
       >
         <option value="">All</option>
-        {options.map((opt, idx) => (
-          <option key={opt.id || `option-${idx}`} value={opt.id}>
-            {opt.name}
-          </option>
-        ))}
+        {options && Array.isArray(options) && options.length > 0 ? (
+          options.map((opt, idx) => (
+            <option key={opt?.id || `option-${idx}`} value={opt?.id || ""}>
+              {opt?.name || "Unknown"}
+            </option>
+          ))
+        ) : (
+          <option disabled>No options available</option>
+        )}
       </select>
     </div>
   );

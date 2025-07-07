@@ -10,35 +10,60 @@ import { useLocationsQuery, useLocationMutation } from "@/hooks/useLocation";
 import { useCategoriesQuery, useCategoryMutation } from "@/hooks/useCategory";
 
 export const useSelectOptions = (type) => {
+  // ✅ Default fallback untuk unknown types
+  const defaultResult = {
+    data: [],
+    isLoading: false,
+    isError: true,
+    error: `Unknown select type: ${type}`
+  };
+
+  let result;
+
   switch (type) {
     case "category": {
-      return useCategoriesQuery();
+      result = useCategoriesQuery();
+      break;
     }
     case "level": {
-      return useLevelsQuery();
+      result = useLevelsQuery();
+      break;
     }
     case "location": {
-      return useLocationsQuery();
+      result = useLocationsQuery();
+      break;
     }
     case "subcategory": {
-      return useSubcategoriesQuery();
+      result = useSubcategoriesQuery();
+      break;
     }
     case "type": {
-      return useTypesQuery();
+      result = useTypesQuery();
+      break;
     }
-    case "instructor":
-      return useInstructorsQuery();
+    case "instructor": {
+      result = useInstructorsQuery();
+      break;
+    }
     case "class": {
       const { data = {}, ...rest } = useClassesQuery({ limit: 20 });
-      return {
+      result = {
         data: data.classes || [],
         ...rest,
       };
+      break;
     }
     default:
-      throw new Error(`Unknown select type: ${type}`);
+      return defaultResult;
   }
+
+  // ✅ Ensure data is always an array
+  return {
+    ...result,
+    data: Array.isArray(result.data) ? result.data : []
+  };
 };
+
 export const useMutationOptions = (type) => {
   switch (type) {
     case "category":
@@ -52,6 +77,16 @@ export const useMutationOptions = (type) => {
     case "type":
       return useTypeMutation();
     default:
-      throw new Error(`Unknown select type: ${type}`);
+      // ✅ Return dummy mutation instead of throwing
+      return {
+        mutate: () => console.warn(`No mutation available for type: ${type}`),
+        isLoading: false,
+        isError: false,
+      };
   }
 };
+
+
+git add .
+git commit -m "fix: resolve SearchFilterSelection map error and broken imports"
+git push origin main

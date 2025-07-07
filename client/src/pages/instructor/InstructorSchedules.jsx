@@ -25,8 +25,6 @@ const InstructorSchedule = () => {
   const isPast = status === "past";
   const isUpcoming = status === "upcoming";
 
-  console.log(data);
-
   return (
     <section className="section p-8 space-y-6">
       <SectionTitle

@@ -82,6 +82,7 @@ function App() {
       <Toaster position="top-center" />
       <ScrollToTop />
       <Routes location={backgroundLocation || location}>
+        {/* Auth Routes (No Layout) */}
         <Route
           path="/signin"
           element={
@@ -98,7 +99,8 @@ function App() {
             </NonAuthRoute>
           }
         />
-        {/* Public */}
+
+        {/* Public Routes */}
         <Route
           path="/"
           element={
@@ -122,9 +124,11 @@ function App() {
               </AuthRoute>
             }
           />
+          {/* 404 for public routes */}
+          <Route path="*" element={<NotFound />} />
         </Route>
 
-        {/* customer */}
+        {/* Customer Routes */}
         <Route
           path="/profile"
           element={
@@ -139,9 +143,11 @@ function App() {
           <Route path="settings" element={<UserSettings />} />
           <Route path="transactions" element={<UserTransactions />} />
           <Route path="notifications" element={<UserNotifications />} />
+          {/* 404 for profile routes */}
+          <Route path="*" element={<NotFound />} />
         </Route>
 
-        {/* admin */}
+        {/* Admin Routes */}
         <Route
           path="/admin"
           element={
@@ -150,11 +156,15 @@ function App() {
             </AdminRoute>
           }
         >
-          <Route path="users" element={<UsersList />} />
+          <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="users" element={<UsersList />} />
           <Route path="messages" element={<Notifications />} />
           <Route path="classes" element={<ClassesList />} />
           <Route path="classes/add" element={<ClassAdd />} />
+          <Route path="classes/options" element={<ClassOptions />} />
+          <Route path="classes/recuring" element={<ClassRecuring />} />
+          <Route path="classes/schedules" element={<ClassSchedules />} />
           <Route path="vouchers" element={<VouchersList />} />
           <Route path="vouchers/add" element={<VouchersAdd />} />
           <Route path="packages" element={<PackagesList />} />
@@ -162,13 +172,11 @@ function App() {
           <Route path="instructors" element={<InstructorsList />} />
           <Route path="transactions" element={<TransactionsList />} />
           <Route path="transactions/:id" element={<TransactionDetail />} />
-          <Route path="classes/options" element={<ClassOptions />} />
-          <Route path="classes/recuring" element={<ClassRecuring />} />
-          <Route path="classes/schedules" element={<ClassSchedules />} />
-          <Route index element={<Navigate to="dashboard" replace />} />
+          {/* 404 for admin routes */}
+          <Route path="*" element={<NotFound />} />
         </Route>
 
-        {/* instructor */}
+        {/* Instructor Routes */}
         <Route
           path="/instructor"
           element={
@@ -177,37 +185,63 @@ function App() {
             </InstructorRoute>
           }
         >
-          <Route path="schedules" element={<InstructorSchedules />} />
           <Route index element={<Navigate to="schedules" replace />} />
+          <Route path="schedules" element={<InstructorSchedules />} />
+          {/* 404 for instructor routes */}
+          <Route path="*" element={<NotFound />} />
         </Route>
 
+        {/* Global 404 - Catch all unmatched routes */}
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      {/* background dialog */}
+      {/* Background Dialog Routes */}
       {backgroundLocation && (
         <Routes>
-          {/* admin */}
-          <Route path="/admin/users/:id" element={<UserDetailDialog />} />
-          {/* instructor */}
+          {/* Admin Dialogs */}
+          <Route
+            path="/admin/users/:id"
+            element={
+              <AdminRoute>
+                <UserDetailDialog />
+              </AdminRoute>
+            }
+          />
+
+          {/* Instructor Dialogs */}
           <Route
             path="/instructor/schedules/:id/attendance"
-            element={<ClassAttendanceDetail />}
+            element={
+              <InstructorRoute>
+                <ClassAttendanceDetail />
+              </InstructorRoute>
+            }
           />
           <Route
             path="/instructor/schedules/:id/open"
-            element={<StartClassSchedule />}
+            element={
+              <InstructorRoute>
+                <StartClassSchedule />
+              </InstructorRoute>
+            }
           />
 
-          {/* customer */}
+          {/* Customer Dialogs */}
           <Route
             path="/profile/bookings/:id"
-            element={<BookedScheduleDetail />}
+            element={
+              <AuthRoute>
+                <BookedScheduleDetail />
+              </AuthRoute>
+            }
           />
-
           <Route
             path="/profile/transactions/:id"
-            element={<MyTransactionDetail />}
+            element={
+              <AuthRoute>
+                <MyTransactionDetail />
+              </AuthRoute>
+            }
           />
         </Routes>
       )}

@@ -23,7 +23,6 @@ const GoogleLogin = () => {
         body: JSON.stringify({ idToken }),
       });
       const data = await res.json();
-      console.log("Login Success", data);
     } catch (err) {
       console.error("Login Failed", err);
     }

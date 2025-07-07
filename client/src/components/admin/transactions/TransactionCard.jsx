@@ -62,46 +62,49 @@ export const TransactionCard = ({ transactions, sort, setSort }) => {
             </TableRow>
           </TableHeader>
           <TableBody className="h-12">
-            {transactions.map((tx) => (
-              <TableRow key={tx.id}>
-                <TableCell>
-                  <div>
-                    {tx.fullname.length > 20
-                      ? tx.fullname.slice(0, 20) + "..."
-                      : tx.fullname}
-                  </div>
-                </TableCell>
+            {transactions &&
+              transactions.map((tx) => (
+                <TableRow key={tx.id}>
+                  <TableCell>
+                    <div>
+                      {tx.fullname.length > 20
+                        ? tx.fullname.slice(0, 20) + "..."
+                        : tx.fullname}
+                    </div>
+                  </TableCell>
 
-                <TableCell>{tx.email || ""}</TableCell>
+                  <TableCell>{tx.email || ""}</TableCell>
 
-                <TableCell>{tx.invoiceNumber || ""}</TableCell>
+                  <TableCell>{tx.invoiceNumber || ""}</TableCell>
 
-                <TableCell>{tx.paymentMethod || ""}</TableCell>
+                  <TableCell>{tx.paymentMethod || ""}</TableCell>
 
-                <TableCell>
-                  {tx.status === "success" ? (
-                    <Badge> success</Badge>
-                  ) : "failed" ? (
-                    <Badge variant="destructive">failed</Badge>
-                  ) : (
-                    <Badge variant="secondary">failed</Badge>
-                  )}
-                </TableCell>
+                  <TableCell>
+                    {tx.status === "success" ? (
+                      <Badge> success</Badge>
+                    ) : "failed" ? (
+                      <Badge variant="destructive">failed</Badge>
+                    ) : (
+                      <Badge variant="secondary">failed</Badge>
+                    )}
+                  </TableCell>
 
-                <TableCell>{formatRupiah(tx.total)}</TableCell>
-                <TableCell>{tx.paidAt ? formatDate(tx.paidAt) : "-"}</TableCell>
-                <TableCell>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    title="Print Invoice"
-                    onClick={() => handlePrint(tx.id)}
-                  >
-                    <Printer className="w-5 h-5" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+                  <TableCell>{formatRupiah(tx.total)}</TableCell>
+                  <TableCell>
+                    {tx.paidAt ? formatDate(tx.paidAt) : "-"}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title="Print Invoice"
+                      onClick={() => handlePrint(tx.id)}
+                    >
+                      <Printer className="w-5 h-5" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </div>

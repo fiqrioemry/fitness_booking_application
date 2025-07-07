@@ -60,44 +60,45 @@ export const UsersCard = ({ users, sort, setSort }) => {
             </TableRow>
           </TableHeader>
           <TableBody className="h-12">
-            {users.map((user) => (
-              <TableRow
-                key={user.id}
-                className="border-t border-border hover:bg-muted transition"
-              >
-                <TableCell className="flex justify-center">
-                  <img
-                    src={user.avatar}
-                    alt={user.fullname}
-                    className="w-10 h-10 rounded-full object-cover border"
-                  />
-                </TableCell>
-                <TableCell className="font-medium">{user.fullname}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>
-                  <Badge
-                    variant={
-                      user.role === "admin"
-                        ? "destructive"
-                        : user.role === "instructor"
-                        ? "secondary"
-                        : "default"
-                    }
-                  >
-                    {user.role}
-                  </Badge>
-                </TableCell>
-                <TableCell>{formatDate(user.joinedAt)}</TableCell>
-                <TableCell>
-                  <div className="flex justify-center">
-                    <Eye
-                      onClick={() => openModal(user.id)}
-                      className="w-4 h-4"
+            {users &&
+              users.map((user) => (
+                <TableRow
+                  key={user.id}
+                  className="border-t border-border hover:bg-muted transition"
+                >
+                  <TableCell className="flex justify-center">
+                    <img
+                      src={user.avatar}
+                      alt={user.fullname}
+                      className="w-10 h-10 rounded-full object-cover border"
                     />
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+                  </TableCell>
+                  <TableCell className="font-medium">{user.fullname}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        user.role === "admin"
+                          ? "destructive"
+                          : user.role === "instructor"
+                          ? "secondary"
+                          : "default"
+                      }
+                    >
+                      {user.role}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{formatDate(user.joinedAt)}</TableCell>
+                  <TableCell>
+                    <div className="flex justify-center">
+                      <Eye
+                        onClick={() => openModal(user.id)}
+                        className="w-4 h-4"
+                      />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </div>

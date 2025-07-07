@@ -10,12 +10,11 @@ import { useLocationsQuery, useLocationMutation } from "@/hooks/useLocation";
 import { useCategoriesQuery, useCategoryMutation } from "@/hooks/useCategory";
 
 export const useSelectOptions = (type) => {
-  // ✅ Default fallback untuk unknown types
   const defaultResult = {
     data: [],
     isLoading: false,
     isError: true,
-    error: `Unknown select type: ${type}`
+    error: `Unknown select type: ${type}`,
   };
 
   let result;
@@ -57,10 +56,9 @@ export const useSelectOptions = (type) => {
       return defaultResult;
   }
 
-  // ✅ Ensure data is always an array
   return {
     ...result,
-    data: Array.isArray(result.data) ? result.data : []
+    data: Array.isArray(result.data) ? result.data : [],
   };
 };
 
@@ -85,8 +83,3 @@ export const useMutationOptions = (type) => {
       };
   }
 };
-
-
-git add .
-git commit -m "fix: resolve SearchFilterSelection map error and broken imports"
-git push origin main

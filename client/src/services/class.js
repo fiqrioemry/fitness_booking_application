@@ -18,26 +18,26 @@ export const getClassById = async (id) => {
 // POST /api/classes
 export const createClass = async (data) => {
   const formData = buildFormData(data);
-  const res = await authInstance.post("/classes", formData);
+  const res = await authInstance.post("/admin/classes", formData);
   return res.data;
 };
 
 // PUT /api/classes/:id
 export const updateClass = async (id, data) => {
   const formData = buildFormData(data);
-  const res = await authInstance.put(`/classes/${id}`, formData);
+  const res = await authInstance.put(`/admin/classes/${id}`, formData);
   return res.data;
 };
 
 // DELETE /api/classes/:id
 export const deleteClass = async (id) => {
-  const res = await authInstance.delete(`/classes/${id}`);
+  const res = await authInstance.delete(`/admin/classes/${id}`);
   return res.data;
 };
 
 // POST /api/classes/:id/gallery
 export const uploadClassGallery = async (id, images) => {
   const formData = buildFormData({ images });
-  const res = await authInstance.post(`/classes/${id}/gallery`, formData);
+  const res = await authInstance.post(`/admin/classes/${id}/gallery`, formData);
   return res.data;
 };

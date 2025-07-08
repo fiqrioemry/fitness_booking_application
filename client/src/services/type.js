@@ -12,20 +12,20 @@ export const getTypeById = async (id) => {
   return res.data;
 };
 
-// POST /api/types (Admin Only)
+// POST /api/admin/types (Admin Only)
 export const createType = async (data) => {
-  const res = await authInstance.post("/types", data);
+  const res = await authInstance.post("/admin/types", data);
   return res.data;
 };
 
-// PUT /api/types/:id (Admin Only)
+// PUT /api/admin/types/:id (Admin Only)
 export const updateType = async (id, data) => {
-  const res = await authInstance.put(`/types/${id}`, data);
+  const res = await authInstance.put(`/admin/types/${id}`, data);
   return res.data;
 };
 
-// DELETE /api/types/:id (Admin Only)
+// DELETE /api/admin/types/:id (Admin Only)
 export const deleteType = async (id) => {
-  const res = await authInstance.delete(`/types/${id}`);
+  const res = await authInstance.delete(`/admin/types/${id}`);
   return res.data;
 };

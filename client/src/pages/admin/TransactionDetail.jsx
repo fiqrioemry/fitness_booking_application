@@ -1,17 +1,18 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { DollarSign } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Loading } from "@/components/ui/Loading";
 import { Button } from "@/components/ui/Button";
 import { formatRupiah, formatDate } from "@/lib/utils";
 import { usePaymentDetailQuery } from "@/hooks/usePayment";
 
 const TransactionDetail = () => {
+  const navigate = useNavigate();
   const invoiceRef = useRef();
   const { id } = useParams();
-  const { data, isLoading } = usePaymentDetailQuery(id);
+  const { data, isLoading, isError } = usePaymentDetailQuery(id);
 
   const handleDownload = async () => {
     const element = invoiceRef.current;
@@ -31,6 +32,12 @@ const TransactionDetail = () => {
     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
     pdf.save(`invoice-${id}.pdf`);
   };
+
+  useEffect(() => {
+    if (!isLoading && (isError || !data?.id)) {
+      navigate("/not-found", { replace: true });
+    }
+  }, [isLoading, isError, data, navigate]);
 
   if (isLoading || !data) return <Loading />;
 

@@ -14,18 +14,18 @@ export const getInstructorById = async (id) => {
 
 // POST /api/instructors (Admin Only)
 export const createInstructor = async (data) => {
-  const res = await authInstance.post("/instructors", data);
+  const res = await authInstance.post("/admin/instructors", data);
   return res.data;
 };
 
 // PUT /api/instructors/:id (Admin Only)
 export const updateInstructor = async (id, data) => {
-  const res = await authInstance.put(`/instructors/${id}`, data);
+  const res = await authInstance.put(`/admin/instructors/${id}`, data);
   return res.data;
 };
 
 // DELETE /api/instructors/:id (Admin Only)
 export const deleteInstructor = async (id) => {
-  const res = await authInstance.delete(`/instructors/${id}`);
+  const res = await authInstance.delete(`/admin/instructors/${id}`);
   return res.data;
 };

@@ -18,20 +18,20 @@ export const getSubcategoriesByCategory = async (categoryId) => {
   return res.data;
 };
 
-// POST /api/subcategories (Admin Only)
+// POST /api/admin/subcategories (Admin Only)
 export const createSubcategory = async (data) => {
-  const res = await authInstance.post("/subcategories", data);
+  const res = await authInstance.post("/admin/subcategories", data);
   return res.data;
 };
 
-// PUT /api/subcategories/:id (Admin Only)
+// PUT /api/admin/subcategories/:id (Admin Only)
 export const updateSubcategory = async (id, data) => {
-  const res = await authInstance.put(`/subcategories/${id}`, data);
+  const res = await authInstance.put(`/admin/subcategories/${id}`, data);
   return res.data;
 };
 
-// DELETE /api/subcategories/:id (Admin Only)
+// DELETE /api/admin/subcategories/:id (Admin Only)
 export const deleteSubcategory = async (id) => {
-  const res = await authInstance.delete(`/subcategories/${id}`);
+  const res = await authInstance.delete(`/admin/subcategories/${id}`);
   return res.data;
 };

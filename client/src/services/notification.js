@@ -21,6 +21,9 @@ export const getAllBrowserNotifications = async () => {
 };
 
 export const sendPromoNotification = async (payload) => {
-  const res = await authInstance.post("/notifications/broadcast", payload);
+  const res = await authInstance.post(
+    "/admin/notifications/broadcast",
+    payload
+  );
   return res.data;
 };

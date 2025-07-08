@@ -14,18 +14,18 @@ export const getLocationById = async (id) => {
 
 // POST /api/locations
 export const createLocation = async (data) => {
-  const res = await authInstance.post("/locations", data);
+  const res = await authInstance.post("/admin/locations", data);
   return res.data;
 };
 
 // PUT /api/locations/:id
 export const updateLocation = async (id, data) => {
-  const res = await authInstance.put(`/locations/${id}`, data);
+  const res = await authInstance.put(`/admin/locations/${id}`, data);
   return res.data;
 };
 
 // DEL /api/locations/:id
 export const deleteLocation = async (id) => {
-  const res = await authInstance.delete(`/locations/${id}`);
+  const res = await authInstance.delete(`/admin/locations/${id}`);
   return res.data;
 };

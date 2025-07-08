@@ -15,17 +15,17 @@ export const getPackageById = async (id) => {
 
 export const createPackage = async (data) => {
   const formData = buildFormData(data);
-  const res = await authInstance.post("/packages", formData);
+  const res = await authInstance.post("/admin/packages", formData);
   return res.data;
 };
 
 export const updatePackage = async (id, data) => {
   const formData = buildFormData(data);
-  const res = await authInstance.put(`/packages/${id}`, formData);
+  const res = await authInstance.put(`/admin/packages/${id}`, formData);
   return res.data;
 };
 
 export const deletePackage = async (id) => {
-  const res = await authInstance.delete(`/packages/${id}`);
+  const res = await authInstance.delete(`/admin/packages/${id}`);
   return res.data;
 };

@@ -14,18 +14,18 @@ export const getLevelById = async (id) => {
 
 // POST /api/levels (Admin Only)
 export const createLevel = async (data) => {
-  const res = await authInstance.post("/levels", data);
+  const res = await authInstance.post("/admin/levels", data);
   return res.data;
 };
 
 // PUT /api/levels/:id (Admin Only)
 export const updateLevel = async (id, data) => {
-  const res = await authInstance.put(`/levels/${id}`, data);
+  const res = await authInstance.put(`/admin/levels/${id}`, data);
   return res.data;
 };
 
 // DELETE /api/levels/:id (Admin Only)
 export const deleteLevel = async (id) => {
-  const res = await authInstance.delete(`/levels/${id}`);
+  const res = await authInstance.delete(`/admin/levels/${id}`);
   return res.data;
 };

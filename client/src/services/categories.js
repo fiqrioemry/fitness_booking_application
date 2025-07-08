@@ -14,18 +14,18 @@ export const getCategoryById = async (id) => {
 
 // POST /api/categories
 export const createCategory = async (data) => {
-  const res = await authInstance.post("/categories", data);
+  const res = await authInstance.post("/admin/categories", data);
   return res.data;
 };
 
 // PUT /api/categories/:id
 export const updateCategory = async (id, data) => {
-  const res = await authInstance.put(`/categories/${id}`, data);
+  const res = await authInstance.put(`/admin/categories/${id}`, data);
   return res.data;
 };
 
 // DELETE /api/categories/:id
 export const deleteCategory = async (id) => {
-  const res = await authInstance.delete(`/categories/${id}`);
+  const res = await authInstance.delete(`/admin/categories/${id}`);
   return res.data;
 };

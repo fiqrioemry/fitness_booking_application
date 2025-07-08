@@ -8,11 +8,11 @@ export const getAllVouchers = async () => {
 
 // POST /api/vouchers
 export const createVoucher = async (data) => {
-  const res = await authInstance.post("/vouchers", data);
+  const res = await authInstance.post("/admin/vouchers", data);
   return res.data;
 };
 
-// PoST /api/vouchers/apply
+// POST /api/vouchers/apply
 export const applyVoucher = async ({ userId, code, total }) => {
   const res = await authInstance.post("/vouchers/apply", {
     userId,
@@ -24,12 +24,12 @@ export const applyVoucher = async ({ userId, code, total }) => {
 
 //  PUT /api/vouchers/:id
 export const updateVoucher = async ({ id, data }) => {
-  const res = await authInstance.put(`/vouchers/${id}`, data);
+  const res = await authInstance.put(`/admin/vouchers/${id}`, data);
   return res.data;
 };
 
 //  DELETE /api/vouchers/:id
 export const deleteVoucher = async (id) => {
-  const res = await authInstance.delete(`/vouchers/${id}`);
+  const res = await authInstance.delete(`/admin/vouchers/${id}`);
   return res.data;
 };

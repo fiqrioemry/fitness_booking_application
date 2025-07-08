@@ -13,12 +13,6 @@ export const getAllClassSchedulesWithStatus = async () => {
   return res.data;
 };
 
-// GET /api/schedules/booked
-export const getAllBookedSchedule = async () => {
-  const res = await authInstance.get("/schedules/booked");
-  return res.data;
-};
-
 // GET /api/schedules/:id
 export const getClassScheduleDetail = async (id) => {
   const res = await authInstance.get(`/schedules/${id}`);
@@ -26,76 +20,78 @@ export const getClassScheduleDetail = async (id) => {
 };
 
 export const createClassSchedule = async (data) => {
-  const url = data.isRecurring ? "/schedules/recurring" : "/schedules";
+  const url = data.isRecurring
+    ? "/admin/schedules/recurring"
+    : "/admin/schedules";
   const res = await authInstance.post(url, data);
   return res.data;
 };
 
 // PUT /api/schedules/:id
 export const updateClassSchedule = async (id, data) => {
-  const res = await authInstance.put(`/schedules/${id}`, data);
+  const res = await authInstance.put(`/admin/schedules/${id}`, data);
   return res.data;
 };
 
 // DELETE /api/schedules/:id
 export const deleteClassSchedule = async (id) => {
-  const res = await authInstance.delete(`/schedules/${id}`);
+  const res = await authInstance.delete(`/admin/schedules/${id}`);
   return res.data;
 };
 
 // POST /api/schedule-templates
 export const createTemplate = async (data) => {
-  const res = await authInstance.post("/schedule-templates", data);
+  const res = await authInstance.post("/admin/schedule-templates", data);
   return res.data;
 };
 
 // GET /api/schedule-templates
 export const getAllRecuringSchedule = async () => {
-  const res = await authInstance.get(`/schedule-templates`);
+  const res = await authInstance.get(`/admin/schedule-templates`);
   return res.data;
 };
 
 // PUT /api/schedule-templates/:id
 export const updateScheduleTemplate = async (id, data) => {
-  const res = await authInstance.put(`/schedule-templates/${id}`, data);
+  const res = await authInstance.put(`/admin/schedule-templates/${id}`, data);
   return res.data;
 };
 
 // DELETE /api/schedule-templates/:id
 export const deleteScheduleTemplate = async (id) => {
-  const res = await authInstance.delete(`/schedule-templates/${id}`);
+  const res = await authInstance.delete(`/admin/schedule-templates/${id}`);
   return res.data;
 };
 
 // PUT /api/schedule-templates/:id/run
 export const runScheduleTemplate = async (id) => {
-  const res = await authInstance.post(`/schedule-templates/${id}/run`);
+  const res = await authInstance.post(`/admin/schedule-templates/${id}/run`);
   return res.data;
 };
 // PUT /api/schedule-templates/:id/stop
 export const stopScheduleTemplate = async (id) => {
-  const res = await authInstance.post(`/schedule-templates/${id}/stop`);
+  const res = await authInstance.post(`/admin/schedule-templates/${id}/stop`);
   return res.data;
 };
 
-// GET /api/schedules/instructor
+// GET /api/instructor/schedules
 export const getInstructorSchedules = async (params) => {
   const queryString = qs.stringify(params, { skipNulls: true });
-  const res = await authInstance.get(`/schedules/instructor?${queryString}`);
+  const res = await authInstance.get(`/instructor/schedules?${queryString}`);
   return res.data;
 };
 
-// PATCH /api/schedules/instructor/:id/open
+// PATCH /api/instructor/schedules/:id/open
 export const openClassSchedule = async ({ id, data }) => {
   const res = await authInstance.patch(
-    `/schedules/instructor/${id}/open`,
+    `/instructor/schedules/${id}/open`,
     data
   );
   return res.data;
 };
 
-// GET /api/schedules/instructor/:id/attendance
+// GET /api/instructor/schedules/:id/attendance
 export const getClassAttendances = async (id) => {
-  const res = await authInstance.get(`/schedules/instructor/${id}/attendance`);
+  const res = await authInstance.get(`/instructor/schedules/${id}/attendance`);
   return res.data;
 };

@@ -274,6 +274,10 @@ func (s *authService) GoogleSignIn(idToken string) (*dto.AuthResponse, error) {
 
 	user, err := s.auth.GetUserByEmail(email)
 	if err != nil {
+		return nil, customErr.NewInternal("Failed to get user", err)
+	}
+
+	if user == nil {
 		user = &models.User{
 			Email:    email,
 			Password: "-",
@@ -284,7 +288,6 @@ func (s *authService) GoogleSignIn(idToken string) (*dto.AuthResponse, error) {
 		if err := s.user.CreateUser(user); err != nil {
 			return nil, customErr.NewInternal("Failed to create user", err)
 		}
-
 		s.generateDefaultSettingsForUser(user.ID)
 	}
 

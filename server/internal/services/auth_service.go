@@ -42,12 +42,12 @@ func NewAuthService(auth repositories.AuthRepository, user repositories.UserRepo
 }
 
 func (s *authService) SendOTP(email string) error {
-	_, err := config.RedisClient.Get(config.Ctx, "otp_data:"+email).Result()
+	_, err := config.RedisClient.Get(config.Ctx, "fitness_app:otp_data:"+email).Result()
 	if err != nil {
 		return customErr.NewNotFound("OTP data not found")
 	}
 
-	limitKey := "otp_resend_limit:" + email
+	limitKey := "fitness_app:otp_resend_limit:" + email
 	count, _ := config.RedisClient.Get(config.Ctx, limitKey).Int()
 	if count >= 3 {
 		return customErr.NewTooManyRequest("Too many OTP requests")
@@ -56,7 +56,7 @@ func (s *authService) SendOTP(email string) error {
 	config.RedisClient.Expire(config.Ctx, limitKey, 30*time.Minute)
 
 	otp := utils.GenerateOTP(6)
-	if err := config.RedisClient.Set(config.Ctx, "otp:"+email, otp, 5*time.Minute).Err(); err != nil {
+	if err := config.RedisClient.Set(config.Ctx, "fitness_app:otp:"+email, otp, 5*time.Minute).Err(); err != nil {
 		return customErr.NewInternal("Failed to store OTP", err)
 	}
 	subject := "Your New OTP Code"
@@ -73,13 +73,13 @@ func (s *authService) Logout(refreshToken string) error {
 }
 
 func (s *authService) VerifyOTP(email, otp string) (*dto.AuthResponse, error) {
-	savedOtp, err := config.RedisClient.Get(config.Ctx, "otp:"+email).Result()
+	savedOtp, err := config.RedisClient.Get(config.Ctx, "fitness_app:otp:"+email).Result()
 	if err != nil || savedOtp != otp {
 		return nil, customErr.NewUnauthorized("OTP is invalid or has expired")
 	}
-	config.RedisClient.Del(config.Ctx, "otp:"+email)
+	config.RedisClient.Del(config.Ctx, "fitness_app:otp:"+email)
 
-	val, err := config.RedisClient.Get(config.Ctx, "otp_data:"+email).Result()
+	val, err := config.RedisClient.Get(config.Ctx, "fitness_app:otp_data:"+email).Result()
 	if err != nil {
 		return nil, customErr.NewUnauthorized("Session has expired")
 	}
@@ -139,7 +139,7 @@ func (s *authService) GetUserProfile(userID string) (*dto.AuthMeResponse, error)
 }
 
 func (s *authService) Login(req *dto.LoginRequest) (*dto.AuthResponse, error) {
-	redisKey := fmt.Sprintf("login:attempt:%s", req.Email)
+	redisKey := fmt.Sprintf("fitness_app:login:attempt:%s", req.Email)
 	attempts, _ := config.RedisClient.Get(config.Ctx, redisKey).Int()
 	if attempts >= 5 {
 		return nil, customErr.NewTooManyRequest("Too many request, please try again in 30 minutes")
@@ -198,7 +198,7 @@ func (s *authService) Register(req *dto.RegisterRequest) error {
 	if err := utils.SendEmail(subject, req.Email, otp, body); err != nil {
 		return customErr.ErrInternalServer
 	}
-	if err := config.RedisClient.Set(config.Ctx, "otp:"+req.Email, otp, 5*time.Minute).Err(); err != nil {
+	if err := config.RedisClient.Set(config.Ctx, "fitness_app:otp:"+req.Email, otp, 5*time.Minute).Err(); err != nil {
 		return customErr.ErrInternalServer
 	}
 	tempData := map[string]string{
@@ -211,7 +211,7 @@ func (s *authService) Register(req *dto.RegisterRequest) error {
 		return customErr.ErrInternalServer
 	}
 
-	if err := config.RedisClient.Set(config.Ctx, "otp_data:"+req.Email, jsonStr, 30*time.Minute).Err(); err != nil {
+	if err := config.RedisClient.Set(config.Ctx, "fitness_app:otp_data:"+req.Email, jsonStr, 30*time.Minute).Err(); err != nil {
 		return customErr.ErrInternalServer
 	}
 	return nil

@@ -17,5 +17,5 @@ func InstructorRoutes(r *gin.RouterGroup, h *handlers.InstructorHandler) {
 	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.POST("", h.CreateInstructor)
 	admin.PUT("/:id", h.UpdateInstructor)
-	admin.DELETE("/:id", h.DeleteInstructor)
+	admin.DELETE("/:id", middleware.RoleOnly("super admin"), h.DeleteInstructor)
 }

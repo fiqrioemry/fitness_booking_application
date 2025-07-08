@@ -17,5 +17,5 @@ func LocationRoutes(r *gin.RouterGroup, h *handlers.LocationHandler) {
 	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.POST("", h.CreateLocation)
 	admin.PUT("/:id", h.UpdateLocation)
-	admin.DELETE("/:id", h.DeleteLocation)
+	admin.DELETE("/:id", middleware.RoleOnly("super admin"), h.DeleteLocation)
 }

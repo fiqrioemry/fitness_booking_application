@@ -643,11 +643,11 @@ func SeedPayments(db *gorm.DB) {
 
 	// Get sample users
 	var customer1, customer2 models.User
-	if err := db.Preload("Profile").Where("email = ?", "customer1@fitness.com").First(&customer1).Error; err != nil {
+	if err := db.Where("email = ?", "customer1@fitness.com").First(&customer1).Error; err != nil {
 		log.Println("Failed to find customer1@fitness.com:", err)
 		return
 	}
-	if err := db.Preload("Profile").Where("email = ?", "customer2@fitness.com").First(&customer2).Error; err != nil {
+	if err := db.Where("email = ?", "customer2@fitness.com").First(&customer2).Error; err != nil {
 		log.Println("Failed to find customer2@fitness.com:", err)
 		return
 	}
@@ -771,7 +771,7 @@ func SeedClassSchedules(db *gorm.DB) {
 		log.Println("No class found")
 		return
 	}
-	if err := db.Preload("User.Profile").First(&instructor).Error; err != nil {
+	if err := db.Preload("User").First(&instructor).Error; err != nil {
 		log.Println("No instructor found")
 		return
 	}

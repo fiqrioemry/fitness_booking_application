@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"server/internal/dto"
 	"server/internal/models"
 	"time"
@@ -50,7 +51,13 @@ func (r *classScheduleRepository) DeleteClassSchedule(id string) error {
 func (r *classScheduleRepository) GetClassScheduleByID(id string) (*models.ClassSchedule, error) {
 	var schedule models.ClassSchedule
 	err := r.db.First(&schedule, "id = ?", id).Error
-	return &schedule, err
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &schedule, nil
 }
 
 func (r *classScheduleRepository) GetClassSchedules() ([]models.ClassSchedule, error) {

@@ -65,8 +65,14 @@ func main() {
 		})
 	})
 
-	if err := r.SetTrustedProxies(config.GetTrustedProxies()); err != nil {
-		log.Fatalf("Failed to set trusted proxies: %v", err)
+	trustedProxies := config.GetTrustedProxies()
+	log.Printf("Configuring trusted proxies: %v", trustedProxies)
+
+	err := r.SetTrustedProxies(trustedProxies)
+	if err != nil {
+		log.Printf("Failed to set trusted proxies: %v", err)
+	} else {
+		log.Printf("Trusted proxies configured successfully")
 	}
 
 	// ========== inisialisasi Middleware ========

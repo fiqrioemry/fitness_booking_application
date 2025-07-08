@@ -26,8 +26,11 @@ func NewCategoryService(repo repositories.CategoryRepository) CategoryService {
 }
 
 func (s *categoryService) DeleteCategory(id string) error {
-	_, err := s.repo.GetCategoryByID(id)
+	category, err := s.repo.GetCategoryByID(id)
 	if err != nil {
+		return customErr.NewInternal("Failed to get category", err)
+	}
+	if category == nil {
 		return customErr.NewNotFound("Category not found")
 	}
 
@@ -41,7 +44,7 @@ func (s *categoryService) DeleteCategory(id string) error {
 func (s *categoryService) GetAllCategories() ([]dto.CategoryResponse, error) {
 	categories, err := s.repo.GetAllCategories()
 	if err != nil {
-		return nil, customErr.NewNotFound("Categories not found")
+		return nil, customErr.NewInternal("Failed to get categories", err)
 	}
 
 	var result []dto.CategoryResponse

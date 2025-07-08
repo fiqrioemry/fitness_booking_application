@@ -48,7 +48,11 @@ func (r *subcategoryRepository) GetSubcategoryByID(id string) (*models.Subcatego
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
-	return &subcategory, err
+
+	if err != nil {
+		return nil, err
+	}
+	return &subcategory, nil
 }
 
 func (r *subcategoryRepository) GetSubcategoriesByCategoryID(categoryID string) ([]models.Subcategory, error) {

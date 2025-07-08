@@ -47,5 +47,8 @@ func (r *categoryRepository) GetCategoryByID(id string) (*models.Category, error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
-	return &category, err
+	if err != nil {
+		return nil, err
+	}
+	return &category, nil
 }

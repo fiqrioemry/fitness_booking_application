@@ -47,5 +47,8 @@ func (r *locationRepository) GetLocationByID(id string) (*models.Location, error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
-	return &location, err
+	if err != nil {
+		return nil, err
+	}
+	return &location, nil
 }

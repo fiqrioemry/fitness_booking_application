@@ -25,6 +25,13 @@ func StringToInt(s string) int {
 	return i
 }
 
+func SafeStringPtr(ptr *string) string {
+	if ptr != nil {
+		return *ptr
+	}
+	return ""
+}
+
 func IntSliceToJSON(data []int) datatypes.JSON {
 	bytes, _ := json.Marshal(data)
 	return datatypes.JSON(bytes)

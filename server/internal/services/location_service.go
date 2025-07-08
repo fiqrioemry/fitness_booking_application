@@ -41,7 +41,11 @@ func (s *locationService) CreateLocation(req dto.CreateLocationRequest) error {
 
 func (s *locationService) UpdateLocation(id string, req dto.UpdateLocationRequest) error {
 	location, err := s.repo.GetLocationByID(id)
+
 	if err != nil {
+		return customErr.NewInternal("failed to fetch location", err)
+	}
+	if location == nil {
 		return customErr.NewNotFound("location not found")
 	}
 
@@ -56,8 +60,11 @@ func (s *locationService) UpdateLocation(id string, req dto.UpdateLocationReques
 }
 
 func (s *locationService) DeleteLocation(id string) error {
-	_, err := s.repo.GetLocationByID(id)
+	location, err := s.repo.GetLocationByID(id)
 	if err != nil {
+		return customErr.NewInternal("failed to fetch location", err)
+	}
+	if location == nil {
 		return customErr.NewNotFound("location not found")
 	}
 
@@ -88,6 +95,9 @@ func (s *locationService) GetAllLocations() ([]dto.LocationResponse, error) {
 func (s *locationService) GetLocationByID(id string) (*dto.LocationResponse, error) {
 	location, err := s.repo.GetLocationByID(id)
 	if err != nil {
+		return nil, customErr.NewInternal("failed to fetch location", err)
+	}
+	if location == nil {
 		return nil, customErr.NewNotFound("location not found")
 	}
 

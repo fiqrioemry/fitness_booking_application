@@ -47,6 +47,10 @@ func NewBookingService(db *gorm.DB, booking repositories.BookingRepository, pkg 
 func (s *bookingService) CreateBooking(userID, packageID, scheduleID string) error {
 	schedule, err := s.schedule.GetClassScheduleByID(scheduleID)
 	if err != nil {
+		return customErr.NewInternal("Failed to fetch class schedule", err)
+	}
+
+	if schedule == nil {
 		return customErr.NewNotFound("Class schedule not found")
 	}
 

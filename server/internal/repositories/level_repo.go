@@ -47,6 +47,8 @@ func (r *levelRepository) GetLevelByID(id string) (*models.Level, error) {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
-	return &level, err
-
+	if err != nil {
+		return nil, err
+	}
+	return &level, nil
 }

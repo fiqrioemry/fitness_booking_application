@@ -14,7 +14,6 @@ type PaymentRepository interface {
 	CreatePayment(payment *models.Payment) error
 	UpdatePayment(payment *models.Payment) error
 	GetPaymentByID(id string) (*models.Payment, error)
-	GetPaymentByOrderID(orderID string) (*models.Payment, error)
 	GetAllUserPayments(params dto.PaymentQueryParam) ([]models.Payment, int64, error)
 	GetPaymentsByUserID(userID string, params dto.PaymentQueryParam) ([]models.Payment, int64, error)
 }
@@ -37,16 +36,10 @@ func (r *paymentRepository) GetPaymentByID(id string) (*models.Payment, error) {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
-	return &payment, err
-}
-
-func (r *paymentRepository) GetPaymentByOrderID(orderID string) (*models.Payment, error) {
-	var payment models.Payment
-	err := r.db.First(&payment, "id = ?", orderID).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil
+	if err != nil {
+		return nil, err
 	}
-	return &payment, err
+	return &payment, nil
 }
 
 func (r *paymentRepository) UpdatePayment(payment *models.Payment) error {

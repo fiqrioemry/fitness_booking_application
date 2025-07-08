@@ -53,5 +53,9 @@ func (r *scheduleTemplateRepository) GetTemplateByID(id string) (*models.Schedul
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
-	return &template, err
+	if err != nil {
+		return nil, err
+	}
+	// Ensure the template is not soft-deleted
+	return &template, nil
 }

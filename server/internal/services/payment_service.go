@@ -132,7 +132,7 @@ func (s *paymentService) CreatePayment(userID string, req dto.CreatePaymentReque
 		CancelURL:          stripe.String(cancelURL),
 		ClientReferenceID:  stripe.String(paymentID.String()),
 		Metadata: map[string]string{
-			"order_id":   paymentID.String(),
+			"payment_id": paymentID.String(),
 			"user_id":    userID,
 			"package_id": pkg.ID.String(),
 		},
@@ -199,14 +199,17 @@ func (s *paymentService) StripeWebhookNotification(event stripe.Event) error {
 		return fmt.Errorf("invalid session data")
 	}
 
-	orderID, ok := session.Metadata["order_id"]
-	if !ok || orderID == "" {
-		return fmt.Errorf("missing order_id in Stripe metadata")
+	paymentID, ok := session.Metadata["payment_id"]
+	if !ok || paymentID == "" {
+		return fmt.Errorf("missing payment_id in Stripe metadata")
 	}
 
-	payment, err := s.payment.GetPaymentByOrderID(orderID)
+	payment, err := s.payment.GetPaymentByID(paymentID)
 	if err != nil {
-		return fmt.Errorf("payment not found: %w", err)
+		return fmt.Errorf("failed to get payment by ID %s: %w", paymentID, err)
+	}
+	if payment == nil {
+		return fmt.Errorf("payment not found for ID %s: %w", paymentID, err)
 	}
 
 	if payment.Status == "success" {
@@ -331,8 +334,11 @@ func (s *paymentService) GetAllUserPayments(params dto.PaymentQueryParam) ([]dto
 
 func (s *paymentService) GetPaymentDetail(paymentID string) (*dto.PaymentDetailResponse, error) {
 	payment, err := s.payment.GetPaymentByID(paymentID)
-	if err != nil {
+	if payment == nil {
 		return nil, customErr.NewNotFound("payment not found")
+	}
+	if err != nil {
+		return nil, customErr.NewInternal("failed to get payment detail", err)
 	}
 
 	result := dto.PaymentDetailResponse{
@@ -346,7 +352,7 @@ func (s *paymentService) GetPaymentDetail(paymentID string) (*dto.PaymentDetailR
 		BasePrice:       payment.BasePrice,
 		Tax:             payment.Tax,
 		Total:           payment.Total,
-		VoucherCode:     *payment.VoucherCode,
+		VoucherCode:     utils.SafeStringPtr(payment.VoucherCode),
 		VoucherDiscount: payment.VoucherDiscount,
 		PaymentMethod:   payment.PaymentMethod,
 		Status:          payment.Status,

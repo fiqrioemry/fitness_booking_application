@@ -10,14 +10,14 @@ import (
 func VoucherRoutes(r *gin.RouterGroup, h *handlers.VoucherHandler) {
 	// public-endpoints
 	voucher := r.Group("/vouchers")
+	voucher.GET("", h.GetAllVouchers)
 	voucher.POST("/apply", h.ApplyVoucher)
 	voucher.Use(middleware.AuthRequired(), middleware.RoleOnly("customer"))
-	voucher.GET("", h.GetAllVouchers)
 
 	// admin-endpoints
 	admin := r.Group("/admin/vouchers")
 	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.POST("", h.CreateVoucher)
 	admin.PUT("/:id", h.UpdateVoucher)
-	admin.DELETE("/:id", h.DeleteVoucher)
+	admin.DELETE("/:id", middleware.RoleOnly("super admin"), h.DeleteVoucher)
 }

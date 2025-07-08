@@ -18,5 +18,5 @@ func ClassRoutes(r *gin.RouterGroup, h *handlers.ClassHandler) {
 	admin.POST("", h.CreateClass)
 	admin.PUT("/:id", h.UpdateClass)
 	admin.POST("/:id/gallery", h.UploadClassGallery)
-	admin.DELETE("/:id", h.DeleteClass)
+	admin.DELETE("/:id", middleware.RoleOnly("super admin"), h.DeleteClass)
 }

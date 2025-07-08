@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"server/internal/models"
 	"time"
 
@@ -80,5 +81,13 @@ func (r *voucherRepository) InsertUsedVoucher(userID, voucherID uuid.UUID) error
 func (r *voucherRepository) GetVoucherByID(id string) (*models.Voucher, error) {
 	var voucher models.Voucher
 	err := r.db.First(&voucher, "id = ?", id).Error
-	return &voucher, err
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &voucher, nil
 }

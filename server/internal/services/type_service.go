@@ -24,11 +24,14 @@ func NewTypeService(repo repositories.TypeRepository) TypeService {
 }
 
 func (s *typeService) DeleteType(id string) error {
-	_, err := s.repo.GetTypeByID(id)
+	t, err := s.repo.GetTypeByID(id)
 	if err != nil {
-		return customErr.NewNotFound("type not found")
+		return customErr.NewInternal("failed to fetch type", err)
 	}
 
+	if t == nil {
+		return customErr.NewNotFound("type not found")
+	}
 	if err := s.repo.DeleteType(id); err != nil {
 		return customErr.NewInternal("failed to delete type", err)
 	}
@@ -65,6 +68,9 @@ func (s *typeService) CreateType(req dto.CreateTypeRequest) error {
 func (s *typeService) GetTypeByID(id string) (*dto.TypeResponse, error) {
 	t, err := s.repo.GetTypeByID(id)
 	if err != nil {
+		return nil, customErr.NewInternal("failed to fetch type", err)
+	}
+	if t == nil {
 		return nil, customErr.NewNotFound("type not found")
 	}
 
@@ -77,6 +83,9 @@ func (s *typeService) GetTypeByID(id string) (*dto.TypeResponse, error) {
 func (s *typeService) UpdateType(id string, req dto.UpdateTypeRequest) error {
 	t, err := s.repo.GetTypeByID(id)
 	if err != nil {
+		return customErr.NewInternal("failed to fetch type", err)
+	}
+	if t == nil {
 		return customErr.NewNotFound("type not found")
 	}
 

@@ -17,5 +17,5 @@ func PackageRoutes(r *gin.RouterGroup, h *handlers.PackageHandler) {
 	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.POST("", h.CreatePackage)
 	admin.PUT("/:id", h.UpdatePackage)
-	admin.DELETE("/:id", h.DeletePackage)
+	admin.DELETE("/:id", middleware.RoleOnly("super admin"), h.DeletePackage)
 }

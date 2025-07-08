@@ -17,5 +17,5 @@ func CategoryRoutes(r *gin.RouterGroup, h *handlers.CategoryHandler) {
 	admin.Use(middleware.AuthRequired(), middleware.RoleOnly("admin"))
 	admin.POST("", h.CreateCategory)
 	admin.PUT("/:id", h.UpdateCategory)
-	admin.DELETE("/:id", middleware.RoleOnly("owner"), h.DeleteCategory)
+	admin.DELETE("/:id", middleware.RoleOnly("super admin"), h.DeleteCategory)
 }

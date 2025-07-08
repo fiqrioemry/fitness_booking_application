@@ -146,6 +146,10 @@ func (s *classScheduleService) UpdateClassSchedule(id string, req dto.UpdateClas
 
 	schedule, err := s.schedule.GetClassScheduleByID(id)
 	if err != nil {
+		return customErr.NewInternal("failed to fetch class schedule", err)
+	}
+
+	if schedule == nil {
 		return customErr.NewNotFound("schedule not found")
 	}
 
@@ -196,6 +200,10 @@ func (s *classScheduleService) UpdateClassSchedule(id string, req dto.UpdateClas
 func (s *classScheduleService) DeleteClassSchedule(id string) error {
 	schedule, err := s.schedule.GetClassScheduleByID(id)
 	if err != nil {
+		return customErr.NewInternal("failed to fetch class schedule", err)
+	}
+
+	if schedule == nil {
 		return customErr.NewNotFound("schedule not found")
 	}
 
@@ -222,6 +230,9 @@ func (s *classScheduleService) DeleteClassSchedule(id string) error {
 func (s *classScheduleService) GetClassScheduleByID(scheduleID, userID string) (*dto.ClassScheduleDetailResponse, error) {
 	schedule, err := s.schedule.GetClassScheduleByID(scheduleID)
 	if err != nil {
+		return nil, customErr.NewInternal("failed to fetch class schedule", err)
+	}
+	if schedule == nil {
 		return nil, customErr.NewNotFound("schedule not found")
 	}
 
@@ -366,8 +377,13 @@ func (s *classScheduleService) GetSchedulesByInstructor(userID string, params dt
 func (s *classScheduleService) OpenClassSchedule(id string, req dto.OpenClassScheduleRequest) error {
 	schedule, err := s.schedule.GetClassScheduleByID(id)
 	if err != nil {
-		return customErr.NewNotFound("no schedule found")
+		return customErr.NewInternal("failed to fetch class schedule", err)
 	}
+
+	if schedule == nil {
+		return customErr.NewNotFound("schedule not found")
+	}
+
 	if schedule.IsOpened {
 		return fmt.Errorf("schedule already opened")
 	}
@@ -384,7 +400,7 @@ func (s *classScheduleService) OpenClassSchedule(id string, req dto.OpenClassSch
 func (s *classScheduleService) GetAttendancesForSchedule(scheduleID string) ([]dto.AttendanceWithUserResponse, error) {
 	bookings, err := s.schedule.GetAttendancesByScheduleID(scheduleID)
 	if err != nil {
-		return nil, customErr.NewNotFound("no attendance found")
+		return nil, customErr.NewInternal("failed to fetch attendances", err)
 	}
 
 	var result []dto.AttendanceWithUserResponse

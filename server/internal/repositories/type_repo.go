@@ -47,5 +47,10 @@ func (r *typeRepository) GetTypeByID(id string) (*models.Type, error) {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
-	return &t, err
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &t, nil
 }

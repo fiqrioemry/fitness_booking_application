@@ -164,8 +164,12 @@ func (s *scheduleTemplateService) CreateScheduleTemplate(req dto.CreateScheduleT
 func (s *scheduleTemplateService) UpdateScheduleTemplate(id string, req dto.UpdateScheduleTemplateRequest) error {
 	template, err := s.template.GetTemplateByID(id)
 	if err != nil {
-		return customErr.NewNotFound(fmt.Sprintf("template not found: %v", err))
+		return customErr.NewInternal("failed to fetch template", err)
 	}
+	if template == nil {
+		return customErr.NewNotFound("template not found")
+	}
+
 	if template.IsActive {
 		return customErr.NewBadRequest("cannot update an active template, please stop it first")
 	}
@@ -256,8 +260,13 @@ func (s *scheduleTemplateService) DeleteTemplate(id string) error {
 func (s *scheduleTemplateService) RunTemplate(id string) error {
 	template, err := s.template.GetTemplateByID(id)
 	if err != nil {
-		return err
+		return customErr.NewInternal("failed to fetch template", err)
 	}
+
+	if template == nil {
+		return customErr.NewNotFound("template not found")
+	}
+
 	if template.IsActive {
 		return fmt.Errorf("template is already active")
 	}
@@ -269,6 +278,9 @@ func (s *scheduleTemplateService) RunTemplate(id string) error {
 func (s *scheduleTemplateService) StopTemplate(id string) error {
 	template, err := s.template.GetTemplateByID(id)
 	if err != nil {
+		return customErr.NewInternal("failed to fetch template", err)
+	}
+	if template == nil {
 		return customErr.NewNotFound("template not found")
 	}
 	if !template.IsActive {
@@ -288,6 +300,10 @@ func (s *scheduleTemplateService) GenerateScheduleByTemplateID(id string) error 
 	template, err := s.template.GetTemplateByID(id)
 	if err != nil {
 		return fmt.Errorf("failed to fetch template: %w", err)
+	}
+
+	if template == nil {
+		return fmt.Errorf("template not found")
 	}
 
 	if !template.IsActive {

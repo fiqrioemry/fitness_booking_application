@@ -41,6 +41,32 @@ func main() {
 	// ========== Inisialisasi gin engine =======
 	r := gin.Default()
 
+	trustedProxies := config.GetTrustedProxies()
+	log.Printf("Configuring trusted proxies: %v", trustedProxies)
+
+	err := r.SetTrustedProxies(trustedProxies)
+	if err != nil {
+		log.Printf("Failed to set trusted proxies: %v", err)
+	} else {
+		log.Printf("Trusted proxies configured successfully")
+	}
+
+	// ========== inisialisasi Middleware ========
+	r.Use(
+		ginzap.Ginzap(utils.GetLogger(), time.RFC3339, true),
+		middleware.Recovery(),
+		middleware.CORS(),
+		middleware.RateLimiter(100, 60*time.Second),
+		middleware.LimitFileSize(12<<20),
+		middleware.APIKeyGateway([]string{
+			"/",
+			"/health",
+			"/api/v1/auth/google",
+			"/api/v1/auth/google/callback",
+			"/api/v1/payments/stripe/notifications",
+		}),
+	)
+
 	r.GET("/", func(c *gin.Context) {
 		log.Println("Root endpoint accessed just now", gin.H{
 			"ip":        c.ClientIP(),
@@ -64,29 +90,6 @@ func main() {
 			"uptime":    utils.GetUptime(),
 		})
 	})
-
-	trustedProxies := config.GetTrustedProxies()
-	log.Printf("Configuring trusted proxies: %v", trustedProxies)
-
-	err := r.SetTrustedProxies(trustedProxies)
-	if err != nil {
-		log.Printf("Failed to set trusted proxies: %v", err)
-	} else {
-		log.Printf("Trusted proxies configured successfully")
-	}
-
-	// ========== inisialisasi Middleware ========
-	r.Use(
-		ginzap.Ginzap(utils.GetLogger(), time.RFC3339, true),
-		middleware.Recovery(),
-		middleware.CORS(),
-		middleware.RateLimiter(100, 60*time.Second),
-		middleware.LimitFileSize(12<<20),
-		middleware.APIKeyGateway([]string{
-			"/api/v1/auth/google",
-			"/api/v1/auth/google/callback",
-		}),
-	)
 
 	// ========== inisialisasi routes ===========
 	routes.InitRoutes(r, h)

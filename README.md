@@ -1,4 +1,4 @@
-![thumbnail](./client/public/thumbnail.png)
+![thumbnail](./client/public/sweatup-thumbnail.png)
 
 # 🏋️ SweatUp – Fitness Booking App
 
